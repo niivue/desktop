@@ -1,0 +1,59 @@
+{
+  "name": "niivue-desktop",
+  "productName": "NiiVue",
+  "version": "0.2.0",
+  "description": "A medical image viewer with a focus on neuroimaging",
+  "main": "src/electron/index.js",
+  "scripts": {
+    "dev": "concurrently --kill-others \"npm run dev:ui\" \"electron-forge start -- --dev\"",
+    "dev:ui": "vite",
+    "build:ui": "vite build",
+    "start": "npm run build:ui && electron-forge start",
+    "package": "npm run build:ui && electron-forge package",
+    "makeLinuxX64": "electron-forge make --platform=linux --arch=x64 --enable-logging",
+    "makeMacArm64": "electron-forge make --platform=darwin --arch=arm64 --enable-logging",
+    "makeMacX64": "electron-forge make --platform=darwin --arch=x64 --enable-logging",
+    "make": "npm run build:ui && npm run makeLinuxX64 && npm run makeMacX64 && npm run makeMacArm64",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\"",
+    "test": "echo \"No tests configured\""
+  },
+  "keywords": [],
+  "author": {
+    "name": "Taylor Hanayik",
+    "email": "hanayik@gmail.com"
+  },
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@fontsource/roboto": "^5.0.8",
+    "@mui/icons-material": "^5.14.15",
+    "@mui/material": "^5.14.15",
+    "@niivue/niivue": "^0.38.0",
+    "cors": "^2.8.5",
+    "electron-squirrel-startup": "^1.0.0",
+    "express": "^4.18.2",
+    "minimist": "^1.2.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.1.1",
+    "@electron-forge/maker-deb": "^6.1.1",
+    "@electron-forge/maker-rpm": "^6.1.1",
+    "@electron-forge/maker-squirrel": "^6.1.1",
+    "@electron-forge/maker-zip": "^6.1.1",
+    "@electron-forge/publisher-github": "^6.4.2",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react": "^4.0.0",
+    "concurrently": "^8.2.1",
+    "electron": "24.4.0",
+    "eslint": "^8.38.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.3.4",
+    "vite": "^4.3.2"
+  }
+}
