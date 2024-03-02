@@ -21,7 +21,7 @@ It is built using [Electron](https://www.electronjs.org/) and [Niivue](https://g
 
 ## Installation
 
-Download the latest release from the [releases page]()
+Download the latest release from the [releases page](https://github.com/niivue/desktop/releases)
 
 ## Screenshots
 
