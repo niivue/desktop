@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import {Niivue, SLICE_TYPE} from '@niivue/niivue'
 import {nvUtils} from '../nvUtils'
 
-export function NiiVue({nv=null, volumes=[], meshes=[],  ...props }){
+export function NiivueCanvas({nv=null, volumes=[], meshes=[],  ...props }){
     const [commsInfo, setCommsInfo] = useState(null);
     const canvas = useRef(null);
 

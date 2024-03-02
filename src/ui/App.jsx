@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useContext, createContext} from 'react'
 import './App.css'
 import {nvUtils} from './nvUtils'
-import {Niivue, colortables, SLICE_TYPE} from '@niivue/niivue'
+import {Niivue, SLICE_TYPE} from '@niivue/niivue'
 import {AppContainer} from './components/AppContainer'
-import {NiiVue} from './components/NiiVue'
+import {NiivueCanvas} from './components/NiivueCanvas'
 import { Sidebar } from './components/Sidebar'
 import { FileList } from './components/FileList'
 import { ImageTools } from './components/ImageTools'
@@ -13,9 +13,11 @@ import { MinMaxInput } from './components/MinMaxInput'
 import { OpacitySlider } from './components/OpacitySlider'
 import CssBaseline from '@mui/material/CssBaseline';
 
+// use a context to call the Niivue instance from any component
 const _nv = new Niivue()
 const NV = createContext(_nv)
 
+// map the slice type UI string to the Niivue slice type
 const sliceTypes = {
   'axial': SLICE_TYPE.AXIAL,
   'coronal': SLICE_TYPE.CORONAL,
@@ -24,14 +26,14 @@ const sliceTypes = {
   'render': SLICE_TYPE.RENDER
 }
 
-
 function App() {
   // create a new Niivue object
   const nv = useContext(NV)
+
   nv.onImageLoaded = (volume) => {
-    console.log('image loaded', volume)
     handleDrop()
   }
+
   nv.onLocationChange = (locationData)=> {
     // set the window title to locationData.string
     document.title = locationData.string
@@ -39,6 +41,7 @@ function App() {
   
   // get the list of colormap names
   const colormapNames = nv.colormaps(true) // sorted by name
+
   // create an array of objects with the colormap name and values (used to render the colormap select)
   const colormaps = colormapNames.map((name) => {
     return {
@@ -58,6 +61,53 @@ function App() {
   const [calMax, setCalMax] = useState(0)
   const [opacity, setOpacity] = useState(1)
   const [colormap, setColormap] = useState('gray') // default
+
+
+  // ------------ Callbacks ------------
+  // add a volume from a URL
+  const addVolume = useCallback(async (path, commsInfo) => {
+    let url = makeNiivueUrl(path, commsInfo)
+    console.log(url)
+    await nv.addVolumeFromUrl({url: url, name: path})
+    let volumes = nv.volumes
+    let newImages = volumes.map((volume, index) => {
+      return {
+        url: volume.url,
+        name: volume.name,
+        index: index,
+        id: volume.id,
+        color: volume.colormap,
+        active: index === activeImage,
+        frame: volume.frame4D,
+        maxFrame: volume.nTotalFrame4D
+      }
+    })
+    console.log(newImages)
+    setImages(newImages)
+  }, [activeImage, nv, setImages]);
+
+  const setVisibility  = useCallback((index, opacity)=>{
+    nv.setOpacity(index, opacity)
+  }, [nv])
+
+  const updateOpacity = useCallback((opacity)=>{
+    nv.setOpacity(activeImage, opacity)
+    setOpacity(opacity)
+  }, [activeImage, nv])
+
+
+  const updateColormap = useCallback((colormap)=>{
+    nv.volumes[activeImage].colormap = colormap;
+    nv.updateGLVolume();
+  }, [activeImage, nv])
+
+  const setCalMinMax = useCallback((min, max)=>{
+    nv.volumes[activeImage].cal_min = min;
+    nv.volumes[activeImage].cal_max = max;
+    nv.updateGLVolume();
+    setMin(min)
+    setMax(max)
+  }, [activeImage, nv])
 
   // ------------ Effects ------------
   // get the comms info from the main process
@@ -134,11 +184,12 @@ function App() {
         let id = vol.id;
         let currentFrame = vol.frame4D
         nv.setFrame4D(id, currentFrame + frame);
+        // TODO: update the frame in the FileItem
     });
 
     }
     getCommsInfo()
-  }, [])
+  }, [activeImage, nv, addVolume])
 
   // when active image changes, update the min and max
   useEffect(() => {
@@ -152,7 +203,7 @@ function App() {
     setMax(vol.cal_max)
     setOpacity(vol.opacity)
     setColormap(vol.colormap)
-  }, [activeImage, images])
+  }, [activeImage, images, nv])
 
   // when user changes intensity with the right click selection box
   // for now, only works with the background image
@@ -161,10 +212,9 @@ function App() {
       setMin(volume.cal_min)
       setMax(volume.cal_max)
     }
-  }, [])
+  }, [nv])
 
   // ------------ Helper Functions ------------
-
   function makeNiivueUrl(path, commsInfo){
     return `http://${commsInfo.host}:${commsInfo.fileServerPort}/${commsInfo.route}?${commsInfo.queryKey}=${path}`
   }
@@ -180,48 +230,6 @@ function App() {
       }
       return image
     })
-    setImages(newImages)
-  }
-
-  const setVisibility  = useCallback((index, opacity)=>{
-    nv.setOpacity(index, opacity)
-  }, [])
-
-  const updateOpacity = useCallback((opacity)=>{
-    nv.setOpacity(activeImage, opacity)
-    setOpacity(opacity)
-  }, [activeImage])
-
-
-  const updateColormap = useCallback((colormap)=>{
-    nv.volumes[activeImage].colormap = colormap;
-    nv.updateGLVolume();
-  }, [activeImage])
-
-  const setCalMinMax = useCallback((min, max)=>{
-    nv.volumes[activeImage].cal_min = min;
-    nv.volumes[activeImage].cal_max = max;
-    nv.updateGLVolume();
-    setMin(min)
-    setMax(max)
-  }, [activeImage])
-
-  async function addVolume(path, commsInfo){
-    let url = makeNiivueUrl(path, commsInfo)
-    console.log(url)
-    await nv.addVolumeFromUrl({url: url, name: path})
-    let volumes = nv.volumes
-    let newImages = volumes.map((volume, index) => {
-      return {
-        url: volume.url,
-        name: volume.name,
-        index: index,
-        id: volume.id,
-        color: volume.colormap,
-        active: index === activeImage
-      }
-    })
-    console.log(newImages)
     setImages(newImages)
   }
 
@@ -257,27 +265,33 @@ function App() {
     })
     setActiveImage(0)
     setImages(newImages)
-  }, [])
+  }, [activeImage, nv])
 
 
   return (
+    // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
+      {/* AppContainer: the parent component that lays out the rest of the scene */}
       <AppContainer gap={0}>
+        {/* CssBaseline sets some standard CSS configs for working with MUI */}
         <CssBaseline />
+        {/* Sidebar: is the left panel that shows all files and image/scene widgets */}
         <Sidebar>
-          {/* FileList */}
+          {/* FileList: shows all files in layer order */}
           <FileList>
+            {/* FileItems: each FileItem is an image to be rendered in Niivue */}
             {images.map((image, index) => {
               return (
                 <FileItem 
-                  key={index} 
-                  url={image.url} 
-                  name={image.name}
-                  active={image.active}
-                  index={index}
-                  onSetActive={toggleActive}
-                  onSetVisibility={setVisibility}
-                  onRemove={handleRemove}
+                  key={index} // unique key for React
+                  name={image.name} // the name of the image (the full path on the file system)
+                  active={image.active} // whether the image is the active image
+                  index={index} // the index of the image in the images array
+                  frame={image.frame} // the current frame of the image (for 4D images)
+                  maxFrame={image.maxFrame} // the maximum frame of the image (for 4D images)
+                  onSetActive={toggleActive} // callback to set if the image is active
+                  onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
+                  onRemove={handleRemove} // callback to remove the image from the scene via the context menu
                   >
                 </FileItem>
               )
@@ -285,32 +299,30 @@ function App() {
           </FileList>
           {/* ImageTools */}
           <ImageTools>
-            {/* colormap select */}
+            {/* colormap select: sets the colormap of the active image */}
             <ColormapSelect 
-              colormaps={colormaps}
-              onSetColormap={updateColormap}
-              colormap={colormap}
+              colormaps={colormaps} // array of colormap objects
+              onSetColormap={updateColormap} // callback to set the colormap of the active image
+              colormap={colormap} // the current colormap of the active image
               />
-            {/* min max input */}
+            {/* min max input: set the min and max of the active image */}
             <MinMaxInput 
-              calMin={calMin}
-              calMax={calMax}
-              min={min}
-              max={max}
-              onSetMinMax={setCalMinMax} />
-            {/* opacity slider */}
+              calMin={calMin} // the minimum value of the active image
+              calMax={calMax} // the maximum value of the active image 
+              min={min} // the selected minimum value of the active image
+              max={max} // the selected maximum value of the active image
+              onSetMinMax={setCalMinMax} // callback to set the min and max of the active image
+            />
+            {/* opacity slider: set the opacity of the active image */}
             <OpacitySlider
-              opacity={opacity}
-              onSetOpacity={updateOpacity}
+              opacity={opacity} // the current opacity of the active image
+              onSetOpacity={updateOpacity} // callback to set the opacity of the active image
              />
           </ImageTools>
-          {/* SceneTools */}
-          {/* <SceneTools>
-          </SceneTools> */}
+          {/* SceneTools here in the future! */}
         </Sidebar>
-        <NiiVue nv={nv}>
-
-        </NiiVue>
+        {/* Niivue Canvas: where things are rendered :) */}
+        <NiivueCanvas nv={nv} />
       </AppContainer>
     </NV.Provider>
   )

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, MenuItem, ipcMain} = require('electron');
+const { app, BrowserWindow, Menu, ipcMain} = require('electron');
 const path = require('path');
 const { fork } = require("child_process");
 const {devPorts} = require('./devPorts');
@@ -159,36 +159,13 @@ function registerIpcListeners() {
 }
 
 /**
- * Launches an external GUI process.
- * @param {string} guiName - The name of the GUI to launch.
- */
-function launchExternalGui(guiName) {
-  const externalGuis = [
-    'fsleyes'
-  ];
-
-  if (externalGuis.includes(guiName)) {
-    const { spawn } = require('child_process');
-    const child = spawn(guiName, [], {
-      detached: true,
-      stdio: 'ignore'
-    });
-    child.unref();
-    return true;
-  } else {
-    return false;
-  }
-}
-
-/**
  * Creates a new browser window for the specified GUI.
  * @param {string} guiName - The name of the GUI to create a window for.
  */
 function createWindow(guiName="niivue") {
+  // could eventually add a "settings" GUI name too
+  // that would be a separate window for settings
 
-  if (launchExternalGui(guiName)) {
-    return;
-  } 
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1000,
@@ -247,74 +224,11 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
-
-/**
- * Updates the images menu with the specified files.
- * @param {string[]} files - The files to add to the images menu.
- * @function
- * @returns {undefined}
- * @example
- * updateImagesMenu(['file1.nii.gz', 'file2.nii.gz']);
- * // adds file1.nii.gz and file2.nii.gz to the images menu
- */
-function updateImagesMenu(files) {
-  let appMenu = Menu.getApplicationMenu();
-  let imagesMenu = appMenu.getMenuItemById('images');
-  imagesMenu.submenu = [];
-  imagesMenu.submenu.clear();
-  for (let i = 0; i < files.length; i++) {
-    imagesMenu.submenu.append(new MenuItem({
-      label: files[i],
-      id: `image-${i}`,
-      click: () => {
-        console.log(`setActiveImage ${i}`)
-        //mainWindow.webContents.send('setActiveImage', i);
-      },
-    }));
-  }
-
-  Menu.setApplicationMenu(appMenu)
-}
-
-function appendImageToMenu(file) {
-  let appMenu = Menu.getApplicationMenu();
-  let imagesMenu = appMenu.getMenuItemById('images');
-  imagesMenu.submenu.append(new MenuItem({
-    label: file,
-    id: `image-${imagesMenu.submenu.items.length}`,
-    click: () => {
-      console.log(`setActiveImage ${imagesMenu.submenu.items.length}`)
-    },
-  }));
-  Menu.setApplicationMenu(appMenu)
-}
-
-/**
- * Gets the list of images in the images menu.
- * @returns {string[]} The list of images in the images menu.
- * @function
- */
-function getImageMenuList() {
-  let appMenu = Menu.getApplicationMenu();
-  let imagesMenu = appMenu.getMenuItemById('images');
-  // get just the labels as an array
-  let menuItems = imagesMenu.submenu.items.map((item) => {
-    return item.id === 'noImages' ? null : item.label;
-  });
-  // remove nulls
-  menuItems = menuItems.filter((item) => {
-    return item !== null;
-  });
-  return menuItems;
-}
-
 /**
  * Handles the load volumes menu click event.
  * @returns {string[]} The files selected by the user.
  * @async
  * @function
- * @example
- * onLoadVolumesClick();
  * // opens a file dialog and returns the selected files
  * // also sends a loadVolumes message to the main window
  * // and updates the images menu
@@ -326,22 +240,22 @@ function getImageMenuList() {
 async function onLoadVolumesClick() {
   let files = await events.openFileDialog(filters=nvVolumeFilters);
   mainWindow.webContents.send('loadVolumes', files.filePaths);
-  // updateImagesMenu(files.filePaths);
 }
 
 /**
  * Handles the load surfaces menu click event.
+ * NOT IMPLEMENTED YET
  * @async
  * @function
  */
 async function onLoadSurfacesClick() {
   let files = await events.openFileDialog(filters=nvSurfaceFilters);
   mainWindow.webContents.send('loadSurfaces', files.filePaths);
-  updateImagesMenu(files.filePaths);
 }
 
 /**
  * Handles the add volume overlay menu click event.
+ * NOT IMPLEMENTED YET
  * @async
  * @function
  */
@@ -349,14 +263,11 @@ async function onAddVolumeOverlayClick() {
   let files = await events.openFileDialog(filters=nvVolumeFilters);
   // send just the first file to the main window, since we only want to add one overlay at a time
   mainWindow.webContents.send('addVolumeOverlay', files.filePaths[0]);
-  //let currentImages = getImageMenuList();
-  // prepend the new files to the current images
-  // updateImagesMenu(files.filePaths.concat(currentImages));
-  appendImageToMenu(files.filePaths[0]);
 }
 
+// open a standard template image shipped with the app
 async function openStandard(fileName) {
-  let file = path.join(__dirname, 'standard', fileName);
+  let file = path.join(__dirname, 'images', 'standard', fileName);
   // get the absolute path to the file
   file = path.resolve(file);
   mainWindow.webContents.send('loadVolumes', [file]);
@@ -373,6 +284,8 @@ async function onSetViewClick(view) {
   mainWindow.webContents.send('setView', view);
 }
 
+// closes all volumes
+// TODO: will need to add a similar function for meshes
 async function onCloseAllVolumesClick() {
   mainWindow.webContents.send('closeAllVolumes');
 }
@@ -444,12 +357,6 @@ let menu = [
       // },
     ]
   },
-  // Images menu
-  // {
-  //   label: 'Images',
-  //   submenu: [{label: 'No images loaded', id: 'noImages'}],
-  //   id: 'images'
-  // },
   // add view menu with view options
   {
     label: 'View',
@@ -509,15 +416,17 @@ let menu = [
         type: 'radio',
         accelerator: 'Option+Shift+M'
       },
-      {
-        label: 'Mosaic',
-        id: 'mosaicView',
-        click: async () => {
-          onSetViewClick('mosaic');
-        },
-        type: 'radio',
-        accelerator: 'Option+O'
-      },
+      // disable Mosaic for now until it supports 
+      // user supplied layout strings
+      // {
+      //   label: 'Mosaic',
+      //   id: 'mosaicView',
+      //   click: async () => {
+      //     onSetViewClick('mosaic');
+      //   },
+      //   type: 'radio',
+      //   accelerator: 'Option+O'
+      // },
       {
         label: 'Next frame',
         id: 'nextFrame',
