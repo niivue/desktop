@@ -159,7 +159,12 @@ function App() {
         }
         nv.setSliceType(sliceTypes[view]);
       });
-
+      nvUtils.onSetOpt((view) => {
+        console.log('Setting ', view[0], ' as', view[1])
+        nv.opts[view[0]] = view[1]
+        nv.updateGLVolume()
+        nv.drawScene()
+      });
       // set the callback for when the DRAG mode changes
       nvUtils.onSetDragMode((mode) => {
         switch (mode) {

@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('NIIVUE', {
   onLoadSurfaces: onLoadSurfaces,
   onAddVolumeOverlay: onAddVolumeOverlay,
   onSetView: onSetView,
+  onSetOpt: onSetOpt,
   onSetFrame: onSetFrame,
   onSetColormaps: onSetColormaps,
   onSetDragMode: onSetDragMode,
@@ -43,6 +44,13 @@ async function onAddVolumeOverlay(callback) {
 
 async function onSetView(callback) {
   ipcRenderer.on('setView', (event, view) => {
+    console.log(view)
+    callback(view)
+  })
+}
+
+async function onSetOpt(callback) {
+  ipcRenderer.on('setOpt', (event, view) => {
     console.log(view)
     callback(view)
   })

@@ -284,6 +284,17 @@ async function onSetViewClick(view) {
   mainWindow.webContents.send('setView', view);
 }
 
+/**
+ * Sets a canvas option
+ * @param {string} view - The view to set the canvas to.
+ * @async
+ * @function
+ */
+async function onSetVolOptClick(view) {
+  let val = Menu.getApplicationMenu().getMenuItemById(view).checked
+  mainWindow.webContents.send('setOpt', [view, val]);
+}
+
 // closes all volumes
 // TODO: will need to add a similar function for meshes
 async function onCloseAllVolumesClick() {
@@ -405,7 +416,8 @@ let menu = [
           onSetViewClick('multiPlanarACS');
         },
         type: 'radio',
-        accelerator: 'Option+M'
+        accelerator: 'Option+M',
+        checked: true
       },
       {
         label: 'Multi-planar (A+C+S+R)',
@@ -416,6 +428,7 @@ let menu = [
         type: 'radio',
         accelerator: 'Option+Shift+M'
       },
+      { type: 'separator' },
       // disable Mosaic for now until it supports 
       // user supplied layout strings
       // {
@@ -442,7 +455,27 @@ let menu = [
           mainWindow.webContents.send('setFrame', -1);
         },
         accelerator: 'Left'
-      }
+      },
+      { type: 'separator' },
+      {
+        label: 'Rendering cube visible',
+        id: 'isOrientCube',
+        click: async () => {
+          onSetVolOptClick('isOrientCube');
+        },
+        type: 'checkbox',
+        checked: false
+      },
+
+      {
+        label: 'Colorbar visible',
+        id: 'isColorbar',
+        click: async () => {
+          onSetVolOptClick('isColorbar');
+        },
+        type: 'checkbox',
+        checked: false
+      },
     ]
   },
   // add drag menu
@@ -471,7 +504,8 @@ let menu = [
         click: () => {
           mainWindow.webContents.send('setDragMode', 'contrast');
         },
-        type: 'radio'
+        type: 'radio',
+        checked: true
       },
       {
         label: 'None',
@@ -481,6 +515,58 @@ let menu = [
         },
         type: 'radio'
       }
+    ]
+  },
+  // add volume menu with options that influence volumes but not meshes
+  {
+    label: 'Volume',
+    submenu: [
+      {
+        label: 'Nearest interpolation',
+        id: 'isNearestInterpolation',
+        click: async () => {
+          onSetVolOptClick('isNearestInterpolation');
+        },
+        type: 'checkbox',
+        checked: false
+      },
+      {
+        label: 'Radiological convention',
+        id: 'isRadiologicalConvention',
+        click: async () => {
+          onSetVolOptClick('isRadiologicalConvention');
+        },
+        type: 'checkbox',
+        checked: false
+      },
+      {
+        label: 'Sagittal nose left',
+        id: 'sagittalNoseLeft',
+        click: async () => {
+          onSetVolOptClick('sagittalNoseLeft');
+        },
+        type: 'checkbox',
+        checked: false
+      },
+      {
+        label: 'World (not voxel) Space',
+        id: 'isSliceMM',
+        click: async () => {
+          onSetVolOptClick('isSliceMM');
+        },
+        type: 'checkbox',
+        checked: false
+      },
+      //
+      {
+        label: 'Ruler visible',
+        id: 'isRuler',
+        click: async () => {
+          onSetVolOptClick('isRuler');
+        },
+        type: 'checkbox',
+        checked: false
+      },
     ]
   },
   // add window menu with reload options
