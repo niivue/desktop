@@ -485,6 +485,16 @@ let menu = [
         type: 'checkbox',
         checked: true
       },
+      // isCornerOrientationText
+      {
+        label: 'Corner orientation text',
+        id: 'isCornerOrientationText',
+        click: async () => {
+          onSetVolOptClick('isCornerOrientationText');
+        },
+        type: 'checkbox',
+        checked: false
+      },
     ]
   },
   // add drag menu
