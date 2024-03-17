@@ -108,6 +108,12 @@ nvUtils.onSetView = function (callback) {
   }
 };
 
+nvUtils.onSetOpt = function (callback) {
+  if (isFunction(NIIVUE.onSetOpt)) {
+    NIIVUE.onSetOpt(callback);
+  }
+};
+
 nvUtils.onCloseAllVolumes = function (callback) {
   if (isFunction(NIIVUE.onCloseAllVolumes)) {
     NIIVUE.onCloseAllVolumes(callback);
