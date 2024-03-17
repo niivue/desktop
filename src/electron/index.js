@@ -271,7 +271,6 @@ async function openStandard(fileName) {
   // get the absolute path to the file
   file = path.resolve(file);
   mainWindow.webContents.send('loadVolumes', [file]);
-  updateImagesMenu([file]);
 }
 
 /**
