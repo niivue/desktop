@@ -14,6 +14,9 @@ contextBridge.exposeInMainWorld('NIIVUE', {
   onAddVolumeOverlay: onAddVolumeOverlay,
   onSetView: onSetView,
   onSetOpt: onSetOpt,
+  onSetDrawPen: onSetDrawPen,
+  onSetEvalStr: onSetEvalStr,
+  onGetOpt: onGetOpt,
   onSetFrame: onSetFrame,
   onSetColormaps: onSetColormaps,
   onSetDragMode: onSetDragMode,
@@ -51,8 +54,31 @@ async function onSetView(callback) {
 
 async function onSetOpt(callback) {
   ipcRenderer.on('setOpt', (event, view) => {
-    console.log(view)
+    console.log('preload setOpt', view)
     callback(view)
+  })
+}
+
+async function onSetDrawPen(callback) {
+  ipcRenderer.on('setDrawPen', (event, view) => {
+    console.log('preload setDrawPen', view)
+    callback(view)
+  })
+}
+
+
+async function onSetEvalStr(callback) {
+  ipcRenderer.on('setEvalStr', (event, view) => {
+    console.log('preload setEvalStr', view)
+    callback(view)
+  })
+}
+
+async function onGetOpt(callback) {
+  ipcRenderer.on('getOpt', (event, view) => {
+    console.log('preload getOpt', view)
+    callback(view)
+    return false
   })
 }
 

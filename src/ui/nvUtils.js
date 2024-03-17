@@ -114,6 +114,25 @@ nvUtils.onSetOpt = function (callback) {
   }
 };
 
+nvUtils.onSetDrawPen = function (callback) {
+  if (isFunction(NIIVUE.onSetDrawPen)) {
+    NIIVUE.onSetDrawPen(callback);
+  }
+};
+
+nvUtils.onSetEvalStr = function (callback) {
+  if (isFunction(NIIVUE.onSetEvalStr)) {
+    NIIVUE.onSetEvalStr(callback);
+  }
+};
+
+nvUtils.onGetOpt = function (callback) {
+  if (isFunction(NIIVUE.onGetOpt)) {
+    return NIIVUE.onGetOpt(callback);
+  }
+  return false
+};
+
 nvUtils.onCloseAllVolumes = function (callback) {
   if (isFunction(NIIVUE.onCloseAllVolumes)) {
     NIIVUE.onCloseAllVolumes(callback);

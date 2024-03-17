@@ -160,19 +160,34 @@ function App() {
         nv.setSliceType(sliceTypes[view]);
       });
       nvUtils.onSetOpt((view) => {
-        // view is an array with the first element as the option name and the second as the value
-        console.log('Setting ', view[0], ' as', view[1])
-        // use special if condition for menu items that don't have matching
-        // is<name> options like isCrosshair
-        if (view[0] === 'isCrosshair') {
-          // convert isCrosshair menu item (boolean) to crosshair width (0 or 1)
-          view[1] ? nv.setCrosshairWidth(1) : nv.setCrosshairWidth(0);
+        // view is an array with the first element as the option name and the second as the value(s)
+        console.log('Setting ', view[0], ' as ', view[1])
+        nv.opts[view[0]] = view[1]
+        nv.updateGLVolume()
+        nv.drawScene()
+      });
+      nvUtils.onSetDrawPen((pen) => {
+        // pen is color for drawing
+        if (pen === Infinity) {
+            nv.setDrawingEnabled(false)
+            return
         } else {
-          nv.opts[view[0]] = view[1]
-          nv.updateGLVolume()
-          nv.drawScene()
+            nv.setDrawingEnabled(true)
         }
+        let isFilled = nv.opts.isFilledPen
+        console.log('Setting draw pen to ', pen)
+        nv.setPenValue(pen, isFilled)
         
+      });
+      nvUtils.onSetEvalStr((str) => {
+        console.log('Evaluating ', str)
+        eval(str)
+      });
+      nvUtils.onGetOpt((opt) => {
+        // opt is the option name, returns current value(s)
+        let val = nv.opts[opt[0]]
+        console.log('Getting ', opt[0], ' which is', val)
+        return val
       });
       // set the callback for when the DRAG mode changes
       nvUtils.onSetDragMode((mode) => {
