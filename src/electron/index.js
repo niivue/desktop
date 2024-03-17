@@ -475,6 +475,16 @@ let menu = [
         type: 'checkbox',
         checked: false
       },
+      // crosshair 
+      {
+        label: 'Crosshair visible',
+        id: 'isCrosshair',
+        click: async () => {
+          onSetVolOptClick('isCrosshair');
+        },
+        type: 'checkbox',
+        checked: true
+      },
     ]
   },
   // add drag menu

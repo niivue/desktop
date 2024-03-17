@@ -160,10 +160,19 @@ function App() {
         nv.setSliceType(sliceTypes[view]);
       });
       nvUtils.onSetOpt((view) => {
+        // view is an array with the first element as the option name and the second as the value
         console.log('Setting ', view[0], ' as', view[1])
-        nv.opts[view[0]] = view[1]
-        nv.updateGLVolume()
-        nv.drawScene()
+        // use special if condition for menu items that don't have matching
+        // is<name> options like isCrosshair
+        if (view[0] === 'isCrosshair') {
+          // convert isCrosshair menu item (boolean) to crosshair width (0 or 1)
+          view[1] ? nv.setCrosshairWidth(1) : nv.setCrosshairWidth(0);
+        } else {
+          nv.opts[view[0]] = view[1]
+          nv.updateGLVolume()
+          nv.drawScene()
+        }
+        
       });
       // set the callback for when the DRAG mode changes
       nvUtils.onSetDragMode((mode) => {
