@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types';
+import Box from '@mui/material/Box';
 export function FileList({ children, ...props }) {
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         display: 'flex',
         flexDirection: 'column',
         minWidth: '100%',
@@ -12,11 +13,13 @@ export function FileList({ children, ...props }) {
         backgroundColor: '#F8F8F8',
         // slight border radius
         borderRadius: '4px',
+        // overflow: 'hidden',
+        overflowY: 'scroll',
         ...props
       }}
     >
       {children}
-    </div>
+    </Box>
   )
 }
 

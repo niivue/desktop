@@ -1,4 +1,5 @@
 import TextField from "@mui/material/TextField"
+import Box from "@mui/material/Box"
 import PropTypes from "prop-types"
 
 export function MinMaxInput({
@@ -32,21 +33,20 @@ export function MinMaxInput({
   }
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         width: '100%',
         minHeight: '50px',
-        gap: '10px',
         ...props
       }}
     >
       <TextField
         sx={{
-          minWidth: '50%',
+          // minWidth: '50%',
         }}
         id="min-number"
         label="Min"
@@ -66,7 +66,7 @@ export function MinMaxInput({
       />
       <TextField
         sx={{
-          minWidth: '50%',
+          // minWidth: '50%',
         }}
         id="max-number"
         label="Max"
@@ -83,7 +83,7 @@ export function MinMaxInput({
         onInput={handleMaxChange}
         onDoubleClick={handleMaxDoubleClick}
       />
-    </div>
+    </Box>
   )
 }
 

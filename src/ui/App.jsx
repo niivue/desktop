@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useContext, createContext} from 'reac
 import './App.css'
 import {nvUtils} from './nvUtils'
 import {Niivue, SLICE_TYPE} from '@niivue/niivue'
-import {AppContainer} from './components/AppContainer'
 import {NiivueCanvas} from './components/NiivueCanvas'
 import { Sidebar } from './components/Sidebar'
 import { FileList } from './components/FileList'
@@ -12,6 +11,7 @@ import { ColormapSelect } from './components/ColormapSelect'
 import { MinMaxInput } from './components/MinMaxInput'
 import { OpacitySlider } from './components/OpacitySlider'
 import CssBaseline from '@mui/material/CssBaseline';
+import Container from '@mui/material/Container';
 
 // use a context to call the Niivue instance from any component
 const _nv = new Niivue()
@@ -277,7 +277,18 @@ function App() {
     // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
       {/* AppContainer: the parent component that lays out the rest of the scene */}
-      <AppContainer gap={0}>
+      <Container
+        disableGutters
+        maxWidth={false}
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          height: '100vh',
+          width: '100vw',
+          minHeight: '300px',
+          gap: 0
+        }}
+      >
         {/* CssBaseline sets some standard CSS configs for working with MUI */}
         <CssBaseline />
         {/* Sidebar: is the left panel that shows all files and image/scene widgets */}
@@ -328,7 +339,7 @@ function App() {
         </Sidebar>
         {/* Niivue Canvas: where things are rendered :) */}
         <NiivueCanvas nv={nv} />
-      </AppContainer>
+      </Container>
     </NV.Provider>
   )
 }
