@@ -9,6 +9,7 @@ import { ImageTools } from './components/ImageTools'
 import { FileItem } from './components/FileItem'
 import { ColormapSelect } from './components/ColormapSelect'
 import { MinMaxInput } from './components/MinMaxInput'
+import { MosaicInput } from './components/MosaicInput'
 import { OpacitySlider } from './components/OpacitySlider'
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
@@ -61,6 +62,7 @@ function App() {
   const [calMax, setCalMax] = useState(0)
   const [opacity, setOpacity] = useState(1)
   const [colormap, setColormap] = useState('gray') // default
+  const [sliceType, setSliceType] = useState('')
 
 
   // ------------ Callbacks ------------
@@ -109,6 +111,10 @@ function App() {
     setMax(max)
   }, [activeImage, nv])
 
+  const onMosaicChange = (mosaicString) => {
+    nv.setSliceMosaicString(mosaicString)
+  }
+
   // ------------ Effects ------------
   // get the comms info from the main process
   // when the app is first loaded
@@ -146,12 +152,12 @@ function App() {
       });
       // set the callback for when the view needs updating
       nvUtils.onSetView((view) => {
+        setSliceType(view)
         // clear the mosaic string
         nv.setSliceMosaicString("");
         if (view === 'multiPlanarACSR') {
           nv.opts.multiplanarForceRender = true;
         } else if (view === 'mosaic') {
-          // TODO: allow the user to set the mosaic string
           nv.setSliceMosaicString("A 0 20 C 30 S 42");
           nv.opts.multiplanarForceRender = false;
         } else {
@@ -337,6 +343,12 @@ function App() {
               )
             })}
           </FileList>
+          {/* mosaic text input if sliceType is "mosaic" */}
+          { sliceType === "mosaic" && (
+            <MosaicInput
+              onChange={onMosaicChange}
+            />
+          )}
           {/* ImageTools */}
           <ImageTools>
             {/* colormap select: sets the colormap of the active image */}

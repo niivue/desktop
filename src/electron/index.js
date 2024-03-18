@@ -505,18 +505,18 @@ let menu = [
         type: 'radio',
         accelerator: 'Option+Shift+M'
       },
+      // mosaic view requires user supplied strings
+      // in the UI
+      {
+        label: 'Mosaic',
+        id: 'mosaicView',
+        click: async () => {
+          onSetViewClick('mosaic');
+        },
+        type: 'radio',
+        accelerator: 'Option+O'
+      },
       { type: 'separator' },
-      // disable Mosaic for now until it supports 
-      // user supplied layout strings
-      // {
-      //   label: 'Mosaic',
-      //   id: 'mosaicView',
-      //   click: async () => {
-      //     onSetViewClick('mosaic');
-      //   },
-      //   type: 'radio',
-      //   accelerator: 'Option+O'
-      // },
       {
         label: 'Next frame',
         id: 'nextFrame',
