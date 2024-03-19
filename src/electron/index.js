@@ -554,14 +554,24 @@ let menu = [
         checked: false
       },
       // crosshair 
+      // {
+      //   label: 'Crosshair visible',
+      //   id: 'isCrosshair',
+      //   click: async () => {
+      //     onSetVolOptClick('isCrosshair');
+      //   },
+      //   type: 'checkbox',
+      //   checked: true
+      // },
+      // 3D crosshair
       {
-        label: 'Crosshair visible',
-        id: 'isCrosshair',
+        label: '3D crosshair visible',
+        id: 'show3Dcrosshair',
         click: async () => {
-          onSetVolOptClick('isCrosshair');
+          onSetVolOptClick('show3Dcrosshair');
         },
         type: 'checkbox',
-        checked: true
+        checked: false
       },
       // isCornerOrientationText
       {
