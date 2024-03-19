@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain} = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog} = require('electron');
 const path = require('path');
 const { fork } = require("child_process");
 const {devPorts} = require('./devPorts');
@@ -242,6 +242,23 @@ async function onLoadVolumesClick() {
   mainWindow.webContents.send('loadVolumes', files.filePaths);
 }
 
+
+
+async function onSaveBitmapClick() {
+  /*let savePath = await  dialog.showSaveDialog({
+    filters: [{
+      name: 'Bitmap PNG',
+      extensions: ['png']
+    }]
+  })
+  if (savePath.canceled)
+    return
+  let str = 'nv.saveScene("' + savePath.filePath+ '")'
+  console.log(str)
+  mainWindow.webContents.send('setEvalStr', str);*/
+  mainWindow.webContents.send('setEvalStr', 'nv.saveScene("ScreenShot.png")');
+}
+
 /**
  * Handles the load surfaces menu click event.
  * NOT IMPLEMENTED YET
@@ -285,13 +302,66 @@ async function onSetViewClick(view) {
 
 /**
  * Sets a canvas option
- * @param {string} view - The view to set the canvas to.
+ * @param {string} opt - The boolean option to set.
  * @async
  * @function
  */
-async function onSetVolOptClick(view) {
-  let val = Menu.getApplicationMenu().getMenuItemById(view).checked
-  mainWindow.webContents.send('setOpt', [view, val]);
+async function onSetVolOptClick(opt) {
+  let val = Menu.getApplicationMenu().getMenuItemById(opt).checked
+  mainWindow.webContents.send('setOpt', [opt, val]);
+}
+
+/**
+ * Sets a canvas option
+ * @param {string} opt - The option to set.
+ * @param {number} numericScale - scaling factor for False (0) or True (1)
+ * @async
+ * @function
+ */
+async function onSetNumberOptClick(opt, numericScale = 1.0) {
+  let val = Menu.getApplicationMenu().getMenuItemById(opt).checked
+  if (isFinite(numericScale)) {
+    if (val === true)
+        val = numericScale
+    else
+        val = 0.0
+  }
+  mainWindow.webContents.send('setOpt', [opt, val]);
+}
+
+
+async function onSetDrawPenClick(penColor = Infinity) {
+  mainWindow.webContents.send('setDrawPen', penColor);
+}
+
+async function onCheckClick(opt) {
+  let val = Menu.getApplicationMenu().getMenuItemById(opt).checked
+  let str = ''
+  if (opt === 'drawFilled')
+    str = 'nv.opts.isFilledPen = ' + val.toString()
+  if (opt === 'drawOverwrite')
+    str = 'nv.drawFillOverwrites = ' + val.toString()
+  if (opt === 'drawTranslucent') {
+    var f = val ? '0.8' : '1.0';
+    str = 'nv.drawOpacity = ' + f + '; nv.drawScene()'
+  }
+  mainWindow.webContents.send('setEvalStr', str);
+}
+
+/**
+ * Sets a NiiVue color option
+ * @param {string} opt - The color option to change
+ * @async
+ * @function
+ */
+async function onSetColorOptClick(opt) {
+  console.log('getting', opt)
+  //https://github.com/electron/electron/issues/2473
+  //https://www.npmjs.com/package/electron-color-picker/v/0.1.1?activeTab=readme
+  let val = await mainWindow.webContents.send('getOpt', [opt]);
+  console.log('ret', val)
+  val = [0.0, 1.0, 0.0, 1.0]
+  mainWindow.webContents.send('setOpt', [opt, val]);
 }
 
 // closes all volumes
@@ -330,6 +400,14 @@ let menu = [
       //     await onLoadSurfacesClick();
       //   }
       // },
+      { type: 'separator' },
+      {
+        label: 'Save bitmap',
+        id: 'saveBitmap',
+        click: async () => {
+          await onSaveBitmapClick();
+        }
+      },
       // separator
       { type: 'separator' },
       // add volume overlay
@@ -427,18 +505,18 @@ let menu = [
         type: 'radio',
         accelerator: 'Option+Shift+M'
       },
+      // mosaic view requires user supplied strings
+      // in the UI
+      {
+        label: 'Mosaic',
+        id: 'mosaicView',
+        click: async () => {
+          onSetViewClick('mosaic');
+        },
+        type: 'radio',
+        accelerator: 'Option+O'
+      },
       { type: 'separator' },
-      // disable Mosaic for now until it supports 
-      // user supplied layout strings
-      // {
-      //   label: 'Mosaic',
-      //   id: 'mosaicView',
-      //   click: async () => {
-      //     onSetViewClick('mosaic');
-      //   },
-      //   type: 'radio',
-      //   accelerator: 'Option+O'
-      // },
       {
         label: 'Next frame',
         id: 'nextFrame',
@@ -476,14 +554,24 @@ let menu = [
         checked: false
       },
       // crosshair 
+      // {
+      //   label: 'Crosshair visible',
+      //   id: 'isCrosshair',
+      //   click: async () => {
+      //     onSetVolOptClick('isCrosshair');
+      //   },
+      //   type: 'checkbox',
+      //   checked: true
+      // },
+      // 3D crosshair
       {
-        label: 'Crosshair visible',
-        id: 'isCrosshair',
+        label: '3D crosshair visible',
+        id: 'show3Dcrosshair',
         click: async () => {
-          onSetVolOptClick('isCrosshair');
+          onSetVolOptClick('show3Dcrosshair');
         },
         type: 'checkbox',
-        checked: true
+        checked: false
       },
       // isCornerOrientationText
       {
@@ -585,6 +673,167 @@ let menu = [
         },
         type: 'checkbox',
         checked: false
+      },
+      {
+        label: 'Crosshair visible',
+        id: 'crosshairWidth',
+        click: async () => {
+          onSetNumberOptClick('crosshairWidth', 1.0);
+        },
+        type: 'checkbox',
+        checked: true
+      },
+    ]
+  },
+  // add draw menu
+  {
+    label: 'Draw',
+    submenu: [
+      {
+        label: 'Off',
+        id: 'drawOff',
+        click: async () => {
+          onSetDrawPenClick(Infinity);
+        },
+        type: 'radio',
+        checked: true
+      },
+      {
+        label: 'Red',
+        id: 'drawRed',
+        click: async () => {
+          onSetDrawPenClick(1);
+        },
+        type: 'radio',
+      },
+      {
+        label: 'Green',
+        id: 'drawGreen',
+        click: async () => {
+          onSetDrawPenClick(2);
+        },
+        type: 'radio',
+      },
+      {
+        label: 'Blue',
+        id: 'drawBlue',
+        click: async () => {
+          onSetDrawPenClick(3);
+        },
+        type: 'radio',
+      },
+      {
+        label: 'Yellow',
+        id: 'drawYellow',
+        click: async () => {
+          onSetDrawPenClick(4);
+        },
+        type: 'radio',
+      },
+      {
+        label: 'Cyan',
+        id: 'drawCyan',
+        click: async () => {
+          onSetDrawPenClick(5);
+        },
+        type: 'radio',
+      },
+      {
+        label: 'Purple',
+        id: 'drawPurple',
+        click: async () => {
+          onSetDrawPenClick(6);
+        },
+        type: 'radio',
+      },
+      {
+        label: 'Erase',
+        id: 'drawErase',
+        click: async () => {
+          onSetDrawPenClick(0);
+        },
+        type: 'radio',
+      },
+      { type: 'separator' },
+      {
+        label: 'Filled',
+        id: 'drawFilled',
+        click: async () => {
+          onCheckClick('drawFilled');
+        },
+        type: 'checkbox',
+        checked: false
+      },
+      {
+        label: 'Overwrite',
+        id: 'drawOverwrite',
+        click: async () => {
+          onCheckClick('drawOverwrite');
+        },
+        type: 'checkbox',
+        checked: true
+      },
+      {
+        label: 'Translucent',
+        id: 'drawTranslucent',
+        click: async () => {
+          onCheckClick('drawTranslucent');
+        },
+        type: 'checkbox',
+        checked: true
+      },
+    ]
+  },
+
+
+  // add color menu
+  {
+    label: 'Color',
+    submenu: [
+      {
+        label: 'Background',
+        id: 'backColor',
+        click: async () => {
+          onSetColorOptClick('backColor');
+        },
+      },
+      {
+        label: 'Crosshair',
+        id: 'crosshairColor',
+        click: async () => {
+          onSetColorOptClick('crosshairColor');
+        },
+      },
+      {
+        label: 'Font',
+        id: 'fontColor',
+        click: async () => {
+          onSetColorOptClick('fontColor');
+        },
+      },
+      
+      {
+        label: 'Ruler',
+        id: 'rulerColor',
+        click: async () => {
+          onSetColorOptClick('rulerColor');
+        },
+      },
+      
+      {
+        label: 'Clip plane',
+        id: 'clipPlaneColor',
+        click: async () => {
+          onSetColorOptClick('clipPlaneColor');
+        },
+      },
+      
+      {
+        label: 'Selection box',
+        id: 'selectionBoxColor',
+        click: async () => {
+          onSetColorOptClick('selectionBoxColor');
+        },
       },
     ]
   },

@@ -12,7 +12,7 @@ export function ImageTools({ children, ...props }) {
         minHeight: '100px',
         backgroundColor: '#F8F8F8',
         borderRadius: '4px',
-        gap: 1,
+        gap: 1.5,
         padding: 1,
         ...props
       }}
