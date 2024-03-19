@@ -124,6 +124,10 @@ function App() {
       console.log(info)
       setCommsInfo(info)
 
+      nvUtils.onSaveMosaicString(() => {
+        saveMosaicString(nv.sliceMosaicString)
+      });
+
       // set the callback for when volumes are loaded
       nvUtils.onLoadVolumes((imgs) => {
         console.log('loaded volumes', imgs);
@@ -302,6 +306,15 @@ function App() {
     setImages(newImages)
   }, [activeImage, nv])
 
+  const saveMosaicString = async (mosaic) => {
+    console.log('mosaic:', mosaic)
+    if(mosaic) {
+      const result = await nvUtils.openSaveMosaicFileDialog()
+      if(!result.canceled) {
+        nvUtils.saveTextFile(result.filePath, mosaic);
+      }
+    }
+  }
   const handleMoveUp = useCallback((index) => {
     const newIndex = index - 1;
     if(newIndex < 0) {

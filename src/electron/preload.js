@@ -22,6 +22,9 @@ contextBridge.exposeInMainWorld('NIIVUE', {
   onSetDragMode: onSetDragMode,
   onSetViewSelected: onSetViewSelected,
   onCloseAllVolumes: onCloseAllVolumes,
+  onSaveMosaicString: onSaveMosaicString,
+  openSaveMosaicFileDialog: openSaveMosaicFileDialog,
+  saveTextFile: saveTextFile,
 })
 
 async function onLoadVolumes(callback) {
@@ -145,4 +148,18 @@ async function openFileDialog() {
  */
 async function openSaveFileDialog() {
   return ipcRenderer.invoke('openSaveFileDialog')
+}
+
+function onSaveMosaicString(callback) {
+  ipcRenderer.on('saveMosaicString', () => {
+    callback()
+  })
+}
+
+async function openSaveMosaicFileDialog() {
+  return ipcRenderer.invoke('openSaveMosaicFileDialog')
+}
+
+function saveTextFile(fileText) {
+  return ipcRenderer.invoke('saveTextFile', fileText)
 }

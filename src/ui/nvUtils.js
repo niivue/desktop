@@ -50,6 +50,32 @@ nvUtils.openSaveFileDialog = async function () {
 };
 
 /**
+ * opens a save file dialog in the main process with mosaic.txt as default file name
+ * and .txt file filter
+ * @async
+ * @function
+ * @returns {Promise<Object>} A promise that resolves to an object containing the file path and the file name.
+ */
+nvUtils.openSaveMosaicFileDialog = async function() {
+  if (isFunction(NIIVUE.openSaveMosaicFileDialog)) {
+    return await NIIVUE.openSaveMosaicFileDialog();
+  } else {
+    return NIIVUE.openSaveMosaicFileDialog;
+  }
+}
+
+nvUtils.onSaveMosaicString = function (callback) {
+  if (isFunction(NIIVUE.onSaveMosaicString)) {
+    NIIVUE.onSaveMosaicString(callback);
+  }
+}
+
+nvUtils.saveTextFile = function(filePath, text) {
+  console.log('saveTextFile', text)
+  NIIVUE.saveTextFile({filePath, text});
+}
+
+/**
  * removes the extension from a string
  * @function
  * @param {string} str - The string to remove the extension from.

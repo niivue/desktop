@@ -370,6 +370,13 @@ async function onCloseAllVolumesClick() {
   mainWindow.webContents.send('closeAllVolumes');
 }
 
+// sends a message to save the mosaic string as a text file
+async function onSaveMosaicStringClick() {
+  mainWindow.webContents.send('saveMosaicString');
+}
+
+
+
 // create an application menu
 let menu = [
   // add file menu with load volumes option
@@ -406,6 +413,13 @@ let menu = [
         id: 'saveBitmap',
         click: async () => {
           await onSaveBitmapClick();
+        }
+      },
+      {
+        label: 'Save mosaic string',
+        id: 'closeAllVolumes',
+        click: async () => {
+          await onSaveMosaicStringClick();
         }
       },
       // separator
