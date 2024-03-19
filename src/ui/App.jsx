@@ -306,6 +306,56 @@ function App() {
     setImages(newImages)
   }, [activeImage, nv])
 
+  const handleMoveUp = useCallback((index) => {
+    const newIndex = index - 1;
+    if(newIndex < 0) {
+      return
+    }
+
+    nv.setVolume(nv.volumes[index], newIndex)    
+    let volumes = nv.volumes
+    let newImages = volumes.map((volume, index) => {
+      return {
+        url: volume.url,
+        name: volume.name,
+        index: index,
+        id: volume.id,
+        color: volume.colormap,
+        active: index === activeImage
+      }
+    })
+    setActiveImage(0)
+    setImages(newImages)
+  }, [activeImage, nv])
+
+  const handleMoveDown = useCallback((index) => {
+    const newIndex = index + 1;
+    if(newIndex > nv.volumes.length - 1) {
+      return
+    }
+
+    nv.setVolume(nv.volumes[index], newIndex)
+    let volumes = nv.volumes
+    let newImages = volumes.map((volume, index) => {
+      return {
+        url: volume.url,
+        name: volume.name,
+        index: index,
+        id: volume.id,
+        color: volume.colormap,
+        active: index === activeImage
+      }
+    })
+    setActiveImage(0)
+    setImages(newImages)
+  }, [activeImage, nv])
+
+  const handleShowHeader = (index) => {
+    let vol = nv.volumes[index]
+    alert(vol.hdr.toFormattedString());
+  }
+
+
   const saveMosaicString = async (mosaic) => {
     console.log('mosaic:', mosaic)
     if(mosaic) {

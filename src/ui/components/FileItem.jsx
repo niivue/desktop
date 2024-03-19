@@ -69,6 +69,21 @@ export function FileItem({
     handleClose()
     onMoveDown(index)
   }
+  function handleShowHeader() {
+    handleClose()
+    onShowHeader(index)
+  }
+
+
+  function handleMoveUp() {
+    handleClose()
+    onMoveUp(index)
+  }
+
+  function handleMoveDown() {
+    handleClose()
+    onMoveDown(index)
+  }
 
   function handleShowHeader() {
     handleClose()
