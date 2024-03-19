@@ -49,6 +49,19 @@ nvUtils.openSaveFileDialog = async function () {
   }
 };
 
+nvUtils.openSaveMosaicFileDialog = async function() {
+  if (isFunction(NIIVUE.openSaveMosaicFileDialog)) {
+    return await NIIVUE.openSaveMosaicFileDialog();
+  } else {
+    return NIIVUE.openSaveMosaicFileDialog;
+  }
+}
+
+nvUtils.saveTextFile = function(filePath, text) {
+  console.log('saveTextFile', text)
+  NIIVUE.saveTextFile({filePath, text});
+}
+
 /**
  * removes the extension from a string
  * @function
@@ -152,3 +165,9 @@ nvUtils.onSetViewSelected = function (view, forceRender = false, mosaic = '') {
     NIIVUE.onSetViewSelected(view, forceRender, mosaic);
   }
 };
+
+nvUtils.onSaveMosaicString = function (callback) {
+  if (isFunction(NIIVUE.onSaveMosaicString)) {
+    NIIVUE.onSaveMosaicString(callback);
+  }
+}

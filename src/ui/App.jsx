@@ -10,6 +10,15 @@ import { FileItem } from './components/FileItem'
 import { ColormapSelect } from './components/ColormapSelect'
 import { MinMaxInput } from './components/MinMaxInput'
 import { OpacitySlider } from './components/OpacitySlider'
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 
@@ -25,6 +34,15 @@ const sliceTypes = {
   'multiPlanarACS': SLICE_TYPE.MULTIPLANAR,
   'render': SLICE_TYPE.RENDER
 }
+
+// const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+//   '& .MuiDialogContent-root': {
+//     padding: theme.spacing(2),
+//   },
+//   '& .MuiDialogActions-root': {
+//     padding: theme.spacing(1),
+//   },
+// }));
 
 function App() {
   // create a new Niivue object
@@ -61,14 +79,18 @@ function App() {
   const [calMax, setCalMax] = useState(0)
   const [opacity, setOpacity] = useState(1)
   const [colormap, setColormap] = useState('gray') // default
-
+  const [open, setOpen] = useState(false);
+  const handleClose = () => {
+    setOpen(false);
+    // check if value
+  }
 
   // ------------ Callbacks ------------
   // add a volume from a URL
   const addVolume = useCallback(async (path, commsInfo) => {
     let url = makeNiivueUrl(path, commsInfo)
     console.log(url)
-    await nv.addVolumeFromUrl({url: url, name: path})
+    await nv.addVolumeFromUrl({url: url, name: path})    
     let volumes = nv.volumes
     let newImages = volumes.map((volume, index) => {
       return {
@@ -82,6 +104,7 @@ function App() {
         maxFrame: volume.nTotalFrame4D
       }
     })
+    
     console.log(newImages)
     setImages(newImages)
   }, [activeImage, nv, setImages]);
@@ -109,6 +132,7 @@ function App() {
     setMax(max)
   }, [activeImage, nv])
 
+
   // ------------ Effects ------------
   // get the comms info from the main process
   // when the app is first loaded
@@ -117,6 +141,11 @@ function App() {
       let info = await nvUtils.getCommsInfo()
       console.log(info)
       setCommsInfo(info)
+
+      nvUtils.onSaveMosaicString(() => {
+        console.log('saveMosaic function called')
+        setOpen(true);
+      });
 
       // set the callback for when volumes are loaded
       nvUtils.onLoadVolumes((imgs) => {
@@ -201,6 +230,8 @@ function App() {
         // TODO: update the frame in the FileItem
     });
 
+      
+
     }
     getCommsInfo()
   }, [activeImage, nv, addVolume])
@@ -281,6 +312,15 @@ function App() {
     setImages(newImages)
   }, [activeImage, nv])
 
+  const saveMosaicString = async (mosaic) => {
+    console.log('mosaic:', mosaic)
+    if(mosaic) {
+      const result = await nvUtils.openSaveMosaicFileDialog()
+      if(!result.canceled) {
+        nvUtils.saveTextFile(result.filePath, mosaic);
+      }
+    }
+  }
 
   return (
     // wrap the app in the Niivue context
@@ -348,6 +388,45 @@ function App() {
         </Sidebar>
         {/* Niivue Canvas: where things are rendered :) */}
         <NiivueCanvas nv={nv} />
+        <Dialog
+        open={open}
+        onClose={handleClose}
+        PaperProps={{
+          component: 'form',
+          onSubmit: (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.currentTarget);
+            const formJson = Object.fromEntries(formData.entries());
+            // const email = formJson.mosaic;
+            // console.log(email);
+            saveMosaicString(formJson.mosaic);
+            handleClose();
+          },
+        }}
+      >
+        <DialogTitle>Save Mosaic String</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Save mosaic string to a text file
+          </DialogContentText>
+          <TextField
+            autoFocus
+            required
+            margin="dense"
+            id="mosaic"
+            name="mosaic"
+            label="Mosaic String"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={nv.sliceMosaicString}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button type="submit">Save</Button>
+        </DialogActions>
+      </Dialog>
       </Container>
     </NV.Provider>
   )

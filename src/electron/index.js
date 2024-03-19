@@ -300,6 +300,11 @@ async function onCloseAllVolumesClick() {
   mainWindow.webContents.send('closeAllVolumes');
 }
 
+async function onSaveMosaicStringClick() {
+  mainWindow.webContents.send('saveMosaicString');
+}
+
+
 // create an application menu
 let menu = [
   // add file menu with load volumes option
@@ -355,6 +360,14 @@ let menu = [
             }
           }
         ]
+      },
+      { type: 'separator' },
+      {
+        label: 'Save Mosaic String',
+        id: 'closeAllVolumes',
+        click: async () => {
+          await onSaveMosaicStringClick();
+        }
       },
       // add surface overlay
       // TODO: this should prob be a separate submenu on each surface item to add mesh overlays
@@ -426,6 +439,15 @@ let menu = [
         },
         type: 'radio',
         accelerator: 'Option+Shift+M'
+      },
+      {
+        label: 'Mosaic',
+        id: 'mosaic',
+        click: async () => {
+          onSetViewClick('mosaic');
+        },
+        type: 'radio',
+        accelerator: 'Option+Shift+O'
       },
       { type: 'separator' },
       // disable Mosaic for now until it supports 

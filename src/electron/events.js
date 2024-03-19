@@ -1,5 +1,5 @@
 // require fs and path
-const fs = require('fs').promises
+const fs = require('fs') //.promises
 const path = require('path')
 const util = require('util') // node.js utility module for promisify
 
@@ -51,10 +51,34 @@ async function onSaveFileDialog() {
     return result
 }
 
+/**
+ * Handles the openSaveMosaicFileDialog command.
+ * @async
+ * @function
+ * @returns {Promise<Object>} A promise that resolves to an object with, cancelled, filePaths, and bookmarks properties.
+ */
+async function onSaveMosaicFileDialog() {
+    const { dialog } = require('electron')
+    const result = await dialog.showSaveDialog({ defaultPath: 'mosaic.txt', filters: ['*.txt'], properties: ['createDirectory', 'showOverwriteConfirmation'] })
+    console.log(result)
+    return result
+}
+
+/**
+ * Handles the saveTextFile command.
+ */
+function onSaveTextFile(textFile) {
+    console.log('trying to save ' + textFile.text + ' to ' + textFile.filePath);
+    try { fs.writeFileSync(textFile.filePath, textFile.text, 'utf-8'); console.log('saved ', textFile.filePath)}
+    catch(e) { console.log('Failed to save the file !', e); }
+}
+
 const events = {
     openFileDialog: onFileDialog,
     openSaveFileDialog: onSaveFileDialog,
     getCommsInfo: onGetCommsInfo,
+    openSaveMosaicFileDialog: onSaveMosaicFileDialog,
+    saveTextFile: onSaveTextFile,    
 }
 
 module.exports.events = events
