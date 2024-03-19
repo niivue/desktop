@@ -302,6 +302,56 @@ function App() {
     setImages(newImages)
   }, [activeImage, nv])
 
+  const handleMoveUp = useCallback((index) => {
+    const newIndex = index - 1;
+    if(newIndex < 0) {
+      return
+    }
+
+    nv.setVolume(nv.volumes[index], newIndex)    
+    let volumes = nv.volumes
+    let newImages = volumes.map((volume, index) => {
+      return {
+        url: volume.url,
+        name: volume.name,
+        index: index,
+        id: volume.id,
+        color: volume.colormap,
+        active: index === activeImage
+      }
+    })
+    setActiveImage(0)
+    setImages(newImages)
+  }, [activeImage, nv])
+
+  const handleMoveDown = useCallback((index) => {
+    const newIndex = index + 1;
+    if(newIndex > nv.volumes.length - 1) {
+      return
+    }
+
+    nv.setVolume(nv.volumes[index], newIndex)
+    let volumes = nv.volumes
+    let newImages = volumes.map((volume, index) => {
+      return {
+        url: volume.url,
+        name: volume.name,
+        index: index,
+        id: volume.id,
+        color: volume.colormap,
+        active: index === activeImage
+      }
+    })
+    setActiveImage(0)
+    setImages(newImages)
+  }, [activeImage, nv])
+
+  const handleShowHeader = (index) => {
+    let vol = nv.volumes[index]
+    alert(vol.hdr.toFormattedString());
+  }
+
+
 
   return (
     // wrap the app in the Niivue context
@@ -338,6 +388,9 @@ function App() {
                   onSetActive={toggleActive} // callback to set if the image is active
                   onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
                   onRemove={handleRemove} // callback to remove the image from the scene via the context menu
+                  onMoveUp={handleMoveUp} // callback to move the image up via the context menu
+                  onMoveDown={handleMoveDown} // callback to move the image down via the context menu
+                  onShowHeader={handleShowHeader} // callback to show the image header via the context menu
                   >
                 </FileItem>
               )
