@@ -355,6 +355,19 @@ function App() {
     alert(vol.hdr.toFormattedString());
   }
 
+  const handleNextFrame = (index) => {
+    const vol = nv.volumes[index]
+    let id = vol.id;
+    let currentFrame = vol.frame4D
+    nv.setFrame4D(id, currentFrame + 1)
+  }
+
+  const handlePreviousFrame = (index) => {
+    const vol = nv.volumes[index]
+    let id = vol.id;
+    let currentFrame = vol.frame4D
+    nv.setFrame4D(id, currentFrame - 1)
+  }
 
   const saveMosaicString = async (mosaic) => {
     console.log('mosaic:', mosaic)

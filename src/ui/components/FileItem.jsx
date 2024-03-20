@@ -69,9 +69,20 @@ export function FileItem({
     handleClose()
     onMoveDown(index)
   }
+
   function handleShowHeader() {
     handleClose()
     onShowHeader(index)
+  }
+
+  function handleNextFrame() {
+    handleClose()
+    onNextFrame(index)
+  }
+
+  function handlePreviousFrame() {
+    handleClose()
+    onPreviousFrame(index)
   }
 
 
