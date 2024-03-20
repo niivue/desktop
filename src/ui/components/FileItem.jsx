@@ -19,6 +19,8 @@ export function FileItem({
   onMoveUp = () => {},
   onMoveDown = () => {},
   onShowHeader = () => {},
+  onNextFrame = () => {},
+  onPreviousFrame = () => {},
 
   ...props
 }) {
@@ -67,9 +69,20 @@ export function FileItem({
     handleClose()
     onMoveDown(index)
   }
+
   function handleShowHeader() {
     handleClose()
     onShowHeader(index)
+  }
+
+  function handleNextFrame() {
+    handleClose()
+    onNextFrame(index)
+  }
+
+  function handlePreviousFrame() {
+    handleClose()
+    onPreviousFrame(index)
   }
 
 
@@ -128,6 +141,8 @@ export function FileItem({
         <MenuItem onClick={handleMoveUp}>Move Up</MenuItem>
         <MenuItem onClick={handleMoveDown}>Move Down</MenuItem>
         <MenuItem onClick={handleShowHeader}>Show Header</MenuItem>
+        <MenuItem onClick={handleNextFrame}>Next Frame</MenuItem>
+        <MenuItem onClick={handlePreviousFrame}>Previous Frame</MenuItem>
       </Menu>
     </div>
   )
@@ -143,6 +158,8 @@ FileItem.propTypes = {
   onMoveUp: PropTypes.func,
   onMoveDown: PropTypes.func,
   onShowHeader: PropTypes.func,
+  onNextFrame: PropTypes.func,
+  onPreviousFrame: PropTypes.func,
   frame: PropTypes.number,
   maxFrame: PropTypes.number
 }

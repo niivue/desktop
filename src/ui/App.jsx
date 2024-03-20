@@ -351,6 +351,19 @@ function App() {
     alert(vol.hdr.toFormattedString());
   }
 
+  const handleNextFrame = (index) => {
+    const vol = nv.volumes[index]
+    let id = vol.id;
+    let currentFrame = vol.frame4D
+    nv.setFrame4D(id, currentFrame + 1)
+  }
+
+  const handlePreviousFrame = (index) => {
+    const vol = nv.volumes[index]
+    let id = vol.id;
+    let currentFrame = vol.frame4D
+    nv.setFrame4D(id, currentFrame - 1)
+  }
 
 
   return (
@@ -391,6 +404,8 @@ function App() {
                   onMoveUp={handleMoveUp} // callback to move the image up via the context menu
                   onMoveDown={handleMoveDown} // callback to move the image down via the context menu
                   onShowHeader={handleShowHeader} // callback to show the image header via the context menu
+                  onNextFrame={handleNextFrame} // advances the frame for 4D volumes
+                  onPreviousFrame={handlePreviousFrame} // goes back a frame for 4D volumes
                   >
                 </FileItem>
               )
