@@ -417,7 +417,7 @@ let menu = [
       },
       {
         label: 'Save mosaic string',
-        id: 'closeAllVolumes',
+        id: 'saveMosaic',
         click: async () => {
           await onSaveMosaicStringClick();
         }
