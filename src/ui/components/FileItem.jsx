@@ -85,33 +85,6 @@ export function FileItem({
     onPreviousFrame(index)
   }
 
-
-  function handleMoveUp() {
-    handleClose()
-    onMoveUp(index)
-  }
-
-  function handleMoveDown() {
-    handleClose()
-    onMoveDown(index)
-  }
-
-  function handleShowHeader() {
-    handleClose()
-    onShowHeader(index)
-  }
-
-  function handleNextFrame() {
-    handleClose()
-    onNextFrame(index)
-  }
-
-  function handlePreviousFrame() {
-    handleClose()
-    onPreviousFrame(index)
-  }
-
-
   return (
     <div
       style={{
