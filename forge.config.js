@@ -1,5 +1,14 @@
 module.exports = {
   packagerConfig: {
+    // osxSign: {
+    //   identity: process.env.APPLE_IDENTITY
+    // },
+    // osxNotarize: {
+    //   tool: 'notarytool',
+    //   appleApiKey: process.env.APPLE_API_KEY,
+    //   appleApiKeyId: process.env.APPLE_API_KEY_ID,
+    //   appleApiIssuer: process.env.APPLE_API_ISSUER
+    // },
     ignore: [
       /\.git/,
       /\.vscode/,

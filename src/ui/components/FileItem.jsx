@@ -16,6 +16,12 @@ export function FileItem({
   onSetVisibility = () => { },
   onSetActive = () => { },
   onRemove = () => { },
+  onMoveUp = () => {},
+  onMoveDown = () => {},
+  onShowHeader = () => {},
+  onNextFrame = () => {},
+  onPreviousFrame = () => {},
+
   ...props
 }) {
 
@@ -52,6 +58,31 @@ export function FileItem({
   function handleRemove() {
     handleClose()
     onRemove(index)
+  }
+
+  function handleMoveUp() {
+    handleClose()
+    onMoveUp(index)
+  }
+
+  function handleMoveDown() {
+    handleClose()
+    onMoveDown(index)
+  }
+
+  function handleShowHeader() {
+    handleClose()
+    onShowHeader(index)
+  }
+
+  function handleNextFrame() {
+    handleClose()
+    onNextFrame(index)
+  }
+
+  function handlePreviousFrame() {
+    handleClose()
+    onPreviousFrame(index)
   }
 
   return (
@@ -106,6 +137,11 @@ export function FileItem({
         }
       >
         <MenuItem onClick={handleRemove}>Remove</MenuItem>
+        <MenuItem onClick={handleMoveUp}>Move Up</MenuItem>
+        <MenuItem onClick={handleMoveDown}>Move Down</MenuItem>
+        <MenuItem onClick={handleShowHeader}>Show Header</MenuItem>
+        <MenuItem onClick={handleNextFrame}>Next Frame</MenuItem>
+        <MenuItem onClick={handlePreviousFrame}>Previous Frame</MenuItem>
       </Menu>
     </div>
   )
@@ -118,6 +154,11 @@ FileItem.propTypes = {
   onSetVisibility: PropTypes.func,
   onSetActive: PropTypes.func,
   onRemove: PropTypes.func,
+  onMoveUp: PropTypes.func,
+  onMoveDown: PropTypes.func,
+  onShowHeader: PropTypes.func,
+  onNextFrame: PropTypes.func,
+  onPreviousFrame: PropTypes.func,
   frame: PropTypes.number,
   maxFrame: PropTypes.number
 }
