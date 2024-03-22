@@ -147,6 +147,10 @@ function App() {
         saveMosaicString(nv.sliceMosaicString);
       });
 
+      nvUtils.onSaveMosaicString(() => {
+        saveMosaicString(nv.sliceMosaicString)
+      });
+
       // set the callback for when volumes are loaded
       nvUtils.onLoadVolumes((imgs) => {
         console.log("loaded volumes", imgs);
@@ -332,7 +336,7 @@ function App() {
       if (newIndex < 0) {
         return;
       }
-
+      
       nv.setVolume(nv.volumes[index], newIndex);
       let volumes = nv.volumes;
       let newImages = volumes.map((volume, index) => {
