@@ -375,7 +375,10 @@ async function onSaveMosaicStringClick() {
   mainWindow.webContents.send('saveMosaicString');
 }
 
-
+// sends a message to load the mosaic string from a text file
+async function onLoadMosaicStringClick() {
+  mainWindow.webContents.send('loadMosaicString')
+}
 
 // create an application menu
 let menu = [
@@ -389,6 +392,14 @@ let menu = [
         id: 'loadVolumes',
         click: async () => {
           await onLoadVolumesClick();
+        }
+      },
+      // load mosaic string
+      {
+        label: 'Load mosaic string',
+        id: 'loadMosaicString',
+        click: async () => {
+          await onLoadMosaicStringClick();
         }
       },
       // close all volumes

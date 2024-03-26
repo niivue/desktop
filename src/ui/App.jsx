@@ -148,7 +148,11 @@ function App() {
       });
 
       nvUtils.onSaveMosaicString(() => {
-        saveMosaicString(nv.sliceMosaicString)
+        saveMosaicString(nv.sliceMosaicString);
+      });
+
+      nvUtils.onLoadMosaicString(() => {
+        loadMosaicString();
       });
 
       // set the callback for when volumes are loaded
@@ -336,7 +340,7 @@ function App() {
       if (newIndex < 0) {
         return;
       }
-      
+
       nv.setVolume(nv.volumes[index], newIndex);
       let volumes = nv.volumes;
       let newImages = volumes.map((volume, index) => {
@@ -406,6 +410,14 @@ function App() {
       if (!result.canceled) {
         nvUtils.saveTextFile(result.filePath, mosaic);
       }
+    }
+  };
+
+  const loadMosaicString = async () => {
+    const result = await nvUtils.openLoadMosaicFileDialog();
+    if (!result.canceled) {
+      const mosaicString = await nvUtils.loadTextFile(result.filePaths[0]);
+      nv.setSliceMosaicString(mosaicString);
     }
   };
 
