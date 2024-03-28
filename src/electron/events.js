@@ -45,9 +45,10 @@ async function onFileDialog(filters = [], cliImages = []) {
  * @function
  * @returns {Promise<Object>} A promise that resolves to an object with, cancelled, filePaths, and bookmarks properties.
  */
-async function onSaveFileDialog() {
+async function onSaveFileDialog(defaultPath) {
   const { dialog } = require("electron");
   const result = await dialog.showSaveDialog({
+    defaultPath,
     properties: ["createDirectory", "showOverwriteConfirmation"],
   });
   console.log(result);

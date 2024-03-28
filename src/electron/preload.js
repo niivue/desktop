@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld('NIIVUE', {
   loadTextFile: loadTextFile,
   openLoadMosaicFileDialog: openLoadMosaicFileDialog,
   onLoadDocument: onLoadDocument,
+  onSaveDocument: onSaveDocument,
 
 })
 
@@ -151,8 +152,8 @@ async function openFileDialog() {
  * @function
  * @returns {Promise<Object>} A promise that resolves to an object containing the file path and the file name.
  */
-async function openSaveFileDialog() {
-  return ipcRenderer.invoke('openSaveFileDialog')
+async function openSaveFileDialog(defaultPath) {
+  return ipcRenderer.invoke('openSaveFileDialog', defaultPath)
 }
 
 function onSaveMosaicString(callback) {
@@ -187,5 +188,11 @@ function onLoadDocument(callback) {
 
 function loadTextFile(textFilePath) {
   return ipcRenderer.invoke("loadTextFile", textFilePath);
+}
+
+function onSaveDocument(callback) {
+  ipcRenderer.on("saveDocument", () => {
+    callback();
+  })
 }
 

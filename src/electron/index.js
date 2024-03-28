@@ -370,20 +370,27 @@ async function onCloseAllVolumesClick() {
   mainWindow.webContents.send('closeAllVolumes');
 }
 
-// sends a message to save the mosaic string as a text file
+// sends a message to save a mosaic string as a text file
 async function onSaveMosaicStringClick() {
   mainWindow.webContents.send('saveMosaicString');
 }
 
-// sends a message to load the mosaic string from a text file
+// sends a message to load a mosaic string from a text file
 async function onLoadMosaicStringClick() {
   mainWindow.webContents.send('loadMosaicString')
 }
 
-// sends a message to load the mosaic string from a text file
+// sends a message to load a document from a file
 async function onLoadDocumentClick() {
   mainWindow.webContents.send('loadDocument')
 }
+
+
+// sends a message to save the document as a file
+async function onSaveDocumentClick() {
+  mainWindow.webContents.send('saveDocument')
+}
+
 
 // create an application menu
 let menu = [
@@ -443,6 +450,13 @@ let menu = [
         id: 'saveMosaic',
         click: async () => {
           await onSaveMosaicStringClick();
+        }
+      },
+      {
+        label: 'Save document',
+        id: 'saveDocument',
+        click: async () => {
+          await onSaveDocumentClick();
         }
       },
       // separator
