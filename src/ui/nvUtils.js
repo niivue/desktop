@@ -41,9 +41,9 @@ nvUtils.openFileDialog = async function () {
  * @function
  * @returns {Promise<Object>} A promise that resolves to an object containing the file path and the file name.
  */
-nvUtils.openSaveFileDialog = async function () {
+nvUtils.openSaveFileDialog = async function (defaultPath) {
   if (isFunction(NIIVUE.openSaveFileDialog)) {
-    return await NIIVUE.openSaveFileDialog();
+    return await NIIVUE.openSaveFileDialog(defaultPath);
   } else {
     return NIIVUE.openSaveFileDialog;
   }
@@ -56,9 +56,9 @@ nvUtils.openSaveFileDialog = async function () {
  * @function
  * @returns {Promise<Object>} A promise that resolves to an object containing the file path and the file name.
  */
-nvUtils.openSaveMosaicFileDialog = async function() {
+nvUtils.openSaveMosaicFileDialog = async function(defaultPath) {
   if (isFunction(NIIVUE.openSaveMosaicFileDialog)) {
-    return await NIIVUE.openSaveMosaicFileDialog();
+    return await NIIVUE.openSaveMosaicFileDialog(defaultPath);
   } else {
     return NIIVUE.openSaveMosaicFileDialog;
   }
@@ -73,6 +73,45 @@ nvUtils.onSaveMosaicString = function (callback) {
 nvUtils.saveTextFile = function(filePath, text) {
   console.log('saveTextFile', text)
   NIIVUE.saveTextFile({filePath, text});
+}
+
+/**
+ * opens a save file dialog in the main process with mosaic.txt as default file name
+ * and .txt file filter
+ * @async
+ * @function
+ * @returns {Promise<Object>} A promise that resolves to an object containing the file path and the file name.
+ */
+nvUtils.openLoadMosaicFileDialog = async function() {
+  if (isFunction(NIIVUE.openLoadMosaicFileDialog)) {
+    return await NIIVUE.openLoadMosaicFileDialog();
+  } else {
+    return NIIVUE.openLoadMosaicFileDialog;
+  }
+}
+
+
+nvUtils.onLoadMosaicString = function (callback) {
+  if (isFunction(NIIVUE.onLoadMosaicString)) {
+    NIIVUE.onLoadMosaicString(callback);
+  }
+}
+
+nvUtils.loadTextFile = async function(textFilePath) {
+  console.log('loadTextFile')
+  return await NIIVUE.loadTextFile(textFilePath)
+}
+
+nvUtils.onLoadDocument = function (callback) {
+  if (isFunction(NIIVUE.onLoadDocument)) {
+    NIIVUE.onLoadDocument(callback);
+  }
+}
+
+nvUtils.onSaveDocument = function (callback) {
+  if (isFunction(NIIVUE.onSaveDocument)) {
+    NIIVUE.onSaveDocument(callback);
+  }
 }
 
 /**
