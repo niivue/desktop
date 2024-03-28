@@ -7,7 +7,7 @@ import {
 } from "react";
 import "./App.css";
 import { nvUtils } from "./nvUtils";
-import { Niivue, SLICE_TYPE } from "@niivue/niivue";
+import { Niivue, NVDocument, SLICE_TYPE } from "@niivue/niivue";
 import { NiivueCanvas } from "./components/NiivueCanvas";
 import { Sidebar } from "./components/Sidebar";
 import { FileList } from "./components/FileList";
@@ -154,6 +154,10 @@ function App() {
       nvUtils.onLoadMosaicString(() => {
         loadMosaicString();
       });
+
+      nvUtils.onLoadDocument(() => {
+        loadDocument();
+      })
 
       // set the callback for when volumes are loaded
       nvUtils.onLoadVolumes((imgs) => {
@@ -420,6 +424,16 @@ function App() {
       nv.setSliceMosaicString(mosaicString);
     }
   };
+
+  const loadDocument = async () => {
+    const result = await nvUtils.openFileDialog(['*.nvd']);
+    if (!result.canceled) {
+      const jsonString = await nvUtils.loadTextFile(result.filePaths[0]);
+      const json = JSON.parse(jsonString);
+      const document = NVDocument.loadFromJSON(json)
+      nv.loadDocument(document)
+    }
+  }
 
   return (
     // wrap the app in the Niivue context

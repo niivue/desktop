@@ -380,6 +380,11 @@ async function onLoadMosaicStringClick() {
   mainWindow.webContents.send('loadMosaicString')
 }
 
+// sends a message to load the mosaic string from a text file
+async function onLoadDocumentClick() {
+  mainWindow.webContents.send('loadDocument')
+}
+
 // create an application menu
 let menu = [
   // add file menu with load volumes option
@@ -400,6 +405,13 @@ let menu = [
         id: 'loadMosaicString',
         click: async () => {
           await onLoadMosaicStringClick();
+        }
+      },
+      {
+        label: 'Load document',
+        id: 'loadDocument',
+        click: async () => {
+          await onLoadDocumentClick();
         }
       },
       // close all volumes
