@@ -41,9 +41,9 @@ nvUtils.openFileDialog = async function () {
  * @function
  * @returns {Promise<Object>} A promise that resolves to an object containing the file path and the file name.
  */
-nvUtils.openSaveFileDialog = async function () {
+nvUtils.openSaveFileDialog = async function (defaultPath) {
   if (isFunction(NIIVUE.openSaveFileDialog)) {
-    return await NIIVUE.openSaveFileDialog();
+    return await NIIVUE.openSaveFileDialog(defaultPath);
   } else {
     return NIIVUE.openSaveFileDialog;
   }
@@ -56,9 +56,9 @@ nvUtils.openSaveFileDialog = async function () {
  * @function
  * @returns {Promise<Object>} A promise that resolves to an object containing the file path and the file name.
  */
-nvUtils.openSaveMosaicFileDialog = async function() {
+nvUtils.openSaveMosaicFileDialog = async function(defaultPath) {
   if (isFunction(NIIVUE.openSaveMosaicFileDialog)) {
-    return await NIIVUE.openSaveMosaicFileDialog();
+    return await NIIVUE.openSaveMosaicFileDialog(defaultPath);
   } else {
     return NIIVUE.openSaveMosaicFileDialog;
   }
@@ -103,8 +103,14 @@ nvUtils.loadTextFile = async function(textFilePath) {
 }
 
 nvUtils.onLoadDocument = function (callback) {
-  if (isFunction(NIIVUE.onLoadMosaicString)) {
+  if (isFunction(NIIVUE.onLoadDocument)) {
     NIIVUE.onLoadDocument(callback);
+  }
+}
+
+nvUtils.onSaveDocument = function (callback) {
+  if (isFunction(NIIVUE.onSaveDocument)) {
+    NIIVUE.onSaveDocument(callback);
   }
 }
 

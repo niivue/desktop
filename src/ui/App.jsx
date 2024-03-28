@@ -145,11 +145,7 @@ function App() {
 
       nvUtils.onSaveMosaicString(() => {
         saveMosaicString(nv.sliceMosaicString);
-      });
-
-      nvUtils.onSaveMosaicString(() => {
-        saveMosaicString(nv.sliceMosaicString);
-      });
+      });      
 
       nvUtils.onLoadMosaicString(() => {
         loadMosaicString();
@@ -157,6 +153,10 @@ function App() {
 
       nvUtils.onLoadDocument(() => {
         loadDocument();
+      })
+
+      nvUtils.onSaveDocument(() => {
+        saveDocument();
       })
 
       // set the callback for when volumes are loaded
@@ -431,7 +431,24 @@ function App() {
       const jsonString = await nvUtils.loadTextFile(result.filePaths[0]);
       const json = JSON.parse(jsonString);
       const document = NVDocument.loadFromJSON(json)
-      nv.loadDocument(document)
+      nv.loadDocument(document);
+     
+    }
+  }
+
+  const saveDocument = async () => {
+    const result = await nvUtils.openSaveFileDialog("niivue.nvd");
+    if (!result.canceled) {
+      const json = nv.json();
+      const re = new RegExp("([^\\\\\\\\/]*$)")
+
+      json.name = result.filePath.match(re)[0]
+      let imageIndex = 0;
+      for(const imageOption of json.imageOptionsArray) {
+        imageOption.name = `${nv.volumes[imageIndex++].name}.nii`;
+      }
+      const jsonString = JSON.stringify(json)
+      nvUtils.saveTextFile(result.filePath, jsonString);
     }
   }
 
