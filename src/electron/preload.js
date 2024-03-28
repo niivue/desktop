@@ -28,6 +28,8 @@ contextBridge.exposeInMainWorld('NIIVUE', {
   onLoadMosaicString: onLoadMosaicString,
   loadTextFile: loadTextFile,
   openLoadMosaicFileDialog: openLoadMosaicFileDialog,
+  onLoadDocument: onLoadDocument,
+
 })
 
 async function onLoadVolumes(callback) {
@@ -173,6 +175,12 @@ async function openLoadMosaicFileDialog() {
 
 function onLoadMosaicString(callback) {
   ipcRenderer.on("loadMosaicString", () => {
+    callback();
+  });
+}
+
+function onLoadDocument(callback) {
+  ipcRenderer.on("loadDocument", () => {
     callback();
   });
 }

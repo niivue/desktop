@@ -102,6 +102,12 @@ nvUtils.loadTextFile = async function(textFilePath) {
   return await NIIVUE.loadTextFile(textFilePath)
 }
 
+nvUtils.onLoadDocument = function (callback) {
+  if (isFunction(NIIVUE.onLoadMosaicString)) {
+    NIIVUE.onLoadDocument(callback);
+  }
+}
+
 /**
  * removes the extension from a string
  * @function
