@@ -1,5 +1,12 @@
 const osxSign = {
-  identity: process.env.APPLE_IDENTITY // usually looks like: "Developer ID Application: Your Name (XXXXXXXXXX)"
+  identity: process.env.APPLE_IDENTITY, // usually looks like: "Developer ID Application: Your Name (XXXXXXXXXX)"
+  // add a list of entitlements to the app
+  entitlements: [
+    'com.apple.security.network.client',
+    'com.apple.security.network.server',
+    'com.apple.security.files.user-selected.read-only', // show open dialog
+    'com.apple.security.files.user-selected.read-write', // show save dialog
+  ],
 }
 
 const osxNotarize = {
