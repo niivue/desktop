@@ -25,6 +25,12 @@ contextBridge.exposeInMainWorld('NIIVUE', {
   onSaveMosaicString: onSaveMosaicString,
   openSaveMosaicFileDialog: openSaveMosaicFileDialog,
   saveTextFile: saveTextFile,
+  onLoadMosaicString: onLoadMosaicString,
+  loadTextFile: loadTextFile,
+  openLoadMosaicFileDialog: openLoadMosaicFileDialog,
+  onLoadDocument: onLoadDocument,
+  onSaveDocument: onSaveDocument,
+
 })
 
 async function onLoadVolumes(callback) {
@@ -146,8 +152,8 @@ async function openFileDialog() {
  * @function
  * @returns {Promise<Object>} A promise that resolves to an object containing the file path and the file name.
  */
-async function openSaveFileDialog() {
-  return ipcRenderer.invoke('openSaveFileDialog')
+async function openSaveFileDialog(defaultPath) {
+  return ipcRenderer.invoke('openSaveFileDialog', defaultPath)
 }
 
 function onSaveMosaicString(callback) {
@@ -163,3 +169,30 @@ async function openSaveMosaicFileDialog() {
 function saveTextFile(fileText) {
   return ipcRenderer.invoke('saveTextFile', fileText)
 }
+
+async function openLoadMosaicFileDialog() {
+  return ipcRenderer.invoke('openLoadMosaicFileDialog')
+}
+
+function onLoadMosaicString(callback) {
+  ipcRenderer.on("loadMosaicString", () => {
+    callback();
+  });
+}
+
+function onLoadDocument(callback) {
+  ipcRenderer.on("loadDocument", () => {
+    callback();
+  });
+}
+
+function loadTextFile(textFilePath) {
+  return ipcRenderer.invoke("loadTextFile", textFilePath);
+}
+
+function onSaveDocument(callback) {
+  ipcRenderer.on("saveDocument", () => {
+    callback();
+  })
+}
+

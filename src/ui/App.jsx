@@ -7,7 +7,7 @@ import {
 } from "react";
 import "./App.css";
 import { nvUtils } from "./nvUtils";
-import { Niivue, SLICE_TYPE } from "@niivue/niivue";
+import { Niivue, NVDocument, SLICE_TYPE } from "@niivue/niivue";
 import { NiivueCanvas } from "./components/NiivueCanvas";
 import { Sidebar } from "./components/Sidebar";
 import { FileList } from "./components/FileList";
@@ -69,6 +69,7 @@ function App() {
   const [opacity, setOpacity] = useState(1);
   const [colormap, setColormap] = useState("gray"); // default
   const [sliceType, setSliceType] = useState("");
+  const [mosaicString, setMosaicString] = useState("A 0 20 C 30 S 42");
 
   // ------------ Callbacks ------------
   // add a volume from a URL
@@ -130,8 +131,9 @@ function App() {
     [activeImage, nv]
   );
 
-  const onMosaicChange = (mosaicString) => {
-    nv.setSliceMosaicString(mosaicString);
+  const onMosaicChange = (newValue) => {
+    nv.setSliceMosaicString(newValue);
+    setMosaicString(newValue);
   };
 
   // ------------ Effects ------------
@@ -145,11 +147,19 @@ function App() {
 
       nvUtils.onSaveMosaicString(() => {
         saveMosaicString(nv.sliceMosaicString);
+      });      
+
+      nvUtils.onLoadMosaicString(() => {
+        loadMosaicString();
       });
 
-      nvUtils.onSaveMosaicString(() => {
-        saveMosaicString(nv.sliceMosaicString)
-      });
+      nvUtils.onLoadDocument(() => {
+        loadDocument();
+      })
+
+      nvUtils.onSaveDocument(() => {
+        saveDocument();
+      })
 
       // set the callback for when volumes are loaded
       nvUtils.onLoadVolumes((imgs) => {
@@ -336,7 +346,7 @@ function App() {
       if (newIndex < 0) {
         return;
       }
-      
+
       nv.setVolume(nv.volumes[index], newIndex);
       let volumes = nv.volumes;
       let newImages = volumes.map((volume, index) => {
@@ -409,6 +419,42 @@ function App() {
     }
   };
 
+  const loadMosaicString = async () => {
+    const result = await nvUtils.openLoadMosaicFileDialog();
+    if (!result.canceled) {
+      const mosaicString = await nvUtils.loadTextFile(result.filePaths[0]);
+      nv.setSliceMosaicString(mosaicString);
+      setMosaicString(mosaicString);
+    }
+  };
+
+  const loadDocument = async () => {
+    const result = await nvUtils.openFileDialog(['*.nvd']);
+    if (!result.canceled) {
+      const jsonString = await nvUtils.loadTextFile(result.filePaths[0]);
+      const json = JSON.parse(jsonString);
+      const document = NVDocument.loadFromJSON(json)
+      nv.loadDocument(document);
+     
+    }
+  }
+
+  const saveDocument = async () => {
+    const result = await nvUtils.openSaveFileDialog("niivue.nvd");
+    if (!result.canceled) {
+      const json = nv.json();
+      const re = new RegExp("([^\\\\\\\\/]*$)")
+
+      json.name = result.filePath.match(re)[0]
+      let imageIndex = 0;
+      for(const imageOption of json.imageOptionsArray) {
+        imageOption.name = `${nv.volumes[imageIndex++].name}.nii`;
+      }
+      const jsonString = JSON.stringify(json)
+      nvUtils.saveTextFile(result.filePath, jsonString);
+    }
+  }
+
   return (
     // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
@@ -454,7 +500,7 @@ function App() {
             })}
           </FileList>
           {/* mosaic text input if sliceType is "mosaic" */}
-          {sliceType === "mosaic" && <MosaicInput onChange={onMosaicChange} />}
+          {sliceType === "mosaic" && <MosaicInput onChange={onMosaicChange} value={mosaicString} />}
           {/* ImageTools */}
           <ImageTools>
             {/* colormap select: sets the colormap of the active image */}
