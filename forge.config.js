@@ -1,5 +1,18 @@
 const osxSign = {
-  identity: process.env.APPLE_IDENTITY // usually looks like: "Developer ID Application: Your Name (XXXXXXXXXX)"
+  identity: process.env.APPLE_IDENTITY, // usually looks like: "Developer ID Application: Your Name (XXXXXXXXXX)"
+  // add the entitlements our app needs
+  // this isn't working with notarization at the moment, but 
+  // doesn't seem to be necessary for the app to run
+  // optionsForFile: (filePath) => {
+  //   return {
+  //     entitlements: [
+  //       'com.apple.security.network.client',
+  //       'com.apple.security.network.server',
+  //       'com.apple.security.files.user-selected.read-write',
+  //       'com.apple.security.files.user-selected.read-only',
+  //     ],
+  //   }
+  // }
 }
 
 const osxNotarize = {
@@ -19,7 +32,8 @@ const packagerConfig = {
     // minimist is used to parse command line arguments
     // express is used to to serve files to niivue 
     // cors is used to allow cross origin requests (not strictly necessary since this code was taken from another app)
-    /node_modules\/(?!(minimist|express|cors)).*/,
+    // /node_modules\/(?!(minimist|express|cors)).*/,
+    // /node_modules/,
     /docs/,
     /dist/,
     /\.gitignore/,
