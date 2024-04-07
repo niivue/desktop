@@ -69,6 +69,7 @@ function App() {
   const [opacity, setOpacity] = useState(1);
   const [colormap, setColormap] = useState("gray"); // default
   const [sliceType, setSliceType] = useState("");
+  const [mosaicString, setMosaicString] = useState("A 0 20 C 30 S 42");
 
   // ------------ Callbacks ------------
   // add a volume from a URL
@@ -130,8 +131,9 @@ function App() {
     [activeImage, nv]
   );
 
-  const onMosaicChange = (mosaicString) => {
-    nv.setSliceMosaicString(mosaicString);
+  const onMosaicChange = (newValue) => {
+    nv.setSliceMosaicString(newValue);
+    setMosaicString(newValue);
   };
 
   // ------------ Effects ------------
@@ -422,6 +424,7 @@ function App() {
     if (!result.canceled) {
       const mosaicString = await nvUtils.loadTextFile(result.filePaths[0]);
       nv.setSliceMosaicString(mosaicString);
+      setMosaicString(mosaicString);
     }
   };
 
@@ -497,7 +500,7 @@ function App() {
             })}
           </FileList>
           {/* mosaic text input if sliceType is "mosaic" */}
-          {sliceType === "mosaic" && <MosaicInput onChange={onMosaicChange} />}
+          {sliceType === "mosaic" && <MosaicInput onChange={onMosaicChange} value={mosaicString} />}
           {/* ImageTools */}
           <ImageTools>
             {/* colormap select: sets the colormap of the active image */}

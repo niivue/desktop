@@ -1,25 +1,22 @@
 import TextField from "@mui/material/TextField"
 import Box from "@mui/material/Box"
 import PropTypes from "prop-types"
-import { useState } from "react"
 
 export function MosaicInput({
   onChange = () => { },
+  value="",
   ...props
 }) {
 
   const defaultMosaic = "A 0 20 C 30 S 42"
 
-  const [mosaicString, setMosaicString] = useState(defaultMosaic)
 
   function handleChange(event) {
     onChange(event.target.value)
-    setMosaicString(event.target.value)
   }
 
   function reset() {
     onChange(defaultMosaic)
-    setMosaicString(defaultMosaic)
   }
 
 
@@ -49,7 +46,7 @@ export function MosaicInput({
           type: 'textarea'
         }}
         // value should be set to 2 decimal places
-        value={mosaicString}
+        value={value}
         variant="standard"
         onChange={handleChange}
         onDoubleClick={reset}
@@ -60,4 +57,5 @@ export function MosaicInput({
 
 MosaicInput.propTypes = {
   onChange: PropTypes.func,
+  value: PropTypes.string
 }
