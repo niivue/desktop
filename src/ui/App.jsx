@@ -72,7 +72,7 @@ function App() {
   const [sliceType, setSliceType] = useState("");
   const [mosaicString, setMosaicString] = useState("A 0 20 C 30 S 42");
   const [isColorPickerOpen, setColorPickerOpen] = useState(false);
-  const [colorPickerColor, setColorPickerColor] = useState("#ff0000ff");
+  const [colorPickerColor, setColorPickerColor] = useState({ r: 255, g: 0, b: 0, a: 1 });
   const [colorOptionToChange, setColorOption] = useState();
   // ------------ Callbacks ------------
   // add a volume from a URL
@@ -213,7 +213,8 @@ function App() {
         console.log("Setting ", view[0], " as ", view[1]);
         const regex = new RegExp('Color$');
         if (regex.test(view[0])) {
-          console.log("opening color picker");
+          const currentColor = nv.opts[view[0]]
+          setColorPickerColor({ r: currentColor[0] * 255, g: currentColor[1] * 255, b: currentColor[2] * 255, a: currentColor[3] });
           setColorPickerOpen(true);
           setColorOption(view[0]);
 
