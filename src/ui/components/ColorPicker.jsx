@@ -10,7 +10,7 @@ import { useTheme } from '@mui/material/styles';
 
 import { SketchPicker } from 'react-color'
 
-export const ColorPicker = ({isOpen = false, pickedColor = "#ff0000ff", isFullScreen = true, onChange, onClose}) => {
+export const ColorPicker = ({isOpen = false, pickedColor = "#ff0000", isFullScreen = true, onChange, onClose}) => {
     // const [color, setColor] = useState(pickedColor);
     // const handleChange = color => setColor(color);
     // const [open, setOpen] = React.useState(isOpen);
@@ -68,10 +68,10 @@ export const ColorPicker = ({isOpen = false, pickedColor = "#ff0000ff", isFullSc
                     <SketchPicker color={pickedColor} onChangeComplete={onChange} />
                 </DialogContent>
                 <DialogActions>
-                    <Button autoFocus onClick={onClose}>
+                    <Button autoFocus onClick={() => onClose(true)}>
                         Cancel
                     </Button>
-                    <Button onClick={onClose} autoFocus>
+                    <Button onClick={() => onClose(false)} autoFocus>
                         Apply
                     </Button>
                 </DialogActions>
