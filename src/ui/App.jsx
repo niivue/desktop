@@ -19,7 +19,7 @@ import { MosaicInput } from "./components/MosaicInput";
 import { OpacitySlider } from "./components/OpacitySlider";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
-import { ColorPicker} from "./components/ColorPicker";
+import { ColorPicker } from "./components/ColorPicker";
 
 // use a context to call the Niivue instance from any component
 const _nv = new Niivue();
@@ -71,7 +71,9 @@ function App() {
   const [colormap, setColormap] = useState("gray"); // default
   const [sliceType, setSliceType] = useState("");
   const [mosaicString, setMosaicString] = useState("A 0 20 C 30 S 42");
-
+  const [isColorPickerOpen, setColorPickerOpen] = useState(false);
+  const [colorPickerColor, setColorPickerColor] = useState("#ff0000ff");
+  const [colorOptionToChange, setColorOption] = useState();
   // ------------ Callbacks ------------
   // add a volume from a URL
   const addVolume = useCallback(
@@ -137,6 +139,7 @@ function App() {
     setMosaicString(newValue);
   };
 
+
   // ------------ Effects ------------
   // get the comms info from the main process
   // when the app is first loaded
@@ -148,7 +151,7 @@ function App() {
 
       nvUtils.onSaveMosaicString(() => {
         saveMosaicString(nv.sliceMosaicString);
-      });      
+      });
 
       nvUtils.onLoadMosaicString(() => {
         loadMosaicString();
@@ -187,6 +190,8 @@ function App() {
         setOpacity(1);
         setCalMax(0);
         setCalMin(0);
+        setColorPickerOpen(false);
+        setColorPickerColor("#ff000000")
       });
       // set the callback for when the view needs updating
       nvUtils.onSetView((view) => {
@@ -206,9 +211,18 @@ function App() {
       nvUtils.onSetOpt((view) => {
         // view is an array with the first element as the option name and the second as the value(s)
         console.log("Setting ", view[0], " as ", view[1]);
-        nv.opts[view[0]] = view[1];
-        nv.updateGLVolume();
-        nv.drawScene();
+        const regex = new RegExp('Color$');
+        if (regex.test(view[0])) {
+          console.log("opening color picker");
+          setColorPickerOpen(true);
+          setColorOption(view[0]);
+
+        }
+        else {
+          nv.opts[view[0]] = view[1];
+          nv.updateGLVolume();
+          nv.drawScene();
+        }
       });
       nvUtils.onSetDrawPen((pen) => {
         // pen is color for drawing
@@ -436,7 +450,7 @@ function App() {
       const json = JSON.parse(jsonString);
       const document = NVDocument.loadFromJSON(json)
       nv.loadDocument(document);
-     
+
     }
   }
 
@@ -448,12 +462,27 @@ function App() {
 
       json.name = result.filePath.match(re)[0]
       let imageIndex = 0;
-      for(const imageOption of json.imageOptionsArray) {
+      for (const imageOption of json.imageOptionsArray) {
         imageOption.name = `${nv.volumes[imageIndex++].name}.nii`;
       }
       const jsonString = JSON.stringify(json)
       nvUtils.saveTextFile(result.filePath, jsonString);
     }
+  }
+
+  const onColorPickerChange = (color) => {
+    setColorPickerColor(color);
+    console.log("color picked: ", color);
+  }
+
+  const onCloseColorPicker = () => {
+    setColorPickerOpen(false);
+    console.log("color picker closed");
+    const colorPicked = [colorPickerColor.rgb.r / 255.0, colorPickerColor.rgb.g / 255.0, colorPickerColor.rgb.b / 255.0, colorPickerColor.rgb.a * 1.0];
+    console.log("color picked", colorPicked);
+    nv.opts[colorOptionToChange] = colorPicked;
+    nv.updateGLVolume();
+    nv.drawScene();
   }
 
   return (
@@ -528,7 +557,7 @@ function App() {
         </Sidebar>
         {/* Niivue Canvas: where things are rendered :) */}
         <NiivueCanvas nv={nv} />
-        <ColorPicker />
+        <ColorPicker isOpen={isColorPickerOpen} pickedColor={colorPickerColor} onChange={onColorPickerChange} onClose={onCloseColorPicker} isFullScreen={false} />
       </Container>
     </NV.Provider>
   );
