@@ -19,6 +19,7 @@ import { MosaicInput } from "./components/MosaicInput";
 import { OpacitySlider } from "./components/OpacitySlider";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
+import { ColorPicker} from "./components/ColorPicker";
 
 // use a context to call the Niivue instance from any component
 const _nv = new Niivue();
@@ -527,6 +528,7 @@ function App() {
         </Sidebar>
         {/* Niivue Canvas: where things are rendered :) */}
         <NiivueCanvas nv={nv} />
+        <ColorPicker />
       </Container>
     </NV.Provider>
   );
