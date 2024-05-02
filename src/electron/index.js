@@ -334,6 +334,10 @@ async function onSetDrawPenClick(penColor = Infinity) {
   mainWindow.webContents.send('setDrawPen', penColor);
 }
 
+async function onPickColorClick() {
+  mainWindow.webContents.send('pickColor');
+}
+
 async function onCheckClick(opt) {
   let val = Menu.getApplicationMenu().getMenuItemById(opt).checked
   let str = ''
