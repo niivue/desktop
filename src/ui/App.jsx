@@ -5,6 +5,7 @@ import {
   useContext,
   createContext,
 } from "react";
+import update from 'immutability-helper'
 import "./App.css";
 import { nvUtils } from "./nvUtils";
 import { Niivue, NVDocument, SLICE_TYPE } from "@niivue/niivue";
@@ -289,6 +290,7 @@ function App() {
     setMax(vol.cal_max);
     setOpacity(vol.opacity);
     setColormap(vol.colormap);
+    // nv.updateGLVolume();
   }, [activeImage, images, nv]);
 
   // when user changes intensity with the right click selection box
@@ -489,6 +491,42 @@ function App() {
     }
   }
 
+  const moveImage = useCallback((dragIndex, hoverIndex) => {
+    setImages((prevImages) => 
+      update(prevImages, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevImages[dragIndex]],
+        ],
+      }),
+    )
+    // update the volume order in Niivue
+    nv.setVolume(nv.volumes[dragIndex], hoverIndex)
+  }, [nv])
+
+  const renderImage = useCallback((image, index) => {
+    return (
+      <FileItem
+        id={image.id}
+        key={image.id} // unique key for React
+        moveImage={moveImage}
+        name={image.name} // the name of the image (the full path on the file system)
+        active={image.active} // whether the image is the active image
+        index={index} // the index of the image in the images array
+        frame={image.frame} // the current frame of the image (for 4D images)
+        maxFrame={image.maxFrame} // the maximum frame of the image (for 4D images)
+        onSetActive={toggleActive} // callback to set if the image is active
+        onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
+        onRemove={handleRemove} // callback to remove the image from the scene via the context menu
+        onMoveUp={handleMoveUp} // callback to move the image up via the context menu
+        onMoveDown={handleMoveDown} // callback to move the image down via the context menu
+        onShowHeader={handleShowHeader} // callback to show the image header via the context menu
+        onNextFrame={handleNextFrame} // advances the frame for 4D volumes
+        onPreviousFrame={handlePreviousFrame} // goes back a frame for 4D volumes
+      ></FileItem>
+    )
+  }, [toggleActive, setVisibility, handleRemove, handleMoveUp, handleMoveDown, handleShowHeader, handleNextFrame, handlePreviousFrame, moveImage])
+
   return (
     // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
@@ -513,24 +551,7 @@ function App() {
           <FileList>
             {/* FileItems: each FileItem is an image to be rendered in Niivue */}
             {images.map((image, index) => {
-              return (
-                <FileItem
-                  key={index} // unique key for React
-                  name={image.name} // the name of the image (the full path on the file system)
-                  active={image.active} // whether the image is the active image
-                  index={index} // the index of the image in the images array
-                  frame={image.frame} // the current frame of the image (for 4D images)
-                  maxFrame={image.maxFrame} // the maximum frame of the image (for 4D images)
-                  onSetActive={toggleActive} // callback to set if the image is active
-                  onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
-                  onRemove={handleRemove} // callback to remove the image from the scene via the context menu
-                  onMoveUp={handleMoveUp} // callback to move the image up via the context menu
-                  onMoveDown={handleMoveDown} // callback to move the image down via the context menu
-                  onShowHeader={handleShowHeader} // callback to show the image header via the context menu
-                  onNextFrame={handleNextFrame} // advances the frame for 4D volumes
-                  onPreviousFrame={handlePreviousFrame} // goes back a frame for 4D volumes
-                ></FileItem>
-              );
+              return renderImage(image, index)
             })}
           </FileList>
           {/* mosaic text input if sliceType is "mosaic" */}
