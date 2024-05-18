@@ -472,7 +472,7 @@ function App() {
   }
 
   const onColorPickerChange = (color) => {
-    setColorPickerColor(color);
+    setColorPickerColor(color.rgb);
     console.log("color picked: ", color);
   }
 
@@ -481,7 +481,7 @@ function App() {
     console.log("color picker closed");
 
     if (!isCanceled) {
-      const colorPicked = [colorPickerColor.rgb.r / 255.0, colorPickerColor.rgb.g / 255.0, colorPickerColor.rgb.b / 255.0, colorPickerColor.rgb.a * 1.0];
+      const colorPicked = [colorPickerColor.r / 255.0, colorPickerColor.g / 255.0, colorPickerColor.b / 255.0, colorPickerColor.a * 1.0];
       console.log("color picked", colorPicked);
       nv.opts[colorOptionToChange] = colorPicked;
       nv.updateGLVolume();
