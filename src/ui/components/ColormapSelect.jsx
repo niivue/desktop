@@ -12,11 +12,11 @@ export function ColormapSelect({
   ...props
 }) {
 
-  const [color, setColor] = React.useState(colormap)
+  // const [color, setColor] = React.useState(colormap)
 
   function handleColorChange(event) {
     let clr = event.target.value
-    setColor(clr)
+    // setColor(clr)
     onSetColormap(clr)
   }
 
@@ -88,7 +88,7 @@ export function ColormapSelect({
       <Select
         labelId="colormap-select-label"
         sx={{ width: '100%' }}
-        value={color}
+        value={colormap}
         label='Colormap'
         size='small'
         onChange={handleColorChange}

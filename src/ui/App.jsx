@@ -120,6 +120,7 @@ function App() {
     (colormap) => {
       nv.volumes[activeImage].colormap = colormap;
       nv.updateGLVolume();
+      setColormap(colormap);
     },
     [activeImage, nv]
   );
@@ -307,7 +308,7 @@ function App() {
     return `http://${commsInfo.host}:${commsInfo.fileServerPort}/${commsInfo.route}?${commsInfo.queryKey}=${path}`;
   }
 
-  function toggleActive(name, value) {
+  const toggleActive = useCallback((name, value) => {
     console.log(name, value);
     let newImages = images.map((image, index) => {
       if (image.name === name) {
@@ -319,7 +320,7 @@ function App() {
       return image;
     });
     setImages(newImages);
-  }
+  }, [images, setActiveImage]);
 
   function handleDrop() {
     let volumes = nv.volumes;
@@ -502,7 +503,13 @@ function App() {
     )
     // update the volume order in Niivue
     nv.setVolume(nv.volumes[dragIndex], hoverIndex)
-  }, [nv])
+    // update the active image if it was moved
+    if (activeImage === dragIndex) {
+      setActiveImage(hoverIndex)
+    } else if (activeImage === hoverIndex) {
+      setActiveImage(dragIndex)
+    }
+  }, [nv, activeImage, setImages, setActiveImage])
 
   const renderImage = useCallback((image, index) => {
     return (
@@ -562,7 +569,7 @@ function App() {
             <ColormapSelect
               colormaps={colormaps} // array of colormap objects
               onSetColormap={updateColormap} // callback to set the colormap of the active image
-              colormap={colormap} // the current colormap of the active image
+              colormap={images.length > 0 ? nv.volumes[activeImage].colormap : colormap} // the current colormap of the active image
             />
             {/* min max input: set the min and max of the active image */}
             <MinMaxInput
