@@ -5,7 +5,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import Tooltip from '@mui/material/Tooltip';
 import PropTypes from "prop-types";
+import { basename } from "../utils";
 
 export function FileItem({
   name,
@@ -101,17 +103,19 @@ export function FileItem({
       <IconButton onClick={toggleVisibility}>
         {!visible ? <VisibilityOffIcon /> : <VisibilityIcon />}
       </IconButton>
-      <Typography
-        sx={{
-          marginLeft: '8px',
-          wordBreak: 'break-word', // wrap long names
-          flexBasis: '75%' // allow for name wrapping for long names and alignment to the button
-        }}
-        onClick={toggleActive}
-        onContextMenu={handleContextMenu}
-      >
-        {name}
-      </Typography>
+      <Tooltip title={name}>
+        <Typography
+          sx={{
+            marginLeft: '8px',
+            wordBreak: 'break-word', // wrap long names
+            flexBasis: '75%' // allow for name wrapping for long names and alignment to the button
+          }}
+          onClick={toggleActive}
+          onContextMenu={handleContextMenu}
+        >
+          {basename(name)}
+        </Typography>
+      </Tooltip>
       {/* very small Typography to indicate if mesh or volume */}
       {/* "mesh" or "volume" will be placed in the bottom right corner */}
       <Typography
