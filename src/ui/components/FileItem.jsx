@@ -6,12 +6,16 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Tooltip from '@mui/material/Tooltip';
+import Box from '@mui/material/Box';
 import PropTypes from "prop-types";
 import { basename } from "../utils";
-
+import { useRef } from "react";
+import { useDrag, useDrop } from 'react-dnd'
 export function FileItem({
   name,
   index,
+  moveImage,
+  id,
   active = false,
   frame = 0,
   maxFrame = 0,
@@ -23,12 +27,69 @@ export function FileItem({
   onShowHeader = () => {},
   onNextFrame = () => {},
   onPreviousFrame = () => {},
-
   ...props
 }) {
-
+  const ref = useRef(null)
   const [visible, setVisible] = React.useState(true);
   const [contextMenu, setContextMenu] = React.useState(null);
+
+  const [{ handlerId }, drop] = useDrop({
+    accept: 'fileItem',
+    collect(monitor) {
+      return {
+        handlerId: monitor.getHandlerId(),
+      }
+    },
+    hover(item, monitor) {
+      if (!ref.current) {
+        return
+      }
+      const dragIndex = item.index
+      const hoverIndex = index
+      // Don't replace items with themselves
+      if (dragIndex === hoverIndex) {
+        return
+      }
+      // Determine rectangle on screen
+      const hoverBoundingRect = ref.current?.getBoundingClientRect()
+      // Get vertical middle
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2
+      // Determine mouse position
+      const clientOffset = monitor.getClientOffset()
+      // Get pixels to the top
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top
+      // Only perform the move when the mouse has crossed half of the items height
+      // When dragging downwards, only move when the cursor is below 50%
+      // When dragging upwards, only move when the cursor is above 50%
+      // Dragging downwards
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return
+      }
+      // Dragging upwards
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return
+      }
+      // Time to actually perform the action
+      moveImage(dragIndex, hoverIndex)
+      // Note: we're mutating the monitor item here!
+      // Generally it's better to avoid mutations,
+      // but it's good here for the sake of performance
+      // to avoid expensive index searches.
+      item.index = hoverIndex
+    },
+  })
+
+  const [{ isDragging }, drag] = useDrag({
+    type: 'fileItem',
+    item: () => {
+      return { id, index }
+    },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  })
+  drag(drop(ref))
 
   function toggleVisibility() {
     onSetVisibility(index, visible === true ? 0 : 1)
@@ -88,8 +149,8 @@ export function FileItem({
   }
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
@@ -97,8 +158,11 @@ export function FileItem({
         width: '100%',
         // background color is very light blue if active
         backgroundColor: active ? '#E6F0FF' : '#F8F8F8',
+        opacity: isDragging ? 0 : 1,
         ...props
       }}
+      ref={ref}
+      data-handler-id={handlerId}
     >
       <IconButton onClick={toggleVisibility}>
         {!visible ? <VisibilityOffIcon /> : <VisibilityIcon />}
@@ -111,6 +175,7 @@ export function FileItem({
             flexBasis: '75%' // allow for name wrapping for long names and alignment to the button
           }}
           onClick={toggleActive}
+          // onMouseUp={toggleActive}
           onContextMenu={handleContextMenu}
         >
           {basename(name)}
@@ -147,7 +212,7 @@ export function FileItem({
         <MenuItem onClick={handleNextFrame}>Next Frame</MenuItem>
         <MenuItem onClick={handlePreviousFrame}>Previous Frame</MenuItem>
       </Menu>
-    </div>
+    </Box>
   )
 }
 
@@ -164,5 +229,7 @@ FileItem.propTypes = {
   onNextFrame: PropTypes.func,
   onPreviousFrame: PropTypes.func,
   frame: PropTypes.number,
-  maxFrame: PropTypes.number
+  maxFrame: PropTypes.number,
+  id: PropTypes.any,
+  moveImage: PropTypes.func,
 }
