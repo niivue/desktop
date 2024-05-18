@@ -911,6 +911,19 @@ let menu = [
         }
       }
     ]
+  },
+  // add help menu with link to github issues
+  {
+    label: 'Help',
+    submenu: [
+      {
+        label: 'Report issue',
+        click: async () => {
+          const { shell } = require('electron');
+          await shell.openExternal('https://github.com/niivue/desktop/issues/new/choose');
+        }
+      }
+    ]
   }
 ];
 // Add macOS application menus
