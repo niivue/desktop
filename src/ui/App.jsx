@@ -38,11 +38,17 @@ const sliceTypes = {
   render: SLICE_TYPE.RENDER,
 };
 
+const NONE = 0;
+const VOLUME = 1;
+const MESH = 2;
+
+
 function App() {
   // create a new Niivue object
   const nv = useContext(NV);
 
   nv.onImageLoaded = (volume) => {
+    setActiveImage(nv.volumes.length - 1)
     handleDrop();
   };
 
@@ -84,6 +90,7 @@ function App() {
   const [colorOptionToChange, setColorOption] = useState();
   const [meshes, setMeshes] = useState([]);
   const [activeMesh, setActiveMesh] = useState(0)
+  const [activeImageType, setActiveImageType] = useState(NONE)
 
   // ------------ Callbacks ------------
   // add a volume from a URL
@@ -200,6 +207,7 @@ function App() {
 
         // update active image, min, max, opacity
         setActiveImage(0);
+        setActiveMesh(0);
         setMin(0);
         setMax(0);
         setOpacity(1);
@@ -207,6 +215,7 @@ function App() {
         setCalMin(0);
         setColorPickerOpen(false);
         setColorPickerColor("#ff000000")
+        setActiveImageType(NONE)
       });
       // set the callback for when the view needs updating
       nvUtils.onSetView((view) => {
@@ -327,6 +336,7 @@ function App() {
       if (image.name === name) {
         image.active = value;
         setActiveImage(index);
+        setActiveImageType(VOLUME)
       } else {
         image.active = false;
       }
@@ -334,6 +344,22 @@ function App() {
     });
     setImages(newImages);
   }, [images, setActiveImage]);
+
+  const toggleActiveMesh = useCallback((name, value) => {
+    console.log(name, value);
+    let newMeshes = meshes.map((mesh, index) => {
+      if (mesh.name === name) {
+        mesh.active = value;
+        setActiveMesh(index);
+        setActiveImageType(MESH)
+      } else {
+        mesh.active = false;
+      }
+      return mesh;
+    });
+    setMeshes(newMeshes);
+  }, [meshes, setActiveMesh]);
+
 
   const getImageList = useCallback(() => {
     let volumes = nv.volumes;
@@ -387,7 +413,7 @@ function App() {
         opacity: mesh.opacity,
         meshShaderIndex: mesh.meshShaderIndex,
         colormap: mesh.colormap,
-        active: index === activeMesh,
+        active: true,
         index
       }
     })
@@ -402,6 +428,14 @@ function App() {
       nv.removeVolume(vol);
       let newImages = getImageList();
       setActiveImage(0);
+      if(images.length === 0) {
+        if(meshes.length > 0) {
+          setActiveImageType(MESH)
+        }
+        else {
+          setActiveImageType(NONE)
+        }
+      }
       setImages(newImages);
     },
     [nv, getImageList]
@@ -592,15 +626,15 @@ function App() {
         index={index}
         name={mesh.name}
         active={mesh.active}
-        onSetActive={toggleActive} // callback to set if the image is active
+        onSetActive={toggleActiveMesh} // callback to set if the image is active
         onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
         onRemove={handleRemoveMesh} // callback to remove the image from the scene via the context menu
 ></MeshItem>
     )
-  }, [toggleActive, setVisibility, handleRemoveMesh])
+  }, [toggleActiveMesh, setVisibility, handleRemoveMesh])
 
   let imageToolsPanel;
-  if(nv.volumes.length > 0) {
+  if(activeImageType === VOLUME) {
     imageToolsPanel = <ImageTools>{/* colormap select: sets the colormap of the active image */}
     <ColormapSelect
       colormaps={colormaps} // array of colormap objects
