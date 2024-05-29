@@ -5,7 +5,7 @@ import {
   useContext,
   createContext,
 } from "react";
-import update from 'immutability-helper'
+import update from "immutability-helper";
 import "./App.css";
 import { nvUtils } from "./nvUtils";
 import { Niivue, NVDocument, SLICE_TYPE } from "@niivue/niivue";
@@ -24,6 +24,96 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
 import { ColorPicker } from "./components/ColorPicker";
 import Typography from "@mui/material/Typography";
+import { styled, useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import MuiDrawer from "@mui/material/Drawer";
+import MuiAppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import List from "@mui/material/List";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import InboxIcon from "@mui/icons-material/MoveToInbox";
+import MailIcon from "@mui/icons-material/Mail";
+import {
+  FileCopySharp,
+  Filter,
+  Filter1Sharp,
+  HubSharp,
+} from "@mui/icons-material";
+
+const drawerWidth = 220;
+
+const openedMixin = (theme) => ({
+  width: drawerWidth,
+  transition: theme.transitions.create("width", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.enteringScreen,
+  }),
+  overflowX: "hidden",
+});
+
+const closedMixin = (theme) => ({
+  transition: theme.transitions.create("width", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  overflowX: "hidden",
+  width: `calc(${theme.spacing(7)} + 1px)`,
+  [theme.breakpoints.up("sm")]: {
+    width: `calc(${theme.spacing(8)} + 1px)`,
+  },
+});
+
+const DrawerHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
+}));
+
+const AppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(["width", "margin"], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(["width", "margin"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  }),
+}));
+
+const Drawer = styled(MuiDrawer, {
+  shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: "nowrap",
+  boxSizing: "border-box",
+  ...(open && {
+    ...openedMixin(theme),
+    "& .MuiDrawer-paper": openedMixin(theme),
+  }),
+  ...(!open && {
+    ...closedMixin(theme),
+    "& .MuiDrawer-paper": closedMixin(theme),
+  }),
+}));
 
 // use a context to call the Niivue instance from any component
 const _nv = new Niivue();
@@ -48,15 +138,15 @@ function App() {
   const nv = useContext(NV);
 
   nv.onImageLoaded = (volume) => {
-    setActiveImage(nv.volumes.length - 1)
-    setActiveImageType(VOLUME)
+    setActiveImage(nv.volumes.length - 1);
+    setActiveImageType(VOLUME);
     handleDrop();
   };
 
   nv.onMeshLoaded = (mesh) => {
-    setActiveImageType(MESH)
-    handleMeshAdded()
-  }
+    setActiveImageType(MESH);
+    handleMeshAdded();
+  };
 
   nv.onLocationChange = (locationData) => {
     // set the window title to locationData.string
@@ -88,14 +178,32 @@ function App() {
   const [sliceType, setSliceType] = useState("");
   const [mosaicString, setMosaicString] = useState("A 0 20 C 30 S 42");
   const [isColorPickerOpen, setColorPickerOpen] = useState(false);
-  const [colorPickerColor, setColorPickerColor] = useState({ r: 255, g: 0, b: 0, a: 1 });
+  const [colorPickerColor, setColorPickerColor] = useState({
+    r: 255,
+    g: 0,
+    b: 0,
+    a: 1,
+  });
   const [colorOptionToChange, setColorOption] = useState();
   const [meshes, setMeshes] = useState([]);
-  const [activeMesh, setActiveMesh] = useState(0)
-  const [meshOpacity, setMeshOpacity] = useState(1.0)
-  const [activeImageType, setActiveImageType] = useState(NONE)
+  const [activeMesh, setActiveMesh] = useState(0);
+  const [meshOpacity, setMeshOpacity] = useState(1.0);
+  const [activeImageType, setActiveImageType] = useState(NONE);
+  const [sidebarContent, setSidebarContent] = useState(NONE);
+  
 
-
+  const toggleSidebarContent = useCallback((content) => {    
+    window.resizeTo(window.width, window.height);
+    if(sidebarContent === content) {
+      setSidebarContent(NONE)
+      setActiveImageType(NONE)
+    }
+    else {
+      setSidebarContent(content)
+      setActiveImageType(content)
+    }
+    
+  }, [sidebarContent])
   // ------------ Callbacks ------------
   // add a volume from a URL
   const addVolume = useCallback(
@@ -142,12 +250,11 @@ function App() {
       const mesh = nv.meshes[activeMesh];
       mesh.opacity = opacity;
       mesh.updateMesh(nv.gl);
-      setMeshOpacity(opacity)
-      // nv.drawScene();
-      console.log('mesh opactiy is updated', mesh)
+      setMeshOpacity(opacity);
+      console.log("mesh opactiy is updated", mesh);
     },
     [activeMesh, nv]
-  )
+  );
 
   const updateColormap = useCallback(
     (colormap) => {
@@ -161,10 +268,10 @@ function App() {
   const updateMeshColormap = useCallback(
     (colormap) => {
       nv.meshes[activeMesh].colormap = colormap;
-      nv.updateMeshOpacity()
+      nv.updateMeshOpacity();
     },
     [activeMesh, nv]
-  )
+  );
 
   const setCalMinMax = useCallback(
     (min, max) => {
@@ -181,7 +288,6 @@ function App() {
     nv.setSliceMosaicString(newValue);
     setMosaicString(newValue);
   };
-
 
   // ------------ Effects ------------
   // get the comms info from the main process
@@ -202,11 +308,11 @@ function App() {
 
       nvUtils.onLoadDocument(() => {
         loadDocument();
-      })
+      });
 
       nvUtils.onSaveDocument(() => {
         saveDocument();
-      })
+      });
 
       // set the callback for when volumes are loaded
       nvUtils.onLoadVolumes((imgs) => {
@@ -227,7 +333,7 @@ function App() {
         }
 
         nv.meshes = [];
-        
+
         setImages([]);
         setMeshes([]);
 
@@ -240,8 +346,8 @@ function App() {
         setCalMax(0);
         setCalMin(0);
         setColorPickerOpen(false);
-        setColorPickerColor("#ff000000")
-        setActiveImageType(NONE)
+        setColorPickerColor("#ff000000");
+        setActiveImageType(NONE);
       });
       // set the callback for when the view needs updating
       nvUtils.onSetView((view) => {
@@ -261,15 +367,18 @@ function App() {
       nvUtils.onSetOpt((view) => {
         // view is an array with the first element as the option name and the second as the value(s)
         console.log("Setting ", view[0], " as ", view[1]);
-        const regex = new RegExp('Color$');
+        const regex = new RegExp("Color$");
         if (regex.test(view[0])) {
-          const currentColor = nv.opts[view[0]]
-          setColorPickerColor({ r: currentColor[0] * 255, g: currentColor[1] * 255, b: currentColor[2] * 255, a: currentColor[3] });
+          const currentColor = nv.opts[view[0]];
+          setColorPickerColor({
+            r: currentColor[0] * 255,
+            g: currentColor[1] * 255,
+            b: currentColor[2] * 255,
+            a: currentColor[3],
+          });
           setColorPickerOpen(true);
           setColorOption(view[0]);
-
-        }
-        else {
+        } else {
           nv.opts[view[0]] = view[1];
           nv.updateGLVolume();
           nv.drawScene();
@@ -356,36 +465,41 @@ function App() {
     return `http://${commsInfo.host}:${commsInfo.fileServerPort}/${commsInfo.route}?${commsInfo.queryKey}=${path}`;
   }
 
-  const toggleActive = useCallback((name, value) => {
-    console.log(name, value);
-    let newImages = images.map((image, index) => {
-      if (image.name === name) {
-        image.active = value;
-        setActiveImage(index);
-        setActiveImageType(VOLUME)
-      } else {
-        image.active = false;
-      }
-      return image;
-    });
-    setImages(newImages);
-  }, [images, setActiveImage]);
+  const toggleActive = useCallback(
+    (name, value) => {
+      console.log(name, value);
+      let newImages = images.map((image, index) => {
+        if (image.name === name) {
+          image.active = value;
+          setActiveImage(index);
+          setActiveImageType(VOLUME);
+        } else {
+          image.active = false;
+        }
+        return image;
+      });
+      setImages(newImages);
+    },
+    [images, setActiveImage]
+  );
 
-  const toggleActiveMesh = useCallback((name, value) => {
-    console.log(name, value);
-    let newMeshes = meshes.map((mesh, index) => {
-      if (mesh.name === name) {
-        mesh.active = value;
-        setActiveMesh(index);
-        setActiveImageType(MESH)
-      } else {
-        mesh.active = false;
-      }
-      return mesh;
-    });
-    setMeshes(newMeshes);
-  }, [meshes, setActiveMesh]);
-
+  const toggleActiveMesh = useCallback(
+    (name, value) => {
+      console.log(name, value);
+      let newMeshes = meshes.map((mesh, index) => {
+        if (mesh.name === name) {
+          mesh.active = value;
+          setActiveMesh(index);
+          setActiveImageType(MESH);
+        } else {
+          mesh.active = false;
+        }
+        return mesh;
+      });
+      setMeshes(newMeshes);
+    },
+    [meshes, setActiveMesh]
+  );
 
   const getImageList = useCallback(() => {
     let volumes = nv.volumes;
@@ -401,8 +515,7 @@ function App() {
     });
 
     return newImages;
-  }, [nv, activeImage])
-
+  }, [nv, activeImage]);
 
   const getMeshList = useCallback(() => {
     let meshes = nv.meshes;
@@ -414,13 +527,12 @@ function App() {
         meshShaderIndex: mesh.meshShaderIndex,
         colormap: mesh.colormap,
         active: index === activeMesh,
-        index
+        index,
       };
     });
 
     return newMeshes;
-  }, [nv, activeMesh])
-
+  }, [nv, activeMesh]);
 
   function handleDrop() {
     const newImages = getImageList();
@@ -431,7 +543,7 @@ function App() {
   }
 
   function handleMeshAdded() {
-    console.log('mesh added handler called')
+    console.log("mesh added handler called");
     let meshes = nv.meshes.map((mesh, index) => {
       return {
         id: mesh.id,
@@ -440,12 +552,12 @@ function App() {
         meshShaderIndex: mesh.meshShaderIndex,
         colormap: mesh.colormap,
         active: true,
-        index
-      }
-    })
+        index,
+      };
+    });
 
-    console.log('meshes', meshes)
-    setMeshes(meshes)
+    console.log("meshes", meshes);
+    setMeshes(meshes);
   }
 
   const handleRemove = useCallback(
@@ -454,12 +566,11 @@ function App() {
       nv.removeVolume(vol);
       let newImages = getImageList();
       setActiveImage(0);
-      if(images.length === 0) {
-        if(meshes.length > 0) {
-          setActiveImageType(MESH)
-        }
-        else {
-          setActiveImageType(NONE)
+      if (images.length === 0) {
+        if (meshes.length > 0) {
+          setActiveImageType(MESH);
+        } else {
+          setActiveImageType(NONE);
         }
       }
       setImages(newImages);
@@ -480,7 +591,7 @@ function App() {
           meshShaderIndex: mesh.meshShaderIndex,
           colormap: mesh.colormap,
           active: index === activeMesh,
-          index
+          index,
         };
       });
       setActiveMesh(0);
@@ -497,7 +608,7 @@ function App() {
       }
 
       nv.setVolume(nv.volumes[index], newIndex);
-      let newImages = getImageList()
+      let newImages = getImageList();
       setActiveImage(0);
       setImages(newImages);
     },
@@ -512,7 +623,7 @@ function App() {
       }
 
       nv.setVolume(nv.volumes[index], newIndex);
-      let newImages = getImageList()
+      let newImages = getImageList();
       setActiveImage(0);
       setImages(newImages);
     },
@@ -558,144 +669,238 @@ function App() {
   };
 
   const loadDocument = async () => {
-    const result = await nvUtils.openFileDialog(['*.nvd']);
+    const result = await nvUtils.openFileDialog(["*.nvd"]);
     if (!result.canceled) {
       const jsonString = await nvUtils.loadTextFile(result.filePaths[0]);
       const json = JSON.parse(jsonString);
-      const document = NVDocument.loadFromJSON(json)
+      const document = NVDocument.loadFromJSON(json);
       nv.loadDocument(document);
-
     }
-  }
+  };
 
   const saveDocument = async () => {
     const result = await nvUtils.openSaveFileDialog("niivue.nvd");
     if (!result.canceled) {
       const json = nv.json();
-      const re = new RegExp("([^\\\\\\\\/]*$)")
+      const re = new RegExp("([^\\\\\\\\/]*$)");
 
-      json.name = result.filePath.match(re)[0]
+      json.name = result.filePath.match(re)[0];
       let imageIndex = 0;
       for (const imageOption of json.imageOptionsArray) {
         imageOption.name = `${nv.volumes[imageIndex++].name}.nii`;
       }
-      const jsonString = JSON.stringify(json)
+      const jsonString = JSON.stringify(json);
       nvUtils.saveTextFile(result.filePath, jsonString);
     }
-  }
+  };
 
   const onColorPickerChange = (color) => {
     setColorPickerColor(color.rgb);
     console.log("color picked: ", color);
-  }
+  };
 
   const onCloseColorPicker = (isCanceled = true) => {
     setColorPickerOpen(false);
     console.log("color picker closed");
 
     if (!isCanceled) {
-      const colorPicked = [colorPickerColor.r / 255.0, colorPickerColor.g / 255.0, colorPickerColor.b / 255.0, colorPickerColor.a * 1.0];
+      const colorPicked = [
+        colorPickerColor.r / 255.0,
+        colorPickerColor.g / 255.0,
+        colorPickerColor.b / 255.0,
+        colorPickerColor.a * 1.0,
+      ];
       console.log("color picked", colorPicked);
       nv.opts[colorOptionToChange] = colorPicked;
       nv.updateGLVolume();
       nv.drawScene();
     }
-  }
-  
-  const moveImage = useCallback((dragIndex, hoverIndex) => {
-    setImages((prevImages) => 
-      update(prevImages, {
-        $splice: [
-          [dragIndex, 1],
-          [hoverIndex, 0, prevImages[dragIndex]],
-        ],
-      }),
-    )
-    // update the volume order in Niivue
-    nv.setVolume(nv.volumes[dragIndex], hoverIndex)
-    // update the active image if it was moved
-    if (activeImage === dragIndex) {
-      setActiveImage(hoverIndex)
-    } else if (activeImage === hoverIndex) {
-      setActiveImage(dragIndex)
-    }
-  }, [nv, activeImage, setImages, setActiveImage])
+  };
 
-  const renderImage = useCallback((image, index) => {
-    return (
-      <FileItem
-        id={image.id}
-        key={image.id} // unique key for React
-        moveImage={moveImage}
-        name={image.name} // the name of the image (the full path on the file system)
-        active={image.active} // whether the image is the active image
-        index={index} // the index of the image in the images array
-        frame={image.frame} // the current frame of the image (for 4D images)
-        maxFrame={image.maxFrame} // the maximum frame of the image (for 4D images)
-        onSetActive={toggleActive} // callback to set if the image is active
-        onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
-        onRemove={handleRemove} // callback to remove the image from the scene via the context menu
-        onMoveUp={handleMoveUp} // callback to move the image up via the context menu
-        onMoveDown={handleMoveDown} // callback to move the image down via the context menu
-        onShowHeader={handleShowHeader} // callback to show the image header via the context menu
-        onNextFrame={handleNextFrame} // advances the frame for 4D volumes
-        onPreviousFrame={handlePreviousFrame} // goes back a frame for 4D volumes
-      ></FileItem>
-    )
-  }, [toggleActive, setVisibility, handleRemove, handleMoveUp, handleMoveDown, handleShowHeader, handleNextFrame, handlePreviousFrame, moveImage])
+  const moveImage = useCallback(
+    (dragIndex, hoverIndex) => {
+      setImages((prevImages) =>
+        update(prevImages, {
+          $splice: [
+            [dragIndex, 1],
+            [hoverIndex, 0, prevImages[dragIndex]],
+          ],
+        })
+      );
+      // update the volume order in Niivue
+      nv.setVolume(nv.volumes[dragIndex], hoverIndex);
+      // update the active image if it was moved
+      if (activeImage === dragIndex) {
+        setActiveImage(hoverIndex);
+      } else if (activeImage === hoverIndex) {
+        setActiveImage(dragIndex);
+      }
+    },
+    [nv, activeImage, setImages, setActiveImage]
+  );
 
+  const renderImage = useCallback(
+    (image, index) => {
+      return (
+        <FileItem
+          id={image.id}
+          key={image.id} // unique key for React
+          moveImage={moveImage}
+          name={image.name} // the name of the image (the full path on the file system)
+          active={image.active} // whether the image is the active image
+          index={index} // the index of the image in the images array
+          frame={image.frame} // the current frame of the image (for 4D images)
+          maxFrame={image.maxFrame} // the maximum frame of the image (for 4D images)
+          onSetActive={toggleActive} // callback to set if the image is active
+          onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
+          onRemove={handleRemove} // callback to remove the image from the scene via the context menu
+          onMoveUp={handleMoveUp} // callback to move the image up via the context menu
+          onMoveDown={handleMoveDown} // callback to move the image down via the context menu
+          onShowHeader={handleShowHeader} // callback to show the image header via the context menu
+          onNextFrame={handleNextFrame} // advances the frame for 4D volumes
+          onPreviousFrame={handlePreviousFrame} // goes back a frame for 4D volumes
+        ></FileItem>
+      );
+    },
+    [
+      toggleActive,
+      setVisibility,
+      handleRemove,
+      handleMoveUp,
+      handleMoveDown,
+      handleShowHeader,
+      handleNextFrame,
+      handlePreviousFrame,
+      moveImage,
+    ]
+  );
 
-  const renderMesh = useCallback((mesh, index) => {
-    return (
-      <MeshItem
-        key={mesh.id} // unique key for React
-        index={index}
-        name={mesh.name}
-        active={mesh.active}
-        onSetActive={toggleActiveMesh} // callback to set if the image is active
-        onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
-        onRemove={handleRemoveMesh} // callback to remove the image from the scene via the context menu
-></MeshItem>
-    )
-  }, [toggleActiveMesh, setVisibility, handleRemoveMesh])
+  const renderMesh = useCallback(
+    (mesh, index) => {
+      return (
+        <MeshItem
+          key={mesh.id} // unique key for React
+          index={index}
+          name={mesh.name}
+          active={mesh.active}
+          onSetActive={toggleActiveMesh} // callback to set if the image is active
+          onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
+          onRemove={handleRemoveMesh} // callback to remove the image from the scene via the context menu
+        ></MeshItem>
+      );
+    },
+    [toggleActiveMesh, setVisibility, handleRemoveMesh]
+  );
 
   let imageToolsPanel;
-  switch(activeImageType) {
-  case VOLUME: {
-    imageToolsPanel = <ImageTools>{/* colormap select: sets the colormap of the active image */}
-    <ColormapSelect
-      colormaps={colormaps} // array of colormap objects
-      onSetColormap={updateColormap} // callback to set the colormap of the active image
-      colormap={nv.volumes.length > 0 && nv.volumes[activeImage] ? nv.volumes[activeImage].colormap : colormap} // the current colormap of the active image
-    />
-    {/* min max input: set the min and max of the active image */}
-    <MinMaxInput
-      calMin={calMin} // the minimum value of the active image
-      calMax={calMax} // the maximum value of the active image
-      min={min} // the selected minimum value of the active image
-      max={max} // the selected maximum value of the active image
-      onSetMinMax={setCalMinMax} // callback to set the min and max of the active image
-    />
-    {/* opacity slider: set the opacity of the active image */}
-    <OpacitySlider
-      opacity={opacity} // the current opacity of the active image
-      onSetOpacity={updateOpacity} // callback to set the opacity of the active image
-    /></ImageTools>
+  switch (activeImageType) {
+    case VOLUME:
+      {
+        imageToolsPanel = (
+          <ImageTools>
+            {/* colormap select: sets the colormap of the active image */}
+            <ColormapSelect
+              colormaps={colormaps} // array of colormap objects
+              onSetColormap={updateColormap} // callback to set the colormap of the active image
+              colormap={
+                nv.volumes.length > 0 && nv.volumes[activeImage]
+                  ? nv.volumes[activeImage].colormap
+                  : colormap
+              } // the current colormap of the active image
+            />
+            {/* min max input: set the min and max of the active image */}
+            <MinMaxInput
+              calMin={calMin} // the minimum value of the active image
+              calMax={calMax} // the maximum value of the active image
+              min={min} // the selected minimum value of the active image
+              max={max} // the selected maximum value of the active image
+              onSetMinMax={setCalMinMax} // callback to set the min and max of the active image
+            />
+            {/* opacity slider: set the opacity of the active image */}
+            <OpacitySlider
+              opacity={opacity} // the current opacity of the active image
+              onSetOpacity={updateOpacity} // callback to set the opacity of the active image
+            />
+          </ImageTools>
+        );
+      }
+      break;
+    case MESH:
+      {
+        imageToolsPanel = (
+          <ImageTools>
+            {/* min max input: set the min and max of the active image */}
+            {/* opacity slider: set the opacity of the active image */}
+            <OpacitySlider
+              opacity={meshOpacity} // the current opacity of the active image
+              onSetOpacity={updateMeshOpacity} // callback to set the opacity of the active image
+            />
+          </ImageTools>
+        );
+      }
+      break;
+    default:
+      imageToolsPanel = <></>;
   }
-  break;
-  case MESH: {
-    imageToolsPanel = <ImageTools>
-    {/* min max input: set the min and max of the active image */}    
-    {/* opacity slider: set the opacity of the active image */}
-    <OpacitySlider
-      opacity={meshOpacity} // the current opacity of the active image
-      onSetOpacity={updateMeshOpacity} // callback to set the opacity of the active image
-    /></ImageTools>
+
+  let sideBar;
+
+  switch (sidebarContent) {
+    case VOLUME:
+      sideBar = (
+        <Sidebar>
+          <Typography
+            variant="body"
+            sx={{
+              marginTop: 0,
+              marginBottom: 0.5,
+            }}
+          ></Typography>
+          Volumes
+          <FileList>
+            {/* FileItems: each FileItem is an image to be rendered in Niivue */}
+            {images.map((image, index) => {
+              return renderImage(image, index);
+            })}
+          </FileList>
+          {/* mosaic text input if sliceType is "mosaic" */}
+          {sliceType === "mosaic" && (
+            <MosaicInput onChange={onMosaicChange} value={mosaicString} />
+          )}
+          {imageToolsPanel}
+          {/* SceneTools here in the future! */}
+        </Sidebar>
+      );
+      break;
+    case MESH:
+      sideBar = (
+        <Sidebar>
+          <Typography
+            variant="body"
+            sx={{
+              marginTop: 0,
+              marginBottom: 0.5,
+            }}
+          ></Typography>
+          Meshes
+          <MeshList>
+            {meshes.map((mesh, index) => {
+              return renderMesh(mesh, index);
+            })}
+          </MeshList>
+          {/* mosaic text input if sliceType is "mosaic" */}
+          {sliceType === "mosaic" && (
+            <MosaicInput onChange={onMosaicChange} value={mosaicString} />
+          )}
+          {imageToolsPanel}
+          {/* SceneTools here in the future! */}
+        </Sidebar>
+      );
+      break;
+    default:
+      sideBar = <></>;
   }
-  break;
-  default:
-    imageToolsPanel = <></>
-  }
+
   return (
     // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
@@ -714,39 +919,66 @@ function App() {
       >
         {/* CssBaseline sets some standard CSS configs for working with MUI */}
         <CssBaseline />
+        <Drawer variant="permanent" open={open}>
+          <List>
+            <ListItem key="Volumes" disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? "initial" : "center",
+                  px: 2.5,
+                }}
+                onClick={() => {toggleSidebarContent(VOLUME)}}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Filter />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Volumes"
+                  sx={{ opacity: open ? 1 : 0 }}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem key="Meshes" disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? "initial" : "center",
+                  px: 2.5,
+                }}
+                onClick={()=> toggleSidebarContent(MESH)}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  <HubSharp />
+                </ListItemIcon>
+                <ListItemText primary="Meshes" sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Drawer>
         {/* Sidebar: is the left panel that shows all files and image/scene widgets */}
-        <Sidebar>
-        <Typography
-        variant="body"
-        sx={{
-          marginTop: 0,
-          marginBottom: 0.5,
-        }}
-      >
-        
-      </Typography>
-          Images
-          {/* FileList: shows all files in layer order */}
-          <FileList>
-            {/* FileItems: each FileItem is an image to be rendered in Niivue */}
-            {images.map((image, index) => {
-              return renderImage(image, index)
-            })}
-          </FileList>
-          Meshes
-          <MeshList>
-            {meshes.map((mesh, index) => {
-              return renderMesh(mesh, index)
-            })}
-          </MeshList>
-          {/* mosaic text input if sliceType is "mosaic" */}
-          {sliceType === "mosaic" && <MosaicInput onChange={onMosaicChange} value={mosaicString} />}
-          {imageToolsPanel}
-          {/* SceneTools here in the future! */}
-        </Sidebar>
+        {sideBar}
         {/* Niivue Canvas: where things are rendered :) */}
         <NiivueCanvas nv={nv} />
-        <ColorPicker isOpen={isColorPickerOpen} pickedColor={colorPickerColor} onChange={onColorPickerChange} onClose={onCloseColorPicker} isFullScreen={false} />
+        <ColorPicker
+          isOpen={isColorPickerOpen}
+          pickedColor={colorPickerColor}
+          onChange={onColorPickerChange}
+          onClose={onCloseColorPicker}
+          isFullScreen={false}
+        />
       </Container>
     </NV.Provider>
   );
