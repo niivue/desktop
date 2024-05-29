@@ -49,10 +49,12 @@ function App() {
 
   nv.onImageLoaded = (volume) => {
     setActiveImage(nv.volumes.length - 1)
+    setActiveImageType(VOLUME)
     handleDrop();
   };
 
   nv.onMeshLoaded = (mesh) => {
+    setActiveImageType(MESH)
     handleMeshAdded()
   }
 

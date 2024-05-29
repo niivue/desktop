@@ -143,12 +143,7 @@ export function MeshItem({
             : undefined
         }
       >
-        <MenuItem onClick={handleRemove}>Remove</MenuItem>
-        <MenuItem onClick={handleMoveUp}>Move Up</MenuItem>
-        <MenuItem onClick={handleMoveDown}>Move Down</MenuItem>
-        <MenuItem onClick={handleShowHeader}>Show Header</MenuItem>
-        <MenuItem onClick={handleNextFrame}>Next Frame</MenuItem>
-        <MenuItem onClick={handlePreviousFrame}>Previous Frame</MenuItem>
+        <MenuItem onClick={handleRemove}>Remove</MenuItem>        
       </Menu>
     </Box>
   )
