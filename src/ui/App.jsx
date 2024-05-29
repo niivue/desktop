@@ -12,8 +12,10 @@ import { Niivue, NVDocument, SLICE_TYPE } from "@niivue/niivue";
 import { NiivueCanvas } from "./components/NiivueCanvas";
 import { Sidebar } from "./components/Sidebar";
 import { FileList } from "./components/FileList";
+import { MeshList } from "./components/MeshList";
 import { ImageTools } from "./components/ImageTools";
 import { FileItem } from "./components/FileItem";
+import { MeshItem } from "./components/MeshItem";
 import { ColormapSelect } from "./components/ColormapSelect";
 import { MinMaxInput } from "./components/MinMaxInput";
 import { MosaicInput } from "./components/MosaicInput";
@@ -21,6 +23,7 @@ import { OpacitySlider } from "./components/OpacitySlider";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
 import { ColorPicker } from "./components/ColorPicker";
+import Typography from "@mui/material/Typography";
 
 // use a context to call the Niivue instance from any component
 const _nv = new Niivue();
@@ -42,6 +45,10 @@ function App() {
   nv.onImageLoaded = (volume) => {
     handleDrop();
   };
+
+  nv.onMeshLoaded = (mesh) => {
+    handleMeshAdded()
+  }
 
   nv.onLocationChange = (locationData) => {
     // set the window title to locationData.string
@@ -75,6 +82,9 @@ function App() {
   const [isColorPickerOpen, setColorPickerOpen] = useState(false);
   const [colorPickerColor, setColorPickerColor] = useState({ r: 255, g: 0, b: 0, a: 1 });
   const [colorOptionToChange, setColorOption] = useState();
+  const [meshes, setMeshes] = useState([]);
+  const [activeMesh, setActiveMesh] = useState(0)
+
   // ------------ Callbacks ------------
   // add a volume from a URL
   const addVolume = useCallback(
@@ -184,7 +194,10 @@ function App() {
         for (let i = volumes.length - 1; i >= 0; i--) {
           nv.removeVolumeByIndex(i);
         }
+        
         setImages([]);
+        setMeshes([]);
+
         // update active image, min, max, opacity
         setActiveImage(0);
         setMin(0);
@@ -322,7 +335,7 @@ function App() {
     setImages(newImages);
   }, [images, setActiveImage]);
 
-  function handleDrop() {
+  const getImageList = useCallback(() => {
     let volumes = nv.volumes;
     let newImages = volumes.map((volume, index) => {
       return {
@@ -334,29 +347,86 @@ function App() {
         active: index === activeImage,
       };
     });
+
+    return newImages;
+  }, [nv, activeImage])
+
+
+  const getMeshList = useCallback(() => {
+    let meshes = nv.meshes;
+    let newMeshes = meshes.map((mesh, index) => {
+      return {
+        id: mesh.id,
+        name: mesh.name,
+        opacity: mesh.opacity,
+        meshShaderIndex: mesh.meshShaderIndex,
+        colormap: mesh.colormap,
+        active: index === activeMesh,
+        index
+      };
+    });
+
+    return newMeshes;
+  }, [nv, activeMesh])
+
+
+  function handleDrop() {
+    const newImages = getImageList();
+    const newMeshes = getMeshList();
     console.log(newImages);
     setImages(newImages);
+    setMeshes(newMeshes);
+  }
+
+  function handleMeshAdded() {
+    console.log('mesh added handler called')
+    let meshes = nv.meshes.map((mesh, index) => {
+      return {
+        id: mesh.id,
+        name: mesh.name,
+        opacity: mesh.opacity,
+        meshShaderIndex: mesh.meshShaderIndex,
+        colormap: mesh.colormap,
+        active: index === activeMesh,
+        index
+      }
+    })
+
+    console.log('meshes', meshes)
+    setMeshes(meshes)
   }
 
   const handleRemove = useCallback(
     (index) => {
       let vol = nv.volumes[index];
       nv.removeVolume(vol);
-      let volumes = nv.volumes;
-      let newImages = volumes.map((volume, index) => {
-        return {
-          url: volume.url,
-          name: volume.name,
-          index: index,
-          id: volume.id,
-          color: volume.colormap,
-          active: index === activeImage,
-        };
-      });
+      let newImages = getImageList();
       setActiveImage(0);
       setImages(newImages);
     },
-    [activeImage, nv]
+    [nv, getImageList]
+  );
+
+  const handleRemoveMesh = useCallback(
+    (index) => {
+      let mesh = nv.meshes[index];
+      nv.removeVolume(mesh);
+      let meshes = nv.meshes;
+      let newMeshes = meshes.map((mesh, index) => {
+        return {
+          id: mesh.id,
+          name: mesh.name,
+          opacity: mesh.opacity,
+          meshShaderIndex: mesh.meshShaderIndex,
+          colormap: mesh.colormap,
+          active: index === activeMesh,
+          index
+        };
+      });
+      setActiveMesh(0);
+      setMeshes(newMeshes);
+    },
+    [activeMesh, nv]
   );
 
   const handleMoveUp = useCallback(
@@ -367,21 +437,11 @@ function App() {
       }
 
       nv.setVolume(nv.volumes[index], newIndex);
-      let volumes = nv.volumes;
-      let newImages = volumes.map((volume, index) => {
-        return {
-          url: volume.url,
-          name: volume.name,
-          index: index,
-          id: volume.id,
-          color: volume.colormap,
-          active: index === activeImage,
-        };
-      });
+      let newImages = getImageList()
       setActiveImage(0);
       setImages(newImages);
     },
-    [activeImage, nv]
+    [getImageList, nv]
   );
 
   const handleMoveDown = useCallback(
@@ -392,21 +452,11 @@ function App() {
       }
 
       nv.setVolume(nv.volumes[index], newIndex);
-      let volumes = nv.volumes;
-      let newImages = volumes.map((volume, index) => {
-        return {
-          url: volume.url,
-          name: volume.name,
-          index: index,
-          id: volume.id,
-          color: volume.colormap,
-          active: index === activeImage,
-        };
-      });
+      let newImages = getImageList()
       setActiveImage(0);
       setImages(newImages);
     },
-    [activeImage, nv]
+    [getImageList, nv]
   );
 
   const handleShowHeader = (index) => {
@@ -491,7 +541,7 @@ function App() {
       nv.drawScene();
     }
   }
-
+  
   const moveImage = useCallback((dragIndex, hoverIndex) => {
     setImages((prevImages) => 
       update(prevImages, {
@@ -534,6 +584,46 @@ function App() {
     )
   }, [toggleActive, setVisibility, handleRemove, handleMoveUp, handleMoveDown, handleShowHeader, handleNextFrame, handlePreviousFrame, moveImage])
 
+
+  const renderMesh = useCallback((mesh, index) => {
+    return (
+      <MeshItem
+        key={mesh.id} // unique key for React
+        index={index}
+        name={mesh.name}
+        active={mesh.active}
+        onSetActive={toggleActive} // callback to set if the image is active
+        onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
+        onRemove={handleRemoveMesh} // callback to remove the image from the scene via the context menu
+></MeshItem>
+    )
+  }, [toggleActive, setVisibility, handleRemoveMesh])
+
+  let imageToolsPanel;
+  if(nv.volumes.length > 0) {
+    imageToolsPanel = <ImageTools>{/* colormap select: sets the colormap of the active image */}
+    <ColormapSelect
+      colormaps={colormaps} // array of colormap objects
+      onSetColormap={updateColormap} // callback to set the colormap of the active image
+      colormap={nv.volumes.length > 0 && nv.volumes[activeImage] ? nv.volumes[activeImage].colormap : colormap} // the current colormap of the active image
+    />
+    {/* min max input: set the min and max of the active image */}
+    <MinMaxInput
+      calMin={calMin} // the minimum value of the active image
+      calMax={calMax} // the maximum value of the active image
+      min={min} // the selected minimum value of the active image
+      max={max} // the selected maximum value of the active image
+      onSetMinMax={setCalMinMax} // callback to set the min and max of the active image
+    />
+    {/* opacity slider: set the opacity of the active image */}
+    <OpacitySlider
+      opacity={opacity} // the current opacity of the active image
+      onSetOpacity={updateOpacity} // callback to set the opacity of the active image
+    /></ImageTools>
+  }
+  else {
+    imageToolsPanel = <></>
+  }
   return (
     // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
@@ -554,6 +644,16 @@ function App() {
         <CssBaseline />
         {/* Sidebar: is the left panel that shows all files and image/scene widgets */}
         <Sidebar>
+        <Typography
+        variant="body"
+        sx={{
+          marginTop: 0,
+          marginBottom: 0.5,
+        }}
+      >
+        
+      </Typography>
+          Images
           {/* FileList: shows all files in layer order */}
           <FileList>
             {/* FileItems: each FileItem is an image to be rendered in Niivue */}
@@ -561,30 +661,15 @@ function App() {
               return renderImage(image, index)
             })}
           </FileList>
+          Meshes
+          <MeshList>
+            {meshes.map((mesh, index) => {
+              return renderMesh(mesh, index)
+            })}
+          </MeshList>
           {/* mosaic text input if sliceType is "mosaic" */}
           {sliceType === "mosaic" && <MosaicInput onChange={onMosaicChange} value={mosaicString} />}
-          {/* ImageTools */}
-          <ImageTools>
-            {/* colormap select: sets the colormap of the active image */}
-            <ColormapSelect
-              colormaps={colormaps} // array of colormap objects
-              onSetColormap={updateColormap} // callback to set the colormap of the active image
-              colormap={images.length > 0 ? nv.volumes[activeImage].colormap : colormap} // the current colormap of the active image
-            />
-            {/* min max input: set the min and max of the active image */}
-            <MinMaxInput
-              calMin={calMin} // the minimum value of the active image
-              calMax={calMax} // the maximum value of the active image
-              min={min} // the selected minimum value of the active image
-              max={max} // the selected maximum value of the active image
-              onSetMinMax={setCalMinMax} // callback to set the min and max of the active image
-            />
-            {/* opacity slider: set the opacity of the active image */}
-            <OpacitySlider
-              opacity={opacity} // the current opacity of the active image
-              onSetOpacity={updateOpacity} // callback to set the opacity of the active image
-            />
-          </ImageTools>
+          {imageToolsPanel}
           {/* SceneTools here in the future! */}
         </Sidebar>
         {/* Niivue Canvas: where things are rendered :) */}
