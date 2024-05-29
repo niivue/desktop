@@ -201,6 +201,8 @@ function App() {
         for (let i = volumes.length - 1; i >= 0; i--) {
           nv.removeVolumeByIndex(i);
         }
+
+        nv.meshes = [];
         
         setImages([]);
         setMeshes([]);
@@ -444,7 +446,7 @@ function App() {
   const handleRemoveMesh = useCallback(
     (index) => {
       let mesh = nv.meshes[index];
-      nv.removeVolume(mesh);
+      nv.removeMesh(mesh);
       let meshes = nv.meshes;
       let newMeshes = meshes.map((mesh, index) => {
         return {
