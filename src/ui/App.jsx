@@ -92,7 +92,9 @@ function App() {
   const [colorOptionToChange, setColorOption] = useState();
   const [meshes, setMeshes] = useState([]);
   const [activeMesh, setActiveMesh] = useState(0)
+  const [meshOpacity, setMeshOpacity] = useState(1.0)
   const [activeImageType, setActiveImageType] = useState(NONE)
+
 
   // ------------ Callbacks ------------
   // add a volume from a URL
@@ -135,6 +137,18 @@ function App() {
     [activeImage, nv]
   );
 
+  const updateMeshOpacity = useCallback(
+    (opacity) => {
+      const mesh = nv.meshes[activeMesh];
+      mesh.opacity = opacity;
+      mesh.updateMesh(nv.gl);
+      setMeshOpacity(opacity)
+      // nv.drawScene();
+      console.log('mesh opactiy is updated', mesh)
+    },
+    [activeMesh, nv]
+  )
+
   const updateColormap = useCallback(
     (colormap) => {
       nv.volumes[activeImage].colormap = colormap;
@@ -143,6 +157,14 @@ function App() {
     },
     [activeImage, nv]
   );
+
+  const updateMeshColormap = useCallback(
+    (colormap) => {
+      nv.meshes[activeMesh].colormap = colormap;
+      nv.updateMeshOpacity()
+    },
+    [activeMesh, nv]
+  )
 
   const setCalMinMax = useCallback(
     (min, max) => {
@@ -442,7 +464,7 @@ function App() {
       }
       setImages(newImages);
     },
-    [nv, getImageList]
+    [nv, getImageList, images, meshes]
   );
 
   const handleRemoveMesh = useCallback(
@@ -638,7 +660,8 @@ function App() {
   }, [toggleActiveMesh, setVisibility, handleRemoveMesh])
 
   let imageToolsPanel;
-  if(activeImageType === VOLUME) {
+  switch(activeImageType) {
+  case VOLUME: {
     imageToolsPanel = <ImageTools>{/* colormap select: sets the colormap of the active image */}
     <ColormapSelect
       colormaps={colormaps} // array of colormap objects
@@ -659,7 +682,18 @@ function App() {
       onSetOpacity={updateOpacity} // callback to set the opacity of the active image
     /></ImageTools>
   }
-  else {
+  break;
+  case MESH: {
+    imageToolsPanel = <ImageTools>
+    {/* min max input: set the min and max of the active image */}    
+    {/* opacity slider: set the opacity of the active image */}
+    <OpacitySlider
+      opacity={meshOpacity} // the current opacity of the active image
+      onSetOpacity={updateMeshOpacity} // callback to set the opacity of the active image
+    /></ImageTools>
+  }
+  break;
+  default:
     imageToolsPanel = <></>
   }
   return (
