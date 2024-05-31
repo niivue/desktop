@@ -8,7 +8,13 @@ import {
 import update from "immutability-helper";
 import "./App.css";
 import { nvUtils } from "./nvUtils";
-import { Niivue, NVDocument, SLICE_TYPE } from "@niivue/niivue";
+import {
+  Niivue,
+  NVDocument,
+  SLICE_TYPE,
+  NVMesh,
+  NVMeshLoaders,
+} from "@niivue/niivue";
 import { NiivueCanvas } from "./components/NiivueCanvas";
 import { Sidebar } from "./components/Sidebar";
 import { FileList } from "./components/FileList";
@@ -71,33 +77,6 @@ const closedMixin = (theme) => ({
   },
 });
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
-}));
-
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(["width", "margin"], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(["width", "margin"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
 const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
@@ -131,7 +110,6 @@ const sliceTypes = {
 const NONE = 0;
 const VOLUME = 1;
 const MESH = 2;
-
 
 function App() {
   // create a new Niivue object
@@ -190,20 +168,20 @@ function App() {
   const [meshOpacity, setMeshOpacity] = useState(1.0);
   const [activeImageType, setActiveImageType] = useState(NONE);
   const [sidebarContent, setSidebarContent] = useState(NONE);
-  
 
-  const toggleSidebarContent = useCallback((content) => {    
-    window.resizeTo(window.width, window.height);
-    if(sidebarContent === content) {
-      setSidebarContent(NONE)
-      setActiveImageType(NONE)
-    }
-    else {
-      setSidebarContent(content)
-      setActiveImageType(content)
-    }
-    
-  }, [sidebarContent])
+  const toggleSidebarContent = useCallback(
+    (content) => {
+      window.resizeTo(window.width, window.height);
+      if (sidebarContent === content) {
+        setSidebarContent(NONE);
+        setActiveImageType(NONE);
+      } else {
+        setSidebarContent(content);
+        setActiveImageType(content);
+      }
+    },
+    [sidebarContent]
+  );
   // ------------ Callbacks ------------
   // add a volume from a URL
   const addVolume = useCallback(
@@ -236,6 +214,14 @@ function App() {
     },
     [nv]
   );
+
+  const toggleLayerVisibility = useCallback((index, layerIndex) => {
+    const mesh = nv.meshes[index];
+    const layer = mesh.layers[layerIndex];
+    layer.opacity = layer.opacity ? 0.0 : 1.0;
+    mesh.updateMesh(nv.gl);
+    nv.drawScene();
+  }, [nv])
 
   const updateOpacity = useCallback(
     (opacity) => {
@@ -555,7 +541,7 @@ function App() {
         index,
       };
     });
-
+    console.log("nv meshes", nv.meshes);
     console.log("meshes", meshes);
     setMeshes(meshes);
   }
@@ -598,6 +584,39 @@ function App() {
       setMeshes(newMeshes);
     },
     [activeMesh, nv]
+  );
+
+  const getLayerList = useCallback((index) => {
+    let mesh = nv.meshes[index];
+    console.log("mesh from getLayerList", mesh, index);
+    return mesh.layers;
+  }, [nv])
+
+  const handleLayerDropped = useCallback(
+    (index, file) => {
+      let mesh = nv.meshes[index];
+      console.log("mesh", mesh);
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        console.log("file", file)
+        console.log("event", event);
+        let buffer = event.target.result;
+        console.log(buffer);
+        let layer = NVMeshLoaders.readLayer(file.path, buffer, mesh); //, 0.5, 'warm', 'winter', true, 0.5, 5.5);
+        if (layer) {
+          layer.name = file.path.replace(/^.*[\\/]/, '');
+          layer.url = file.path;
+          console.log("layer", layer);
+          mesh.layers.push(layer);
+          mesh.updateMesh(nv.gl);
+          nv.drawScene();
+          getMeshList();
+        }
+        console.log("mesh", mesh);
+      };
+      reader.readAsArrayBuffer(file);
+    },
+    [nv, getMeshList]
   );
 
   const handleMoveUp = useCallback(
@@ -786,10 +805,14 @@ function App() {
           onSetActive={toggleActiveMesh} // callback to set if the image is active
           onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
           onRemove={handleRemoveMesh} // callback to remove the image from the scene via the context menu
+          onLayerDropped={handleLayerDropped} // callback to add a layer to a specific mesh
+          layers={mesh.layers}
+          getLayerList={getLayerList}
+          setLayerVisibility={toggleLayerVisibility}
         ></MeshItem>
       );
     },
-    [toggleActiveMesh, setVisibility, handleRemoveMesh]
+    [toggleActiveMesh, setVisibility, handleRemoveMesh, handleLayerDropped, getLayerList, toggleLayerVisibility]
   );
 
   let imageToolsPanel;
@@ -928,7 +951,9 @@ function App() {
                   justifyContent: open ? "initial" : "center",
                   px: 2.5,
                 }}
-                onClick={() => {toggleSidebarContent(VOLUME)}}
+                onClick={() => {
+                  toggleSidebarContent(VOLUME);
+                }}
               >
                 <ListItemIcon
                   sx={{
@@ -952,7 +977,7 @@ function App() {
                   justifyContent: open ? "initial" : "center",
                   px: 2.5,
                 }}
-                onClick={()=> toggleSidebarContent(MESH)}
+                onClick={() => toggleSidebarContent(MESH)}
               >
                 <ListItemIcon
                   sx={{

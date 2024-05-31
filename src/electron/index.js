@@ -427,7 +427,7 @@ let menu = [
       },
       // close all volumes
       {
-        label: 'Close all volumes',
+        label: 'Close all images',
         id: 'closeAllVolumes',
         click: async () => {
           await onCloseAllVolumesClick();
