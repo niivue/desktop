@@ -29,6 +29,7 @@ export function MeshItem({
   onRemove = () => {},
   onLayerDropped = (index, file) => {},
   setLayerVisibility = () => {},
+  setActiveLayer = () => {},
   ...props
 }) {
   const ref = useRef(null);
@@ -73,9 +74,10 @@ export function MeshItem({
   }
 
   function toggleLayerVisibility(layerIndex) {
-    setLayerVisibility(index, layerIndex);
+    
     const isVisible = layers[layerIndex].visible;
     layers[layerIndex].visible = !isVisible;
+    setLayerVisibility(index, layerIndex, layers[layerIndex].visible ? 1.0 : 0.0);
     // slice is necessary to trigger re-render of child controls 
     // https://stackoverflow.com/questions/25937369/react-component-not-re-rendering-on-state-change
     setLayers(layers.slice());
@@ -164,7 +166,7 @@ export function MeshItem({
         <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {layers.map((item, layerIndex) => 
-            <ListItemButton sx={{ pl: 4 }} key={item.url}>
+            <ListItemButton sx={{ pl: 4 }} key={item.url} onClick={() => setActiveLayer(index, layerIndex) }>
               <IconButton onClick={() => toggleLayerVisibility(layerIndex)}>
                 {!layers[layerIndex].visible ? <VisibilityOffIcon /> : <VisibilityIcon />}
               </IconButton>

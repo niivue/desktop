@@ -112,7 +112,8 @@ const sliceTypes = {
 const NONE = 0;
 const VOLUME = 1;
 const MESH = 2;
-const SETTINGS = 3;
+const MESH_LAYER = 3;
+const SETTINGS = 4;
 
 function App() {
   // create a new Niivue object
@@ -171,6 +172,7 @@ function App() {
   const [meshOpacity, setMeshOpacity] = useState(1.0);
   const [activeImageType, setActiveImageType] = useState(NONE);
   const [sidebarContent, setSidebarContent] = useState(NONE);
+  const [activeLayer, setActiveLayer] = useState(0);
 
   const toggleSidebarContent = useCallback(
     (content) => {
@@ -218,13 +220,19 @@ function App() {
     [nv]
   );
 
-  const toggleLayerVisibility = useCallback((index, layerIndex) => {
+  const setLayerVisibility = useCallback((index, layerIndex, opacity) => {
     const mesh = nv.meshes[index];
     const layer = mesh.layers[layerIndex];
-    layer.opacity = layer.opacity ? 0.0 : 1.0;
+    layer.opacity = opacity;
     mesh.updateMesh(nv.gl);
     nv.drawScene();
   }, [nv])
+
+  const setLayerAsActive = useCallback((index, layerIndex) => {
+    setActiveImageType(MESH_LAYER);
+    setActiveMesh(index);
+    setActiveLayer(layerIndex);
+  }, [setActiveImageType, setActiveMesh, setActiveLayer])
 
   const updateOpacity = useCallback(
     (opacity) => {
@@ -240,10 +248,22 @@ function App() {
       mesh.opacity = opacity;
       mesh.updateMesh(nv.gl);
       setMeshOpacity(opacity);
+      nv.drawScene();
       console.log("mesh opactiy is updated", mesh);
     },
     [activeMesh, nv]
   );
+
+  const updateMeshLayerOpacity = useCallback((opacity) => {
+    const mesh = nv.meshes[activeMesh];
+    const layer = nv.meshes[activeMesh].layers[activeLayer];
+    layer.opacity = opacity;
+    mesh.updateMesh(nv.gl);
+    setMeshOpacity(opacity);
+    nv.drawScene();
+    console.log("mesh layer opactiy is updated", mesh);
+  },
+  [activeMesh, activeLayer, nv])
 
   const updateColormap = useCallback(
     (colormap) => {
@@ -254,12 +274,15 @@ function App() {
     [activeImage, nv]
   );
 
-  const updateMeshColormap = useCallback(
+  const updateMeshLayerColormap = useCallback(
     (colormap) => {
-      nv.meshes[activeMesh].colormap = colormap;
-      nv.updateMeshOpacity();
+      const mesh = nv.meshes[activeMesh];
+      const layer = mesh.layers[activeLayer];
+      layer.colormap = colormap;
+      mesh.updateMesh(nv.gl);
+      nv.drawScene();
     },
-    [activeMesh, nv]
+    [activeMesh, activeLayer, nv]
   );
 
   const setCalMinMax = useCallback(
@@ -329,6 +352,7 @@ function App() {
         // update active image, min, max, opacity
         setActiveImage(0);
         setActiveMesh(0);
+        setActiveLayer(0);
         setMin(0);
         setMax(0);
         setOpacity(1);
@@ -489,7 +513,7 @@ function App() {
     },
     [meshes, setActiveMesh]
   );
-
+  
   const getImageList = useCallback(() => {
     let volumes = nv.volumes;
     let newImages = volumes.map((volume, index) => {
@@ -614,10 +638,13 @@ function App() {
           mesh.updateMesh(nv.gl);
           nv.drawScene();
           getMeshList();
+          setActiveImageType(MESH_LAYER);
+          setActiveLayer(mesh.layers.length - 1);
         }
         console.log("mesh", mesh);
       };
       reader.readAsArrayBuffer(file);
+
     },
     [nv, getMeshList]
   );
@@ -810,12 +837,13 @@ function App() {
           onRemove={handleRemoveMesh} // callback to remove the image from the scene via the context menu
           onLayerDropped={handleLayerDropped} // callback to add a layer to a specific mesh
           layers={mesh.layers}
-          getLayerList={getLayerList}
-          setLayerVisibility={toggleLayerVisibility}
+          getLayerList={getLayerList}          
+          setLayerVisibility={setLayerVisibility}
+          setActiveLayer={setLayerAsActive}
         ></MeshItem>
       );
     },
-    [toggleActiveMesh, setVisibility, handleRemoveMesh, handleLayerDropped, getLayerList, toggleLayerVisibility]
+    [toggleActiveMesh, setVisibility, handleRemoveMesh, handleLayerDropped, getLayerList, setLayerVisibility, setLayerAsActive]
   );
 
   let imageToolsPanel;
@@ -865,6 +893,27 @@ function App() {
         );
       }
       break;
+      case MESH_LAYER:
+        imageToolsPanel = (
+          <ImageTools>
+            {/* colormap select: sets the colormap of the active image */}
+            <ColormapSelect
+              colormaps={colormaps} // array of colormap objects
+              onSetColormap={updateMeshLayerColormap} // callback to set the colormap of the active image
+              colormap={
+                nv.meshes.length > 0 && nv.meshes[activeMesh]
+                  ? nv.meshes[activeMesh].layers[activeLayer].colormap
+                  : colormap
+              } // the current colormap of the active image
+            />            
+            {/* opacity slider: set the opacity of the active image */}
+            <OpacitySlider
+              opacity={meshOpacity} // the current opacity of the active image
+              onSetOpacity={updateMeshLayerOpacity} // callback to set the opacity of the active image
+            />
+          </ImageTools>
+        );
+        break;
     default:
       imageToolsPanel = <></>;
   }
@@ -898,6 +947,7 @@ function App() {
         </Sidebar>
       );
       break;
+    case MESH_LAYER:
     case MESH:
       sideBar = (
         <Sidebar>
