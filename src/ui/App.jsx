@@ -52,6 +52,8 @@ import {
   Filter,
   Filter1Sharp,
   HubSharp,
+  VideoSettingsOutlined,
+  ViewInArOutlined,
 } from "@mui/icons-material";
 
 const drawerWidth = 220;
@@ -110,6 +112,7 @@ const sliceTypes = {
 const NONE = 0;
 const VOLUME = 1;
 const MESH = 2;
+const SETTINGS = 3;
 
 function App() {
   // create a new Niivue object
@@ -962,7 +965,7 @@ function App() {
                     justifyContent: "center",
                   }}
                 >
-                  <Filter />
+                  <ViewInArOutlined />
                 </ListItemIcon>
                 <ListItemText
                   primary="Volumes"
@@ -989,6 +992,27 @@ function App() {
                   <HubSharp />
                 </ListItemIcon>
                 <ListItemText primary="Meshes" sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem key="Scene Settings" disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? "initial" : "center",
+                  px: 2.5,
+                }}
+                onClick={() => toggleSidebarContent(SETTINGS)}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  <VideoSettingsOutlined />
+                </ListItemIcon>
+                <ListItemText primary="Scene Settings" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
             </ListItem>
           </List>
