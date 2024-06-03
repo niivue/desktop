@@ -361,6 +361,8 @@ function App() {
         setColorPickerOpen(false);
         setColorPickerColor("#ff000000");
         setActiveImageType(NONE);
+
+        nv.drawScene();
       });
       // set the callback for when the view needs updating
       nvUtils.onSetView((view) => {
