@@ -35,7 +35,7 @@ export function MeshItem({
   const ref = useRef(null);
   const [visible, setVisible] = useState(true);
   const [contextMenu, setContextMenu] = useState(null);
-  const [files, setFiles] = useState([]);  
+  const [files, setFiles] = useState([]);
   const [layers, setLayers] = useState([]);
   const [open, setOpen] = useState(false);
 
@@ -74,11 +74,14 @@ export function MeshItem({
   }
 
   function toggleLayerVisibility(layerIndex) {
-    
     const isVisible = layers[layerIndex].visible;
     layers[layerIndex].visible = !isVisible;
-    setLayerVisibility(index, layerIndex, layers[layerIndex].visible ? 1.0 : 0.0);
-    // slice is necessary to trigger re-render of child controls 
+    setLayerVisibility(
+      index,
+      layerIndex,
+      layers[layerIndex].visible ? 1.0 : 0.0
+    );
+    // slice is necessary to trigger re-render of child controls
     // https://stackoverflow.com/questions/25937369/react-component-not-re-rendering-on-state-change
     setLayers(layers.slice());
   }
@@ -90,66 +93,67 @@ export function MeshItem({
       const newFiles = Array.from(droppedFiles);
       setFiles((prevFiles) => [...prevFiles, ...newFiles]);
       onLayerDropped(index, droppedFiles[0]);
-      layers.push({name: droppedFiles[0].path.replace(/^.*[\\/]/, ''), url: droppedFiles[0].path, visible: true});
+      layers.push({
+        name: droppedFiles[0].path.replace(/^.*[\\/]/, ""),
+        url: droppedFiles[0].path,
+        visible: true,
+      });
       setOpen(true);
     }
 
     console.log("droppedFiles", droppedFiles);
   };
 
-
-
   return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          minWidth: "100%",
-          width: "100%",
-          // background color is very light blue if active
-          backgroundColor: active ? "#E6F0FF" : "#F8F8F8",
-          ...props,
-        }}
-        ref={ref}
-        onDrop={handleDrop}
-        onDragOver={(event) => event.preventDefault()}
-        
-      >
-        <List>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        minWidth: "100%",
+        width: "100%",
+        // background color is very light blue if active
+        backgroundColor: active ? "#E6F0FF" : "#F8F8F8",
+        ...props,
+      }}
+      ref={ref}
+      onDrop={handleDrop}
+      onDragOver={(event) => event.preventDefault()}
+    >
+      <List>
         <ListItemButton onClick={handleClick}>
-        <IconButton onClick={toggleVisibility}>
-          {!visible ? <VisibilityOffIcon /> : <VisibilityIcon />}
-        </IconButton>
-        <Tooltip title={name}>
+          <IconButton onClick={toggleVisibility}>
+            {!visible ? <VisibilityOffIcon /> : <VisibilityIcon />}
+          </IconButton>
+          <Tooltip title={name}>
+            <Typography
+              sx={{
+                marginLeft: "8px",
+                wordBreak: "break-word", // wrap long names
+                flexBasis: "75%", // allow for name wrapping for long names and alignment to the button
+              }}
+              onClick={toggleActive}
+              // onMouseUp={toggleActive}
+              onContextMenu={handleContextMenu}
+            >
+              {basename(name)}
+            </Typography>
+          </Tooltip>
+          {/* very small Typography to indicate if mesh or volume */}
+          {/* "mesh" or "volume" will be placed in the bottom right corner */}
           <Typography
             sx={{
-              marginLeft: "8px",
-              wordBreak: "break-word", // wrap long names
-              flexBasis: "75%", // allow for name wrapping for long names and alignment to the button
+              fontSize: "0.5em",
+              position: "relative",
+              color: "#666666",
+              alignSelf: "flex-end",
             }}
-            onClick={toggleActive}
-            // onMouseUp={toggleActive}
-            onContextMenu={handleContextMenu}
           >
-            {basename(name)}
+            {/* TODO: support all niivue volume and mesh file types */}
+            {name.includes(".nii") ? "volume" : "mesh"}
+            {/* {maxFrame > 1 ? ` (${frame}/${maxFrame})` : ''} */}
           </Typography>
-        </Tooltip>
-        {/* very small Typography to indicate if mesh or volume */}
-        {/* "mesh" or "volume" will be placed in the bottom right corner */}
-        <Typography
-          sx={{
-            fontSize: "0.5em",
-            position: "relative",
-            color: "#666666",
-            alignSelf: "flex-end",
-          }}
-        >
-          {/* TODO: support all niivue volume and mesh file types */}
-          {name.includes(".nii") ? "volume" : "mesh"}
-          {/* {maxFrame > 1 ? ` (${frame}/${maxFrame})` : ''} */}
-        </Typography>
-        {open ? <ExpandLess align="right" /> : <ExpandMore align="right"/>}
+          {open ? <ExpandLess align="right" /> : <ExpandMore align="right" />}
         </ListItemButton>
         <Menu
           open={contextMenu !== null}
@@ -165,18 +169,26 @@ export function MeshItem({
         </Menu>
         <Collapse in={open} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {layers.map((item, layerIndex) => 
-            <ListItemButton sx={{ pl: 4 }} key={item.url} onClick={() => setActiveLayer(index, layerIndex) }>
-              <IconButton onClick={() => toggleLayerVisibility(layerIndex)}>
-                {!layers[layerIndex].visible ? <VisibilityOffIcon /> : <VisibilityIcon />}
-              </IconButton>
-              <ListItemText primary={item.name} />
-            </ListItemButton>)
-            }
+            {layers.map((item, layerIndex) => (
+              <ListItemButton
+                sx={{ pl: 4 }}
+                key={item.url}
+                onClick={() => setActiveLayer(index, layerIndex)}
+              >
+                <IconButton onClick={() => toggleLayerVisibility(layerIndex)}>
+                  {!layers[layerIndex].visible ? (
+                    <VisibilityOffIcon />
+                  ) : (
+                    <VisibilityIcon />
+                  )}
+                </IconButton>
+                <ListItemText primary={item.name} />
+              </ListItemButton>
+            ))}
           </List>
         </Collapse>
-        </List>
-      </Box>
+      </List>
+    </Box>
   );
 }
 
@@ -187,13 +199,9 @@ MeshItem.propTypes = {
   onSetVisibility: PropTypes.func,
   onSetActive: PropTypes.func,
   onRemove: PropTypes.func,
-  onMoveUp: PropTypes.func,
-  onMoveDown: PropTypes.func,
-  onShowHeader: PropTypes.func,
-  onNextFrame: PropTypes.func,
-  onPreviousFrame: PropTypes.func,
-  frame: PropTypes.number,
-  maxFrame: PropTypes.number,
   id: PropTypes.any,
-  moveImage: PropTypes.func,
+  onLayerDropped: PropTypes.func,
+  setLayerVisibility: PropTypes.func,
+  setActiveLayer: PropTypes.func,
+  getLayerList: PropTypes.func,
 };

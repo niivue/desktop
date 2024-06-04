@@ -28,7 +28,7 @@ import { MosaicInput } from "./components/MosaicInput";
 import { OpacitySlider } from "./components/OpacitySlider";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
-import { ColorPicker } from "./components/ColorPicker";
+import { ColorPickerDialog } from "./components/ColorPickerDialog";
 import Typography from "@mui/material/Typography";
 import { styled, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -55,6 +55,7 @@ import {
   VideoSettingsOutlined,
   ViewInArOutlined,
 } from "@mui/icons-material";
+import JsonEditor from "./components/JsonEditor";
 
 const drawerWidth = 220;
 
@@ -768,6 +769,22 @@ function App() {
     }
   };
 
+  // const handleJsonChange = (updatedJsonObject) => {
+  //   console.log('updatedJsonObject', updatedJsonObject);
+  //   for(const key in updatedJsonObject) {
+  //     nv.opts[key] = updatedJsonObject[key]
+  //   }
+
+  //   nv.drawScene()
+  // };
+  const handleJsonChange = (updatedJsonObject, key, value) => {
+    // setJsonObject(updatedJsonObject);
+    console.log(`Property "${key}" changed to`, value);
+    nv.opts[key] = value;
+    nv.drawScene();
+    
+  };
+
   const moveImage = useCallback(
     (dragIndex, hoverIndex) => {
       setImages((prevImages) =>
@@ -975,6 +992,20 @@ function App() {
         </Sidebar>
       );
       break;
+    case SETTINGS:
+      sideBar = (
+      <Sidebar>
+        <Typography
+            variant="body"
+            sx={{
+              marginTop: 0,
+              marginBottom: 0.5,
+            }}
+          ></Typography>
+          <JsonEditor initialJsonObject={nv.opts}  onJsonChange={handleJsonChange}></JsonEditor>
+      </Sidebar>
+      );
+      break;
     default:
       sideBar = <></>;
   }
@@ -1073,7 +1104,7 @@ function App() {
         {sideBar}
         {/* Niivue Canvas: where things are rendered :) */}
         <NiivueCanvas nv={nv} />
-        <ColorPicker
+        <ColorPickerDialog
           isOpen={isColorPickerOpen}
           pickedColor={colorPickerColor}
           onChange={onColorPickerChange}
