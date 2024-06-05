@@ -1,24 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Typography, Container, Box, Paper, Switch, FormControlLabel } from '@mui/material';
+import { TextField, Typography, Container, Box, Paper, Switch, FormControlLabel, colors } from '@mui/material';
 import { ColorPickerTile } from './ColorPickerTile';
+
+function getColorsFromJson(initialJsonObject) {
+  const updatedJsonObject = { ...initialJsonObject };
+    const colors = {};
+    Object.keys(updatedJsonObject).forEach(key => {
+      if (key.toLowerCase().endsWith('color')) {
+        console.log('key, color', key, updatedJsonObject[key])
+        const color = updatedJsonObject[key];
+        colors[key] = {r: color[0] * 255, g: color[1] * 255, b: color[2] * 255, a: color[3] };
+      }
+    });
+    return colors;
+}
 
 const JsonEditor = ({ initialJsonObject, onJsonChange }) => {
   const [jsonObject, setJsonObject] = useState(initialJsonObject);
+  const [colorStates, setColorStates] = useState(getColorsFromJson(initialJsonObject));
 
   useEffect(() => {
     const updatedJsonObject = { ...initialJsonObject };
-
+    const colors = {};
     Object.keys(updatedJsonObject).forEach(key => {
-      if (updatedJsonObject[key] == null) {
-        if (key.toLowerCase().includes('color')) {
-          updatedJsonObject[key] = [1, 1, 1, 1];  // Default color is white
-        } else {
-          updatedJsonObject[key] = '';
-        }
+      if (key.toLowerCase().endsWith('color')) {
+        // console.log('key, color', key, updatedJsonObject[key])
+        colors[key] = updatedJsonObject[key];
       }
     });
+    setColorStates(colors);
+    
 
-    setJsonObject(updatedJsonObject);
+
+    // Dynamically create color states from JSON properties
+    
   }, [initialJsonObject]);
 
   const handleChange = (e, key) => {
@@ -31,12 +46,20 @@ const JsonEditor = ({ initialJsonObject, onJsonChange }) => {
     onJsonChange(updatedJsonObject, key, value);
   };
 
-  const handleColorChange = (colorArray, key) => {
+  const handleColorChange = (color, key) => {
     const updatedJsonObject = {
       ...jsonObject,
-      [key]: colorArray
+      [key]: color.rgb
     };
     setJsonObject(updatedJsonObject);
+    // colors[key] = color.rgb;
+    console.log('Updated color state for', key, ':', color);
+    const colorArray = [
+      color.rgb.r / 255,
+      color.rgb.g / 255,
+      color.rgb.b / 255,
+      color.rgb.a
+    ];
     onJsonChange(updatedJsonObject, key, colorArray);
   };
 
@@ -48,7 +71,7 @@ const JsonEditor = ({ initialJsonObject, onJsonChange }) => {
     setJsonObject(updatedJsonObject);
     onJsonChange(updatedJsonObject, key, e.target.checked);
   };
-
+  // console.log('colorStates', colorStates);
   return (
     <Container>
       <Box sx={{ mt: 4 }}>
@@ -67,7 +90,7 @@ const JsonEditor = ({ initialJsonObject, onJsonChange }) => {
                 <Box>
                   <Typography variant="subtitle1">{key}</Typography>
                   <ColorPickerTile
-                    color={jsonObject[key]}
+                    color={colorStates[key]}
                     onChange={(colorArray) => handleColorChange(colorArray, key)}
                   />
                 </Box>
