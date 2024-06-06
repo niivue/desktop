@@ -114,6 +114,15 @@ nvUtils.onSaveDocument = function (callback) {
   }
 }
 
+nvUtils.openMeshLayersFileDialog = async function() {
+  if(isFunction(NIIVUE.openMeshLayersFileDialog)) {
+    return await NIIVUE.openMeshLayersFileDialog();
+  }
+  else {
+    return NIIVUE.openMeshLayersFileDialog;
+  }
+}
+
 /**
  * removes the extension from a string
  * @function
@@ -155,11 +164,28 @@ nvUtils.onLoadVolumes = function (callback) {
   }
 };
 
-nvUtils.onLoadSurfaces = function (callback) {
-  if (isFunction(NIIVUE.onLoadSurfaces)) {
-    NIIVUE.onLoadSurfaces(callback);
+nvUtils.onLoadMeshes = function (callback) {
+  console.log('onload meshes callback called')
+  if (isFunction(NIIVUE.onLoadMeshes)) {
+    console.log('callback defined')
+    NIIVUE.onLoadMeshes(callback);
+  }
+  else {
+    console.log('callback not defined')
   }
 };
+
+nvUtils.onLoadMeshLayers = function (callback) {
+  console.log('onload meshe layers callback called')
+  if (isFunction(NIIVUE.onLoadMeshLayers)) {
+    console.log('callback defined')
+    NIIVUE.onLoadMeshLayers(callback);
+  }
+  else {
+    console.log('callback not defined')
+  }
+};
+
 
 nvUtils.onAddVolumeOverlay = function (callback) {
   if (isFunction(NIIVUE.onAddVolumeOverlay)) {

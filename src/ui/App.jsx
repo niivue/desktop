@@ -214,6 +214,70 @@ function App() {
     [activeImage, nv, setImages]
   );
 
+  const getMeshList = useCallback(() => {
+    let meshes = nv.meshes;
+    let newMeshes = meshes.map((mesh, index) => {
+      return {
+        id: mesh.id,
+        name: mesh.name,
+        opacity: mesh.opacity,
+        meshShaderIndex: mesh.meshShaderIndex,
+        colormap: mesh.colormap,
+        active: index === activeMesh,
+        index,
+      };
+    });
+
+    return newMeshes;
+  }, [nv, activeMesh]);
+  
+  // add a mesh from a URL
+  const addMesh = useCallback(
+    async (path, commsInfo) => {
+      let url = makeNiivueUrl(path, commsInfo);
+      console.log(url);
+      await nv.addMeshFromUrl({ url: url, name: path });
+      let meshes = nv.meshes;
+      let newMeshes = meshes.map((mesh, index) => {
+        return {
+          url: mesh.url,
+          name: mesh.name,
+          index: index,
+          id: mesh.id,
+          color: mesh.colormap,
+          active: index === activeMesh,
+        };
+      });
+      console.log(newMeshes);
+      setMeshes(newMeshes);
+    },
+    [activeMesh, nv, setMeshes]
+  );
+
+  // add a mesh from a URL
+  const addMeshLayer = useCallback(
+    async (path, commsInfo) => {
+      let url = makeNiivueUrl(path, commsInfo);
+      console.log(url);
+      const mesh = nv.meshes[activeMesh];
+      let buffer =  await (await fetch(url)).arrayBuffer();
+      let layer = NVMeshLoaders.readLayer(url, buffer, mesh);
+      if (layer) {
+        layer.name = url.replace(/^.*[\\/]/, '');
+        layer.url = url;
+        console.log("layer", layer);
+        mesh.layers.push(layer);
+        mesh.updateMesh(nv.gl);
+        nv.drawScene();
+        getMeshList();
+        setActiveImageType(MESH_LAYER);
+        setActiveLayer(mesh.layers.length - 1);
+      }
+
+    },
+    [activeMesh, nv, getMeshList]
+  );
+
   const setVisibility = useCallback(
     (index, opacity) => {
       nv.setOpacity(index, opacity);
@@ -269,7 +333,7 @@ function App() {
   const updateColormap = useCallback(
     (colormap) => {
       nv.volumes[activeImage].colormap = colormap;
-      nv.updateGLVolume();
+      nv.updateGLMesh();
       setColormap(colormap);
     },
     [activeImage, nv]
@@ -334,6 +398,21 @@ function App() {
           await addVolume(img, info);
         });
       });
+
+      // set the callback for when meshes are loaded
+      nvUtils.onLoadMeshes((meshes) => {
+        console.log("loaded meshes", meshes);
+        meshes.forEach(async (mesh) => {
+          await addMesh(mesh, info);
+        });
+      })
+
+      nvUtils.onLoadMeshLayers((meshLayers) => {
+        console.log("loaded mesh layers", meshLayers);
+        meshLayers.forEach(async (layer) => {
+          await addMeshLayer(layer, info);
+        });
+      })
 
       nvUtils.onCloseAllVolumes(() => {
         let volumes = nv.volumes;
@@ -533,22 +612,7 @@ function App() {
     return newImages;
   }, [nv, activeImage]);
 
-  const getMeshList = useCallback(() => {
-    let meshes = nv.meshes;
-    let newMeshes = meshes.map((mesh, index) => {
-      return {
-        id: mesh.id,
-        name: mesh.name,
-        opacity: mesh.opacity,
-        meshShaderIndex: mesh.meshShaderIndex,
-        colormap: mesh.colormap,
-        active: index === activeMesh,
-        index,
-      };
-    });
-
-    return newMeshes;
-  }, [nv, activeMesh]);
+  
 
   function handleDrop() {
     const newImages = getImageList();
@@ -574,6 +638,10 @@ function App() {
     console.log("nv meshes", nv.meshes);
     console.log("meshes", meshes);
     setMeshes(meshes);
+  }
+
+  function handleAddMeshLayers() {
+    nvUtils.openMeshLayersFileDialog();
   }
 
   const handleRemove = useCallback(
@@ -622,6 +690,7 @@ function App() {
     return mesh.layers;
   }, [nv])
 
+
   const handleLayerDropped = useCallback(
     (index, file) => {
       let mesh = nv.meshes[index];
@@ -632,7 +701,7 @@ function App() {
         console.log("event", event);
         let buffer = event.target.result;
         console.log(buffer);
-        let layer = NVMeshLoaders.readLayer(file.path, buffer, mesh); //, 0.5, 'warm', 'winter', true, 0.5, 5.5);
+        let layer = NVMeshLoaders.readLayer(file.path, buffer, mesh); 
         if (layer) {
           layer.name = file.path.replace(/^.*[\\/]/, '');
           layer.url = file.path;
@@ -859,6 +928,7 @@ function App() {
           getLayerList={getLayerList}          
           setLayerVisibility={setLayerVisibility}
           setActiveLayer={setLayerAsActive}
+          onAddLayer={handleAddMeshLayers}
         ></MeshItem>
       );
     },

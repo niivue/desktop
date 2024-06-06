@@ -42,7 +42,7 @@ const nvVolumeFilters = [
  * @property {string} name - The name of the filter.
  * @property {Array<string>} extensions - The extensions for the filter.
  */
-const nvSurfaceFilters = [
+const nvMeshFilters = [
   { name: 'Surface types', extensions: [
     'gz',
     'jcon',
@@ -156,6 +156,9 @@ function registerIpcListeners() {
     }
     ipcMain.handle(key, handler);
   }
+
+  // register one off handlers
+  ipcMain.handle('openAddMeshLayersFileDialog', openAddMeshLayersFileDialog)
 }
 
 /**
@@ -243,6 +246,16 @@ async function onLoadVolumesClick() {
 }
 
 
+async function onLoadMeshesClick() {
+  let files = await events.openFileDialog(filters=nvMeshFilters);
+  mainWindow.webContents.send('loadMeshes', files.filePaths);
+}
+
+async function openAddMeshLayersFileDialog() {
+  let files = await events.openFileDialog(filters=nvMeshFilters);
+  mainWindow.webContents.send('loadMeshLayers', files.filePaths);
+}
+
 
 async function onSaveBitmapClick() {
   /*let savePath = await  dialog.showSaveDialog({
@@ -265,9 +278,9 @@ async function onSaveBitmapClick() {
  * @async
  * @function
  */
-async function onLoadSurfacesClick() {
-  let files = await events.openFileDialog(filters=nvSurfaceFilters);
-  mainWindow.webContents.send('loadSurfaces', files.filePaths);
+async function onLoadMeshesClick() {
+  let files = await events.openFileDialog(filters=nvMeshFilters);
+  mainWindow.webContents.send('loadMeshes', files.filePaths);
 }
 
 /**
@@ -410,6 +423,14 @@ let menu = [
           await onLoadVolumesClick();
         }
       },
+      // load meshes
+      {
+        label: 'Load meshes',
+        id: 'loadMeshes',
+        click: async () => {
+          await onLoadMeshesClick();
+        }
+      },
       // load mosaic string
       {
         label: 'Load mosaic string',
@@ -424,7 +445,7 @@ let menu = [
         click: async () => {
           await onLoadDocumentClick();
         }
-      },
+      },      
       // close all volumes
       {
         label: 'Close all images',
@@ -433,14 +454,7 @@ let menu = [
           await onCloseAllVolumesClick();
         }
       },
-      // load surfaces
-      // {
-      //   label: 'Load surfaces',
-      //   id: 'loadSurfaces',
-      //   click: async () => {
-      //     await onLoadSurfacesClick();
-      //   }
-      // },
+      
       { type: 'separator' },
       {
         label: 'Save bitmap',

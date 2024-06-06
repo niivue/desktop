@@ -10,7 +10,7 @@ contextBridge.exposeInMainWorld('NIIVUE', {
   openSaveFileDialog: openSaveFileDialog,
   getCommsInfo: getCommsInfo,
   onLoadVolumes: onLoadVolumes,
-  onLoadSurfaces: onLoadSurfaces,
+  onLoadMeshes: onLoadMeshes,
   onAddVolumeOverlay: onAddVolumeOverlay,
   onSetView: onSetView,
   onSetOpt: onSetOpt,
@@ -30,7 +30,8 @@ contextBridge.exposeInMainWorld('NIIVUE', {
   openLoadMosaicFileDialog: openLoadMosaicFileDialog,
   onLoadDocument: onLoadDocument,
   onSaveDocument: onSaveDocument,
-
+  openMeshLayersFileDialog: openAddMeshLayersFileDialog,
+  onLoadMeshLayers: onLoadMeshLayers
 })
 
 async function onLoadVolumes(callback) {
@@ -40,10 +41,17 @@ async function onLoadVolumes(callback) {
   })
 }
 
-async function onLoadSurfaces(callback) {
-  ipcRenderer.on('loadSurfaces', (event, surfaces) => {
-    console.log(surfaces)
-    callback(surfaces)
+async function onLoadMeshes(callback) {
+  ipcRenderer.on('loadMeshes', (event, meshes) => {
+    console.log(meshes)
+    callback(meshes)
+  })
+}
+
+async function onLoadMeshLayers(callback) {
+  ipcRenderer.on('loadMeshLayers', (event, meshLayers) => {
+    console.log(meshLayers)
+    callback(meshLayers)
   })
 }
 
@@ -194,5 +202,9 @@ function onSaveDocument(callback) {
   ipcRenderer.on("saveDocument", () => {
     callback();
   })
+}
+
+async function openAddMeshLayersFileDialog() {
+  return ipcRenderer.invoke('openAddMeshLayersFileDialog')
 }
 

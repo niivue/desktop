@@ -30,6 +30,7 @@ export function MeshItem({
   onLayerDropped = (index, file) => {},
   setLayerVisibility = () => {},
   setActiveLayer = () => {},
+  onAddLayer = () => {},
   ...props
 }) {
   const ref = useRef(null);
@@ -71,6 +72,11 @@ export function MeshItem({
   function handleRemove() {
     handleClose();
     onRemove(index);
+  }
+
+  function handleAddLayer() {
+    handleClose();
+    onAddLayer(index);
   }
 
   function toggleLayerVisibility(layerIndex) {
@@ -165,6 +171,7 @@ export function MeshItem({
               : undefined
           }
         >
+          <MenuItem onClick={handleAddLayer}>Add Layer</MenuItem>
           <MenuItem onClick={handleRemove}>Remove</MenuItem>
         </Menu>
         <Collapse in={open} timeout="auto" unmountOnExit>
@@ -204,4 +211,5 @@ MeshItem.propTypes = {
   setLayerVisibility: PropTypes.func,
   setActiveLayer: PropTypes.func,
   getLayerList: PropTypes.func,
+  onAddLayer: PropTypes.func
 };

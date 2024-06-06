@@ -15,7 +15,7 @@ function getColorsFromJson(initialJsonObject) {
     return colors;
 }
 
-const JsonEditor = ({ initialJsonObject, onJsonChange }) => {
+const JsonEditor = ({ initialJsonObject, onJsonChange, title = "Scene Settings" }) => {
   const [jsonObject, setJsonObject] = useState(initialJsonObject);
   const [colorStates, setColorStates] = useState(getColorsFromJson(initialJsonObject));
 
@@ -76,7 +76,7 @@ const JsonEditor = ({ initialJsonObject, onJsonChange }) => {
     <Container>
       <Box sx={{ mt: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Scene Settings
+          {title}
         </Typography>
         <Paper elevation={3} sx={{ p: 2 }}>
           {Object.keys(jsonObject).map(key => (
