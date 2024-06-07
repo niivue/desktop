@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Typography, Container, Box, Paper, Switch, FormControlLabel, colors } from '@mui/material';
+import { TextField, Typography, Container, Box, Paper, Switch, FormControlLabel, InputLabel, FormControl } from '@mui/material';
 import { ColorPickerTile } from './ColorPickerTile';
 
 function getColorsFromJson(initialJsonObject) {
@@ -15,7 +15,7 @@ function getColorsFromJson(initialJsonObject) {
     return colors;
 }
 
-const JsonEditor = ({ initialJsonObject, onJsonChange, title = "Scene Settings" }) => {
+const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
   const [jsonObject, setJsonObject] = useState(initialJsonObject);
   const [colorStates, setColorStates] = useState(getColorsFromJson(initialJsonObject));
 
@@ -87,7 +87,7 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title = "Scene Settings" 
                   label={key}
                 />
               ) : key.toLowerCase().endsWith('color') ? (
-                <Box>
+                <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                   <Typography variant="subtitle1">{key}</Typography>
                   <ColorPickerTile
                     color={colorStates[key]}
@@ -95,13 +95,16 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title = "Scene Settings" 
                   />
                 </Box>
               ) : (
+                <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                <InputLabel sx={{ textAlign: 'left' }}>{key}</InputLabel>
                 <TextField
-                  fullWidth
-                  label={key}
+                  size="small"
+                  sx={{textAlign: 'right', width: '50%', float: 'right'}}
                   variant="outlined"
                   value={jsonObject[key]}
                   onChange={(e) => handleChange(e, key)}
                 />
+                </Box>
               )}
             </Box>
           ))}

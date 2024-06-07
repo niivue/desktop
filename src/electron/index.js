@@ -158,7 +158,8 @@ function registerIpcListeners() {
   }
 
   // register one off handlers
-  ipcMain.handle('openAddMeshLayersFileDialog', openAddMeshLayersFileDialog)
+  ipcMain.handle('openAddMeshLayersFileDialog', openAddMeshLayersFileDialog);
+  
 }
 
 /**
@@ -322,6 +323,15 @@ async function onSetViewClick(view) {
 async function onSetVolOptClick(opt) {
   let val = Menu.getApplicationMenu().getMenuItemById(opt).checked
   mainWindow.webContents.send('setOpt', [opt, val]);
+}
+
+
+/**
+ * Opens settings dialog
+ */
+async function onSettingsClick() {
+  console.log('open settings clicked');
+  mainWindow.webContents.send('openSettings');  
 }
 
 /**
@@ -857,54 +867,11 @@ let menu = [
 
   // add color menu
   {
-    label: 'Color',
-    submenu: [
-      {
-        label: 'Background',
-        id: 'backColor',
-        click: async () => {
-          onSetColorOptClick('backColor');
-        },
-      },
-      {
-        label: 'Crosshair',
-        id: 'crosshairColor',
-        click: async () => {
-          onSetColorOptClick('crosshairColor');
-        },
-      },
-      {
-        label: 'Font',
-        id: 'fontColor',
-        click: async () => {
-          onSetColorOptClick('fontColor');
-        },
-      },
-      
-      {
-        label: 'Ruler',
-        id: 'rulerColor',
-        click: async () => {
-          onSetColorOptClick('rulerColor');
-        },
-      },
-      
-      {
-        label: 'Clip plane',
-        id: 'clipPlaneColor',
-        click: async () => {
-          onSetColorOptClick('clipPlaneColor');
-        },
-      },
-      
-      {
-        label: 'Selection box',
-        id: 'selectionBoxColor',
-        click: async () => {
-          onSetColorOptClick('selectionBoxColor');
-        },
-      },
-    ]
+    label: 'Settings',
+    id: 'settings',
+    click: async () => {
+      onSettingsClick();
+    }
   },
   // add window menu with reload options
   {

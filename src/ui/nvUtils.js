@@ -258,7 +258,16 @@ nvUtils.webGL2Supported = function () {
 };
 
 nvUtils.onSetViewSelected = function (view, forceRender = false, mosaic = '') {
+  console.log('nvutils set view selected')
   if (isFunction(NIIVUE.onSetViewSelected)) {
     NIIVUE.onSetViewSelected(view, forceRender, mosaic);
   }
 };
+
+nvUtils.openSettings = function (callback) {
+  console.log('open settings nvUtils');
+  if (isFunction(NIIVUE.openSettings)) {
+    NIIVUE.openSettings(callback);
+  }
+};
+

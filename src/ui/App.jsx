@@ -56,6 +56,7 @@ import {
   ViewInArOutlined,
 } from "@mui/icons-material";
 import JsonEditor from "./components/JsonEditor";
+import { SceneSettingsDialog } from "./components/SceneSettingsDialog";
 
 const drawerWidth = 220;
 
@@ -167,6 +168,7 @@ function App() {
     b: 0,
     a: 1,
   });
+  const [isSceneSettingsOpen, setSceneSettingsOpen] = useState(false);
   const [colorOptionToChange, setColorOption] = useState();
   const [meshes, setMeshes] = useState([]);
   const [activeMesh, setActiveMesh] = useState(0);
@@ -299,7 +301,7 @@ function App() {
 
   const setLayerVisibility = useCallback(
     (index, layerIndex, opacity) => {
-      console.log('index, layer index, opacity', index, layerIndex, opacity);
+      console.log("index, layer index, opacity", index, layerIndex, opacity);
       const mesh = nv.meshes[index];
       const layer = mesh.layers[layerIndex];
       layer.opacity = opacity;
@@ -309,8 +311,8 @@ function App() {
       const layerItem = layers.get(mesh.id)[layerIndex];
       layerItem.opacity = opacity;
       layerItem.visible = opacity > 0.0;
-      setMeshOpacity(opacity)
-      console.log('layerItem', layerItem)
+      setMeshOpacity(opacity);
+      console.log("layerItem", layerItem);
       // setLayers(layers);
     },
     [nv, layers]
@@ -351,7 +353,7 @@ function App() {
       const layer = layers.get(mesh.id)[activeLayer];
       layer.opacity = opacity;
       layer.visible = opacity > 0;
-      setMeshOpacity(opacity)
+      setMeshOpacity(opacity);
       mesh.layers[activeLayer].opacity = opacity;
       mesh.updateMesh(nv.gl);
       nv.drawScene();
@@ -396,6 +398,41 @@ function App() {
     nv.setSliceMosaicString(newValue);
     setMosaicString(newValue);
   };
+
+  const loadMosaicString = useCallback(async () => {
+    const result = await nvUtils.openLoadMosaicFileDialog();
+    if (!result.canceled) {
+      const mosaicString = await nvUtils.loadTextFile(result.filePaths[0]);
+      nv.setSliceMosaicString(mosaicString);
+      setMosaicString(mosaicString);
+    }
+  }, [nv]);
+
+  const loadDocument = useCallback(async () => {
+    const result = await nvUtils.openFileDialog(["*.nvd"]);
+    if (!result.canceled) {
+      const jsonString = await nvUtils.loadTextFile(result.filePaths[0]);
+      const json = JSON.parse(jsonString);
+      const document = NVDocument.loadFromJSON(json);
+      nv.loadDocument(document);
+    }
+  }, [nv]);
+
+  const saveDocument = useCallback( async () => {
+    const result = await nvUtils.openSaveFileDialog("niivue.nvd");
+    if (!result.canceled) {
+      const json = nv.json();
+      const re = new RegExp("([^\\\\\\\\/]*$)");
+
+      json.name = result.filePath.match(re)[0];
+      let imageIndex = 0;
+      for (const imageOption of json.imageOptionsArray) {
+        imageOption.name = `${nv.volumes[imageIndex++].name}.nii`;
+      }
+      const jsonString = JSON.stringify(json);
+      nvUtils.saveTextFile(result.filePath, jsonString);
+    }
+  }, [nv]);
 
   // ------------ Effects ------------
   // get the comms info from the main process
@@ -471,6 +508,7 @@ function App() {
         setCalMin(0);
         setColorPickerOpen(false);
         setColorPickerColor("#ff000000");
+        setSceneSettingsOpen(false);
         setActiveImageType(NONE);
 
         nv.drawScene();
@@ -558,9 +596,14 @@ function App() {
         nv.setFrame4D(id, currentFrame + frame);
         // TODO: update the frame in the FileItem
       });
+
+      nvUtils.openSettings(() => {
+        console.log('open settings received');
+        setSceneSettingsOpen(true);
+      })
     }
     getCommsInfo();
-  }, [activeImage, nv, addVolume]);
+  }, [activeImage, nv, addVolume, setSceneSettingsOpen, loadMosaicString, loadDocument, saveDocument, addMesh, addMeshLayer, layers]);
 
   // when active image changes, update the min and max
   useEffect(() => {
@@ -820,40 +863,7 @@ function App() {
     }
   };
 
-  const loadMosaicString = async () => {
-    const result = await nvUtils.openLoadMosaicFileDialog();
-    if (!result.canceled) {
-      const mosaicString = await nvUtils.loadTextFile(result.filePaths[0]);
-      nv.setSliceMosaicString(mosaicString);
-      setMosaicString(mosaicString);
-    }
-  };
-
-  const loadDocument = async () => {
-    const result = await nvUtils.openFileDialog(["*.nvd"]);
-    if (!result.canceled) {
-      const jsonString = await nvUtils.loadTextFile(result.filePaths[0]);
-      const json = JSON.parse(jsonString);
-      const document = NVDocument.loadFromJSON(json);
-      nv.loadDocument(document);
-    }
-  };
-
-  const saveDocument = async () => {
-    const result = await nvUtils.openSaveFileDialog("niivue.nvd");
-    if (!result.canceled) {
-      const json = nv.json();
-      const re = new RegExp("([^\\\\\\\\/]*$)");
-
-      json.name = result.filePath.match(re)[0];
-      let imageIndex = 0;
-      for (const imageOption of json.imageOptionsArray) {
-        imageOption.name = `${nv.volumes[imageIndex++].name}.nii`;
-      }
-      const jsonString = JSON.stringify(json);
-      nvUtils.saveTextFile(result.filePath, jsonString);
-    }
-  };
+  
 
   const onColorPickerChange = (color) => {
     setColorPickerColor(color.rgb);
@@ -1019,15 +1029,16 @@ function App() {
     case MESH_LAYER:
       {
         let activeMeshLayer = null;
-        if(layers.has(nv.meshes[activeMesh].id)) {
-          const activeMeshLayers = layers.get(nv.meshes[activeMesh].id)          
-        console.log('active mesh layers', activeMeshLayers);
-        activeMeshLayer = (activeMeshLayers) ? activeMeshLayers[activeLayer] : null;
-          
-        console.log('active mesh layer', activeMeshLayer);
-        }
-        else {
-          console.log('no meshlayers found')
+        if (layers.has(nv.meshes[activeMesh].id)) {
+          const activeMeshLayers = layers.get(nv.meshes[activeMesh].id);
+          console.log("active mesh layers", activeMeshLayers);
+          activeMeshLayer = activeMeshLayers
+            ? activeMeshLayers[activeLayer]
+            : null;
+
+          console.log("active mesh layer", activeMeshLayer);
+        } else {
+          console.log("no meshlayers found");
         }
         imageToolsPanel = (
           <ImageTools>
@@ -1035,11 +1046,7 @@ function App() {
             <ColormapSelect
               colormaps={colormaps} // array of colormap objects
               onSetColormap={updateMeshLayerColormap} // callback to set the colormap of the active image
-              colormap={
-                activeMeshLayer
-                  ? activeMeshLayer.colormap
-                  : colormap
-              } // the current colormap of the active image
+              colormap={activeMeshLayer ? activeMeshLayer.colormap : colormap} // the current colormap of the active image
             />
             {/* opacity slider: set the opacity of the active image */}
             <OpacitySlider
@@ -1237,6 +1244,13 @@ function App() {
           onChange={onColorPickerChange}
           onClose={onCloseColorPicker}
           isFullScreen={false}
+        />
+        <SceneSettingsDialog
+          isOpen={isSceneSettingsOpen}
+          initialJsonObject={nv.opts}
+          onJsonChange={handleJsonChange}
+          isFullScreen={true}
+          onClose={(wasCanceled) => {console.log('isCanceled', wasCanceled); setSceneSettingsOpen(false)}}
         />
       </Container>
     </NV.Provider>

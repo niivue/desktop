@@ -31,7 +31,8 @@ contextBridge.exposeInMainWorld('NIIVUE', {
   onLoadDocument: onLoadDocument,
   onSaveDocument: onSaveDocument,
   openMeshLayersFileDialog: openAddMeshLayersFileDialog,
-  onLoadMeshLayers: onLoadMeshLayers
+  onLoadMeshLayers: onLoadMeshLayers,
+  openSettings: openSettings
 })
 
 async function onLoadVolumes(callback) {
@@ -140,6 +141,13 @@ async function onSetColormaps(callback) {
   ipcRenderer.on('setColormaps', (event, colormapObj) => {
     console.log(colormapObj)
     callback(colormapObj)
+  })
+}
+
+async function openSettings(callback) {
+  console.log('open settings sent to renderer')
+  ipcRenderer.on('openSettings', (event) => {
+    callback();
   })
 }
 
