@@ -192,6 +192,51 @@ function App() {
     },
     [sidebarContent]
   );
+
+  const setVisibility = useCallback(
+    (index, opacity) => {
+      nv.setOpacity(index, opacity);
+    },
+    [nv]
+  );
+
+  const setLayerVisibility = useCallback(
+    (index, layerIndex, opacity) => {
+      console.log("index, layer index, opacity", index, layerIndex, opacity);
+      const mesh = nv.meshes[index];
+      const layer = mesh.layers[layerIndex];
+      layer.opacity = opacity;
+      mesh.updateMesh(nv.gl);
+      nv.drawScene();
+      // update ui state
+      const layerItem = layers.get(mesh.id)[layerIndex];
+      layerItem.opacity = opacity;
+      layerItem.visible = opacity > 0.0;
+      setMeshOpacity(opacity);
+      console.log("layerItem", layerItem);
+      // setLayers(layers);
+    },
+    [nv, layers]
+  );
+
+  const setLayerAsActive = useCallback(
+    (index, layerIndex) => {
+      setActiveImageType(MESH_LAYER);
+      setActiveMesh(index);
+      setActiveLayer(layerIndex);
+    },
+    [setActiveImageType, setActiveMesh, setActiveLayer]
+  );
+
+  const updateOpacity = useCallback(
+    (opacity) => {
+      nv.setOpacity(activeImage, opacity);
+      setOpacity(opacity);
+    },
+    [activeImage, nv]
+  );
+
+
   // ------------ Callbacks ------------
   // add a volume from a URL
   const addVolume = useCallback(
@@ -285,57 +330,17 @@ function App() {
           }))
         );
         getMeshList();
+        setMeshOpacity(layers.get(mesh.id)[activeLayer].opacity);
         setActiveImageType(MESH_LAYER);
         setActiveLayer(mesh.layers.length - 1);
+       
       }
       console.log("mesh", mesh);
     },
-    [activeMesh, nv, getMeshList, layers]
+    [nv, activeMesh, activeLayer, layers, getMeshList]
   );
 
-  const setVisibility = useCallback(
-    (index, opacity) => {
-      nv.setOpacity(index, opacity);
-    },
-    [nv]
-  );
-
-  const setLayerVisibility = useCallback(
-    (index, layerIndex, opacity) => {
-      console.log("index, layer index, opacity", index, layerIndex, opacity);
-      const mesh = nv.meshes[index];
-      const layer = mesh.layers[layerIndex];
-      layer.opacity = opacity;
-      mesh.updateMesh(nv.gl);
-      nv.drawScene();
-      // update ui state
-      const layerItem = layers.get(mesh.id)[layerIndex];
-      layerItem.opacity = opacity;
-      layerItem.visible = opacity > 0.0;
-      setMeshOpacity(opacity);
-      console.log("layerItem", layerItem);
-      // setLayers(layers);
-    },
-    [nv, layers]
-  );
-
-  const setLayerAsActive = useCallback(
-    (index, layerIndex) => {
-      setActiveImageType(MESH_LAYER);
-      setActiveMesh(index);
-      setActiveLayer(layerIndex);
-    },
-    [setActiveImageType, setActiveMesh, setActiveLayer]
-  );
-
-  const updateOpacity = useCallback(
-    (opacity) => {
-      nv.setOpacity(activeImage, opacity);
-      setOpacity(opacity);
-    },
-    [activeImage, nv]
-  );
-
+  
   const updateMeshOpacity = useCallback(
     (opacity) => {
       const mesh = nv.meshes[activeMesh];
@@ -798,12 +803,13 @@ function App() {
               colormap: l.colormap,
             }))
           );
+          setMeshOpacity(layers.get(mesh.id)[activeLayer].opacity);
         }
         console.log("mesh", mesh);
       };
       reader.readAsArrayBuffer(file);
     },
-    [nv, getMeshList, layers]
+    [nv, getMeshList, layers, activeLayer]
   );
 
   const handleMoveUp = useCallback(
@@ -1077,7 +1083,6 @@ function App() {
               marginBottom: 0.5,
             }}
           ></Typography>
-          Volumes
           <FileList>
             {/* FileItems: each FileItem is an image to be rendered in Niivue */}
             {images.map((image, index) => {
@@ -1104,7 +1109,6 @@ function App() {
               marginBottom: 0.5,
             }}
           ></Typography>
-          Meshes
           <MeshList>
             {meshes.map((mesh, index) => {
               return renderMesh(mesh, index);

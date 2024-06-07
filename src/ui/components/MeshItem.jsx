@@ -175,7 +175,7 @@ export function MeshItem({
               <ListItemButton
                 sx={{ pl: 4 }}
                 key={item.url}
-                onClick={() => setActiveLayer(index, layerIndex)}
+                onClick={() => {setActiveLayer(index, layerIndex); setLayerVisibility(index, layerIndex, layers[layerIndex].opacity);}}
               >
                 <IconButton onClick={() => toggleLayerVisibility(layerIndex)}>
                   {item.visible ? (

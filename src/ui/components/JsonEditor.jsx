@@ -18,7 +18,7 @@ function getColorsFromJson(initialJsonObject) {
 const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
   const [jsonObject, setJsonObject] = useState(initialJsonObject);
   const [colorStates, setColorStates] = useState(getColorsFromJson(initialJsonObject));
-  const labelOverrides = new Map([['show3Dcrosshair', 'Show 3D Crosshair'], ['yoke3Dto2DZoom', 'Yoke 3D to 2D Zoom'], ['limitFrames4D', 'Limit Frames 4D']]);
+  const labelOverrides = new Map([['show3Dcrosshair', 'Show 3D Crosshair'], ['yoke3Dto2DZoom', 'Yoke 3D to 2D Zoom'], ['limitFrames4D', 'Limit Frames 4D'], ['meshThicknessOn2D', 'Mesh Thickness On 2D']]);
 
   useEffect(() => {
     const updatedJsonObject = { ...initialJsonObject };
