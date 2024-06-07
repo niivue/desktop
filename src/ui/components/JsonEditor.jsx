@@ -18,6 +18,7 @@ function getColorsFromJson(initialJsonObject) {
 const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
   const [jsonObject, setJsonObject] = useState(initialJsonObject);
   const [colorStates, setColorStates] = useState(getColorsFromJson(initialJsonObject));
+  const labelOverrides = new Map([['show3Dcrosshair', 'Show 3D Crosshair'], ['yoke3Dto2DZoom', 'Yoke 3D to 2D Zoom'], ['limitFrames4D', 'Limit Frames 4D']]);
 
   useEffect(() => {
     const updatedJsonObject = { ...initialJsonObject };
@@ -73,6 +74,9 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
   };
   
   const translateCamlCaseToTitleCase = (text) => {
+    if(labelOverrides.has(text)) {
+      return labelOverrides.get(text);
+    }
     const result = text.replace(/([A-Z])/g, " $1");
     return result.charAt(0).toUpperCase() + result.slice(1); 
   }
