@@ -365,7 +365,8 @@ function App() {
   const updateColormap = useCallback(
     (colormap) => {
       nv.volumes[activeImage].colormap = colormap;
-      nv.updateGLMesh();
+      nv.updateGLVolume();
+      // nv.drawScene();
       setColormap(colormap);
     },
     [activeImage, nv]
@@ -1142,7 +1143,7 @@ function App() {
   return (
     // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
-      <div width={"100%"}>
+      <Box width={"100%"} sx={{position: "sticky", top: "0px", minHeight: "30px"}}>
         <Button
         id="volumes-button"
         aria-controls={open ? 'basic-menu' : undefined}
@@ -1170,8 +1171,9 @@ function App() {
           toggleSidebarContent(SETTINGS);
         }}
       >Settings</Button>
-        </div>
+        </Box>
       {/* AppContainer: the parent component that lays out the rest of the scene */}
+      <div>
       <Container
         disableGutters
         maxWidth={false}
@@ -1285,6 +1287,7 @@ function App() {
           onClose={(wasCanceled) => {console.log('isCanceled', wasCanceled); setSceneSettingsOpen(false)}}
         />
       </Container>
+      </div>
     </NV.Provider>
   );
 }
