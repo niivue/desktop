@@ -173,6 +173,7 @@ function App() {
   const [meshOpacity, setMeshOpacity] = useState(1.0);
   const [activeImageType, setActiveImageType] = useState(NONE);
   const [sidebarContent, setSidebarContent] = useState(NONE);
+  const [layers, setLayers] = useState(new Map());
   const [activeLayer, setActiveLayer] = useState(0);
 
   const toggleSidebarContent = useCallback(
@@ -215,6 +216,7 @@ function App() {
   );
 
   const getMeshList = useCallback(() => {
+    console.log("get meshlist called");
     let meshes = nv.meshes;
     let newMeshes = meshes.map((mesh, index) => {
       return {
@@ -230,7 +232,7 @@ function App() {
 
     return newMeshes;
   }, [nv, activeMesh]);
-  
+
   // add a mesh from a URL
   const addMesh = useCallback(
     async (path, commsInfo) => {
@@ -260,22 +262,32 @@ function App() {
       let url = makeNiivueUrl(path, commsInfo);
       console.log(url);
       const mesh = nv.meshes[activeMesh];
-      let buffer =  await (await fetch(url)).arrayBuffer();
+      let buffer = await (await fetch(url)).arrayBuffer();
       let layer = NVMeshLoaders.readLayer(url, buffer, mesh);
       if (layer) {
-        layer.name = url.replace(/^.*[\\/]/, '');
+        layer.name = url.replace(/^.*[\\/]/, "");
         layer.url = url;
         console.log("layer", layer);
         mesh.layers.push(layer);
         mesh.updateMesh(nv.gl);
         nv.drawScene();
+        layers.set(
+          mesh.id,
+          mesh.layers.map((l) => ({
+            name: l.name,
+            url: l.url,
+            visible: true,
+            opacity: l.opacity,
+            colormap: l.colormap,
+          }))
+        );
         getMeshList();
         setActiveImageType(MESH_LAYER);
         setActiveLayer(mesh.layers.length - 1);
       }
-
+      console.log("mesh", mesh);
     },
-    [activeMesh, nv, getMeshList]
+    [activeMesh, nv, getMeshList, layers]
   );
 
   const setVisibility = useCallback(
@@ -285,19 +297,33 @@ function App() {
     [nv]
   );
 
-  const setLayerVisibility = useCallback((index, layerIndex, opacity) => {
-    const mesh = nv.meshes[index];
-    const layer = mesh.layers[layerIndex];
-    layer.opacity = opacity;
-    mesh.updateMesh(nv.gl);
-    nv.drawScene();
-  }, [nv])
+  const setLayerVisibility = useCallback(
+    (index, layerIndex, opacity) => {
+      console.log('index, layer index, opacity', index, layerIndex, opacity);
+      const mesh = nv.meshes[index];
+      const layer = mesh.layers[layerIndex];
+      layer.opacity = opacity;
+      mesh.updateMesh(nv.gl);
+      nv.drawScene();
+      // update ui state
+      const layerItem = layers.get(mesh.id)[layerIndex];
+      layerItem.opacity = opacity;
+      layerItem.visible = opacity > 0.0;
+      setMeshOpacity(opacity)
+      console.log('layerItem', layerItem)
+      // setLayers(layers);
+    },
+    [nv, layers]
+  );
 
-  const setLayerAsActive = useCallback((index, layerIndex) => {
-    setActiveImageType(MESH_LAYER);
-    setActiveMesh(index);
-    setActiveLayer(layerIndex);
-  }, [setActiveImageType, setActiveMesh, setActiveLayer])
+  const setLayerAsActive = useCallback(
+    (index, layerIndex) => {
+      setActiveImageType(MESH_LAYER);
+      setActiveMesh(index);
+      setActiveLayer(layerIndex);
+    },
+    [setActiveImageType, setActiveMesh, setActiveLayer]
+  );
 
   const updateOpacity = useCallback(
     (opacity) => {
@@ -319,16 +345,19 @@ function App() {
     [activeMesh, nv]
   );
 
-  const updateMeshLayerOpacity = useCallback((opacity) => {
-    const mesh = nv.meshes[activeMesh];
-    const layer = nv.meshes[activeMesh].layers[activeLayer];
-    layer.opacity = opacity;
-    mesh.updateMesh(nv.gl);
-    setMeshOpacity(opacity);
-    nv.drawScene();
-    console.log("mesh layer opactiy is updated", mesh);
-  },
-  [activeMesh, activeLayer, nv])
+  const updateMeshLayerOpacity = useCallback(
+    (opacity) => {
+      const mesh = nv.meshes[activeMesh];
+      const layer = layers.get(mesh.id)[activeLayer];
+      layer.opacity = opacity;
+      layer.visible = opacity > 0;
+      setMeshOpacity(opacity)
+      mesh.layers[activeLayer].opacity = opacity;
+      mesh.updateMesh(nv.gl);
+      nv.drawScene();
+    },
+    [activeMesh, activeLayer, nv, layers]
+  );
 
   const updateColormap = useCallback(
     (colormap) => {
@@ -342,12 +371,14 @@ function App() {
   const updateMeshLayerColormap = useCallback(
     (colormap) => {
       const mesh = nv.meshes[activeMesh];
-      const layer = mesh.layers[activeLayer];
+      const layer = layers.get(mesh.id)[activeLayer];
       layer.colormap = colormap;
+      setColormap(colormap);
+      mesh.layers[activeLayer].colormap = colormap;
       mesh.updateMesh(nv.gl);
       nv.drawScene();
     },
-    [activeMesh, activeLayer, nv]
+    [activeMesh, activeLayer, nv, layers]
   );
 
   const setCalMinMax = useCallback(
@@ -405,14 +436,14 @@ function App() {
         meshes.forEach(async (mesh) => {
           await addMesh(mesh, info);
         });
-      })
+      });
 
       nvUtils.onLoadMeshLayers((meshLayers) => {
         console.log("loaded mesh layers", meshLayers);
         meshLayers.forEach(async (layer) => {
           await addMeshLayer(layer, info);
         });
-      })
+      });
 
       nvUtils.onCloseAllVolumes(() => {
         let volumes = nv.volumes;
@@ -428,7 +459,7 @@ function App() {
 
         setImages([]);
         setMeshes([]);
-
+        layers.clear();
         // update active image, min, max, opacity
         setActiveImage(0);
         setActiveMesh(0);
@@ -595,7 +626,7 @@ function App() {
     },
     [meshes, setActiveMesh]
   );
-  
+
   const getImageList = useCallback(() => {
     let volumes = nv.volumes;
     let newImages = volumes.map((volume, index) => {
@@ -611,8 +642,6 @@ function App() {
 
     return newImages;
   }, [nv, activeImage]);
-
-  
 
   function handleDrop() {
     const newImages = getImageList();
@@ -684,12 +713,14 @@ function App() {
     [activeMesh, nv]
   );
 
-  const getLayerList = useCallback((index) => {
-    let mesh = nv.meshes[index];
-    console.log("mesh from getLayerList", mesh, index);
-    return mesh.layers;
-  }, [nv])
-
+  const getLayerList = useCallback(
+    (index) => {
+      let mesh = nv.meshes[index];
+      console.log("mesh from getLayerList", mesh, index);
+      return mesh.layers;
+    },
+    [nv]
+  );
 
   const handleLayerDropped = useCallback(
     (index, file) => {
@@ -697,13 +728,13 @@ function App() {
       console.log("mesh", mesh);
       const reader = new FileReader();
       reader.onload = async (event) => {
-        console.log("file", file)
+        console.log("file", file);
         console.log("event", event);
         let buffer = event.target.result;
         console.log(buffer);
-        let layer = NVMeshLoaders.readLayer(file.path, buffer, mesh); 
+        let layer = NVMeshLoaders.readLayer(file.path, buffer, mesh);
         if (layer) {
-          layer.name = file.path.replace(/^.*[\\/]/, '');
+          layer.name = file.path.replace(/^.*[\\/]/, "");
           layer.url = file.path;
           console.log("layer", layer);
           mesh.layers.push(layer);
@@ -712,13 +743,22 @@ function App() {
           getMeshList();
           setActiveImageType(MESH_LAYER);
           setActiveLayer(mesh.layers.length - 1);
+          layers.set(
+            mesh.id,
+            mesh.layers.map((l) => ({
+              name: l.name,
+              url: file.path,
+              visible: true,
+              opacity: l.opacity,
+              colormap: l.colormap,
+            }))
+          );
         }
         console.log("mesh", mesh);
       };
       reader.readAsArrayBuffer(file);
-
     },
-    [nv, getMeshList]
+    [nv, getMeshList, layers]
   );
 
   const handleMoveUp = useCallback(
@@ -851,7 +891,6 @@ function App() {
     console.log(`Property "${key}" changed to`, value);
     nv.opts[key] = value;
     nv.drawScene();
-    
   };
 
   const moveImage = useCallback(
@@ -924,15 +963,24 @@ function App() {
           onSetVisibility={setVisibility} // callback to set the visibility of the image (opacity 0 or 1)
           onRemove={handleRemoveMesh} // callback to remove the image from the scene via the context menu
           onLayerDropped={handleLayerDropped} // callback to add a layer to a specific mesh
-          layers={mesh.layers}
-          getLayerList={getLayerList}          
+          layers={layers.get(mesh.id) ?? []}
+          getLayerList={getLayerList}
           setLayerVisibility={setLayerVisibility}
           setActiveLayer={setLayerAsActive}
           onAddLayer={handleAddMeshLayers}
         ></MeshItem>
       );
     },
-    [toggleActiveMesh, setVisibility, handleRemoveMesh, handleLayerDropped, getLayerList, setLayerVisibility, setLayerAsActive]
+    [
+      toggleActiveMesh,
+      setVisibility,
+      handleRemoveMesh,
+      handleLayerDropped,
+      getLayerList,
+      setLayerVisibility,
+      setLayerAsActive,
+      layers,
+    ]
   );
 
   let imageToolsPanel;
@@ -968,21 +1016,19 @@ function App() {
         );
       }
       break;
-    case MESH:
+    case MESH_LAYER:
       {
-        imageToolsPanel = (
-          <ImageTools>
-            {/* min max input: set the min and max of the active image */}
-            {/* opacity slider: set the opacity of the active image */}
-            <OpacitySlider
-              opacity={meshOpacity} // the current opacity of the active image
-              onSetOpacity={updateMeshOpacity} // callback to set the opacity of the active image
-            />
-          </ImageTools>
-        );
-      }
-      break;
-      case MESH_LAYER:
+        let activeMeshLayer = null;
+        if(layers.has(nv.meshes[activeMesh].id)) {
+          const activeMeshLayers = layers.get(nv.meshes[activeMesh].id)          
+        console.log('active mesh layers', activeMeshLayers);
+        activeMeshLayer = (activeMeshLayers) ? activeMeshLayers[activeLayer] : null;
+          
+        console.log('active mesh layer', activeMeshLayer);
+        }
+        else {
+          console.log('no meshlayers found')
+        }
         imageToolsPanel = (
           <ImageTools>
             {/* colormap select: sets the colormap of the active image */}
@@ -990,11 +1036,11 @@ function App() {
               colormaps={colormaps} // array of colormap objects
               onSetColormap={updateMeshLayerColormap} // callback to set the colormap of the active image
               colormap={
-                nv.meshes.length > 0 && nv.meshes[activeMesh]
-                  ? nv.meshes[activeMesh].layers[activeLayer].colormap
+                activeMeshLayer
+                  ? activeMeshLayer.colormap
                   : colormap
               } // the current colormap of the active image
-            />            
+            />
             {/* opacity slider: set the opacity of the active image */}
             <OpacitySlider
               opacity={meshOpacity} // the current opacity of the active image
@@ -1002,7 +1048,8 @@ function App() {
             />
           </ImageTools>
         );
-        break;
+      }
+      break;
     default:
       imageToolsPanel = <></>;
   }
@@ -1064,16 +1111,19 @@ function App() {
       break;
     case SETTINGS:
       sideBar = (
-      <Sidebar>
-        <Typography
+        <Sidebar>
+          <Typography
             variant="body"
             sx={{
               marginTop: 0,
               marginBottom: 0.5,
             }}
           ></Typography>
-          <JsonEditor initialJsonObject={nv.opts}  onJsonChange={handleJsonChange}></JsonEditor>
-      </Sidebar>
+          <JsonEditor
+            initialJsonObject={nv.opts}
+            onJsonChange={handleJsonChange}
+          ></JsonEditor>
+        </Sidebar>
       );
       break;
     default:
@@ -1147,7 +1197,11 @@ function App() {
                 <ListItemText primary="Meshes" sx={{ opacity: open ? 1 : 0 }} />
               </ListItemButton>
             </ListItem>
-            <ListItem key="Scene Settings" disablePadding sx={{ display: "block" }}>
+            <ListItem
+              key="Scene Settings"
+              disablePadding
+              sx={{ display: "block" }}
+            >
               <ListItemButton
                 sx={{
                   minHeight: 48,
@@ -1165,7 +1219,10 @@ function App() {
                 >
                   <VideoSettingsOutlined />
                 </ListItemIcon>
-                <ListItemText primary="Scene Settings" sx={{ opacity: open ? 1 : 0 }} />
+                <ListItemText
+                  primary="Scene Settings"
+                  sx={{ opacity: open ? 1 : 0 }}
+                />
               </ListItemButton>
             </ListItem>
           </List>

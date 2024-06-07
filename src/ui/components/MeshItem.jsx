@@ -31,13 +31,14 @@ export function MeshItem({
   setLayerVisibility = () => {},
   setActiveLayer = () => {},
   onAddLayer = () => {},
+  layers,
   ...props
 }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(true);
   const [contextMenu, setContextMenu] = useState(null);
   const [files, setFiles] = useState([]);
-  const [layers, setLayers] = useState([]);
+  // const [layers, setLayers] = useState([]);
   const [open, setOpen] = useState(false);
 
   const handleClick = () => {
@@ -77,19 +78,17 @@ export function MeshItem({
   function handleAddLayer() {
     handleClose();
     onAddLayer(index);
+    setOpen(true);    
   }
 
   function toggleLayerVisibility(layerIndex) {
-    const isVisible = layers[layerIndex].visible;
-    layers[layerIndex].visible = !isVisible;
+    const isVisible = !layers[layerIndex].visible;
+
     setLayerVisibility(
       index,
       layerIndex,
-      layers[layerIndex].visible ? 1.0 : 0.0
-    );
-    // slice is necessary to trigger re-render of child controls
-    // https://stackoverflow.com/questions/25937369/react-component-not-re-rendering-on-state-change
-    setLayers(layers.slice());
+      isVisible ? 1.0 : 0.0
+    );    
   }
 
   const handleDrop = (event) => {
@@ -99,11 +98,7 @@ export function MeshItem({
       const newFiles = Array.from(droppedFiles);
       setFiles((prevFiles) => [...prevFiles, ...newFiles]);
       onLayerDropped(index, droppedFiles[0]);
-      layers.push({
-        name: droppedFiles[0].path.replace(/^.*[\\/]/, ""),
-        url: droppedFiles[0].path,
-        visible: true,
-      });
+      
       setOpen(true);
     }
 
@@ -183,10 +178,10 @@ export function MeshItem({
                 onClick={() => setActiveLayer(index, layerIndex)}
               >
                 <IconButton onClick={() => toggleLayerVisibility(layerIndex)}>
-                  {!layers[layerIndex].visible ? (
-                    <VisibilityOffIcon />
-                  ) : (
+                  {item.visible ? (
                     <VisibilityIcon />
+                  ) : (
+                    <VisibilityOffIcon />
                   )}
                 </IconButton>
                 <ListItemText primary={item.name} />
@@ -211,5 +206,6 @@ MeshItem.propTypes = {
   setLayerVisibility: PropTypes.func,
   setActiveLayer: PropTypes.func,
   getLayerList: PropTypes.func,
-  onAddLayer: PropTypes.func
+  onAddLayer: PropTypes.func,
+  layers: PropTypes.array
 };
