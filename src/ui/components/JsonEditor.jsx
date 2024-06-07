@@ -110,7 +110,7 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
                 <Typography variant="subtitle1">{translateCamlCaseToTitleCase(key)}</Typography>
                 <TextField
                   size="small"
-                  sx={{textAlign: 'right', float: 'right'}}
+                  sx={{textAlign: 'right', float: 'right', direction: 'rtl'}}
                   variant="outlined"
                   value={jsonObject[key]}
                   onChange={(e) => handleChange(e, key)}
