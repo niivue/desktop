@@ -82,10 +82,12 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
           {Object.keys(jsonObject).map(key => (
             <Box key={key} sx={{ mb: 2 }}>
               {typeof jsonObject[key] === 'boolean' ? (
-                <FormControlLabel
-                  control={<Switch checked={jsonObject[key]} onChange={(e) => handleBooleanChange(e, key)} />}
-                  label={key}
-                />
+                <Box
+                  sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}                  
+                >
+                  <Typography variant="subtitle1">{key}</Typography>
+                  <Switch checked={jsonObject[key]} onChange={(e) => handleBooleanChange(e, key)} />
+                  </Box>
               ) : key.toLowerCase().endsWith('color') ? (
                 <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
                   <Typography variant="subtitle1">{key}</Typography>
@@ -96,10 +98,10 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
                 </Box>
               ) : (
                 <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                <InputLabel sx={{ textAlign: 'left' }}>{key}</InputLabel>
+                <Typography variant="subtitle1">{key}</Typography>
                 <TextField
                   size="small"
-                  sx={{textAlign: 'right', width: '50%', float: 'right'}}
+                  sx={{textAlign: 'right', float: 'right'}}
                   variant="outlined"
                   value={jsonObject[key]}
                   onChange={(e) => handleChange(e, key)}
