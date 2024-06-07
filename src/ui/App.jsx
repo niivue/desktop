@@ -57,6 +57,7 @@ import {
 } from "@mui/icons-material";
 import JsonEditor from "./components/JsonEditor";
 import { SceneSettingsDialog } from "./components/SceneSettingsDialog";
+import Button from '@mui/material/Button';
 
 const drawerWidth = 220;
 
@@ -1141,6 +1142,35 @@ function App() {
   return (
     // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
+      <div width={"100%"}>
+        <Button
+        id="volumes-button"
+        aria-controls={open ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={() => {
+          toggleSidebarContent(VOLUME);
+        }}
+      >Volumes</Button>
+      <Button
+        id="meshes-button"
+        aria-controls={open ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={() => {
+          toggleSidebarContent(MESH);
+        }}
+      >Meshes</Button>
+      <Button
+        id="meshes-button"
+        aria-controls={open ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={() => {
+          toggleSidebarContent(SETTINGS);
+        }}
+      >Settings</Button>
+        </div>
       {/* AppContainer: the parent component that lays out the rest of the scene */}
       <Container
         disableGutters
@@ -1154,9 +1184,10 @@ function App() {
           gap: 0,
         }}
       >
+        
         {/* CssBaseline sets some standard CSS configs for working with MUI */}
         <CssBaseline />
-        <Drawer variant="permanent" open={open}>
+        <Drawer open={open}>
           <List>
             <ListItem key="Volumes" disablePadding sx={{ display: "block" }}>
               <ListItemButton
