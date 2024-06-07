@@ -900,6 +900,7 @@ function App() {
     // setJsonObject(updatedJsonObject);
     console.log(`Property "${key}" changed to`, value);
     nv.opts[key] = value;
+    nv.updateGLVolume();
     nv.drawScene();
   };
 
