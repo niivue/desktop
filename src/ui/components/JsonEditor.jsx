@@ -71,7 +71,12 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
     setJsonObject(updatedJsonObject);
     onJsonChange(updatedJsonObject, key, e.target.checked);
   };
-  // console.log('colorStates', colorStates);
+  
+  const translateCamlCaseToTitleCase = (text) => {
+    const result = text.replace(/([A-Z])/g, " $1");
+    return result.charAt(0).toUpperCase() + result.slice(1); 
+  }
+
   return (
     <Container>
       <Box sx={{ mt: 4 }}>
@@ -85,12 +90,12 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
                 <Box
                   sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}                  
                 >
-                  <Typography variant="subtitle1">{key}</Typography>
+                  <Typography variant="subtitle1">{translateCamlCaseToTitleCase(key)}</Typography>
                   <Switch checked={jsonObject[key]} onChange={(e) => handleBooleanChange(e, key)} />
                   </Box>
               ) : key.toLowerCase().endsWith('color') ? (
                 <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                  <Typography variant="subtitle1">{key}</Typography>
+                  <Typography variant="subtitle1">{translateCamlCaseToTitleCase(key)}</Typography>
                   <ColorPickerTile
                     color={colorStates[key]}
                     onChange={(colorArray) => handleColorChange(colorArray, key)}
@@ -98,7 +103,7 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
                 </Box>
               ) : (
                 <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Typography variant="subtitle1">{key}</Typography>
+                <Typography variant="subtitle1">{translateCamlCaseToTitleCase(key)}</Typography>
                 <TextField
                   size="small"
                   sx={{textAlign: 'right', float: 'right'}}
