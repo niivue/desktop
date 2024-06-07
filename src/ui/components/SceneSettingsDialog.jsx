@@ -7,7 +7,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 
 import JsonEditor from "./JsonEditor";
 
-export const SceneSettingsDialog = ({initialJsonObject, handleJsonChange, onClose, isOpen = false, isFullScreen = true }) => {
+export const SceneSettingsDialog = ({initialJsonObject, onJsonChange, onClose, isOpen = false, isFullScreen = true }) => {
   return ( <React.Fragment>
       <Dialog
               fullScreen={isFullScreen}
@@ -21,7 +21,7 @@ export const SceneSettingsDialog = ({initialJsonObject, handleJsonChange, onClos
               <DialogContent>
               <JsonEditor
             initialJsonObject={initialJsonObject}
-            onJsonChange={handleJsonChange}
+            onJsonChange={onJsonChange}
           ></JsonEditor>
               </DialogContent>
               <DialogActions>                  
