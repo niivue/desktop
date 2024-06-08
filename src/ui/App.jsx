@@ -58,6 +58,8 @@ import {
 import JsonEditor from "./components/JsonEditor";
 import { SceneSettingsDialog } from "./components/SceneSettingsDialog";
 import Button from '@mui/material/Button';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 
 const drawerWidth = 220;
 
@@ -178,6 +180,34 @@ function App() {
   const [sidebarContent, setSidebarContent] = useState(NONE);
   const [layers, setLayers] = useState(new Map());
   const [activeLayer, setActiveLayer] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
+
+  const handleChange = (event, newValue) => {
+    let newTab = 0;
+    let newImageType = NONE;
+    console.log('newValue', newValue);
+    if(newValue != activeTab) {
+      newTab = newValue;
+    }
+
+    switch(newTab) {
+      case 0:
+        newImageType = VOLUME;
+        break;
+      case 1:
+        newImageType = MESH;
+        break;
+      case 2:
+        newImageType = SETTINGS;
+        break;
+    }
+
+    setActiveTab(newTab);
+    setSidebarContent(newImageType);
+    setActiveImageType(newImageType);
+    
+    
+  };
 
   const toggleSidebarContent = useCallback(
     (content) => {
@@ -1147,35 +1177,19 @@ function App() {
   return (
     // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
-      <Box width={"100%"} sx={{position: "sticky", top: "0px", minHeight: "30px"}}>
-        <Button
-        id="volumes-button"
-        aria-controls={open ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        onClick={() => {
-          toggleSidebarContent(VOLUME);
-        }}
-      >Volumes</Button>
-      <Button
-        id="meshes-button"
-        aria-controls={open ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        onClick={() => {
-          toggleSidebarContent(MESH);
-        }}
-      >Meshes</Button>
-      <Button
-        id="meshes-button"
-        aria-controls={open ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        onClick={() => {
-          toggleSidebarContent(SETTINGS);
-        }}
-      >Settings</Button>
-        </Box>
+       <Box sx={{ width: '100%' }}>
+      <Tabs
+        value={activeTab}
+        onChange={handleChange}
+        aria-label="wrapped label tabs example"
+      >
+        <Tab          
+          label="Volumes"
+        />
+        <Tab label="Meshes" />
+        <Tab label="Settings" />
+      </Tabs>
+    </Box>
       {/* AppContainer: the parent component that lays out the rest of the scene */}
       <div>
       <Container
