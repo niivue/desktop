@@ -1183,7 +1183,7 @@ function App() {
   return (
     // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
-       <Box sx={{ width: '100%' }}>
+       <Box sx={{ width: '100%', position: 'sticky', top: '0px', bgcolor: 'background.paper' }}>
       <Tabs
         value={activeTab}
         onChange={handleChange}
