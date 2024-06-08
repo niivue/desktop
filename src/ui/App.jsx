@@ -183,31 +183,37 @@ function App() {
   const [activeTab, setActiveTab] = useState(0);
 
   const handleChange = (event, newValue) => {
-    let newTab = 0;
     let newImageType = NONE;
     console.log('newValue', newValue);
-    if(newValue != activeTab) {
-      newTab = newValue;
-    }
+    
 
-    switch(newTab) {
-      case 0:
+
+    switch(newValue) {
+      case 1:
         newImageType = VOLUME;
         break;
-      case 1:
+      case 2:
         newImageType = MESH;
         break;
-      case 2:
+      case 3:
         newImageType = SETTINGS;
         break;
     }
 
-    setActiveTab(newTab);
+    setActiveTab(newValue);
     setSidebarContent(newImageType);
-    setActiveImageType(newImageType);
+    // setActiveImageType(newImageType);
     
     
   };
+
+  const handleClickTab = (index) => {
+    if(index === activeTab) {
+      setActiveTab(-1);
+      setActiveImageType(NONE);
+      setSidebarContent(NONE);
+    }
+  }
 
   const toggleSidebarContent = useCallback(
     (content) => {
@@ -1183,11 +1189,16 @@ function App() {
         onChange={handleChange}
         aria-label="wrapped label tabs example"
       >
+         <Tab          
+          label="Hide"
+        />
         <Tab          
           label="Volumes"
         />
-        <Tab label="Meshes" />
-        <Tab label="Settings" />
+        <Tab label="Meshes"
+        />
+        <Tab label="Settings" 
+        />
       </Tabs>
     </Box>
       {/* AppContainer: the parent component that lays out the rest of the scene */}
