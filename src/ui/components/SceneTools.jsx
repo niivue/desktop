@@ -1,4 +1,5 @@
 import Box from '@mui/material/Box'
+import PropTypes from 'prop-types';
 
 export function SceneTools({ children, ...props }) {
   return (
@@ -17,4 +18,8 @@ export function SceneTools({ children, ...props }) {
       {children}
     </Box>
   )
+}
+
+SceneTools.propTypes = {
+  children: PropTypes.node,
 }

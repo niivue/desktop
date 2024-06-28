@@ -66,7 +66,7 @@ export function NiivueCanvas({ nv = null, volumes = [], meshes = [], ...props })
   //             setNvImages(JSON.stringify(imagesToLoad));
   //         });
   //         // set the callback for when surfaces are loaded
-  //         nvUtils.onLoadSurfaces((surfs) => {
+  //         nvUtils.onLoadMeshes((surfs) => {
   //             console.log('loaded surfaces', surfs);
   //             let surfacesToLoad = surfs.map((surf) => {
   //                 return {

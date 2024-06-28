@@ -21,15 +21,7 @@ export function Sidebar({ children, asColumn = true, ...props }) {
         ...props
       }}
     >
-      <Typography
-        variant="body"
-        sx={{
-          marginTop: 0,
-          marginBottom: 0.5,
-        }}
-      >
-        Images
-      </Typography>
+      
       {children}
     </Box>
   );

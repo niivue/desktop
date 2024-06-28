@@ -7,7 +7,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 
 import { SketchPicker } from 'react-color'
 
-export const ColorPicker = ({isOpen = false, pickedColor = {r: 255, g: 0, b: 0, a:1}, isFullScreen = true, onChange, onClose}) => {
+export const ColorPickerDialog = ({isOpen = false, pickedColor = {r: 255, g: 0, b: 0, a:1}, isFullScreen = true, onChange, onClose}) => {
     return ( <React.Fragment>
         <Dialog
                 fullScreen={isFullScreen}
