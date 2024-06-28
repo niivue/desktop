@@ -864,15 +864,6 @@ let menu = [
     ]
   },
 
-
-  // add color menu
-  {
-    label: 'Settings',
-    id: 'settings',
-    click: async () => {
-      onSettingsClick();
-    }
-  },
   // add window menu with reload options
   {
     label: 'Window',
