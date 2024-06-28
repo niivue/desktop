@@ -127,7 +127,7 @@ function App() {
   nv.onImageLoaded = (volume) => {
     setActiveImage(nv.volumes.length - 1);
     setActiveImageType(VOLUME);
-    handleDrop();
+    handleVolumeAdded();
   };
 
   nv.onMeshLoaded = (mesh) => {
@@ -184,9 +184,6 @@ function App() {
 
   const handleChange = (event, newValue) => {
     let newImageType = NONE;
-    console.log('newValue', newValue);
-    
-
 
     switch(newValue) {
       case 1:
@@ -730,11 +727,17 @@ function App() {
   }, [nv, activeImage]);
 
   function handleDrop() {
+    console.log('handle drop called');
     const newImages = getImageList();
     const newMeshes = getMeshList();
     console.log(newImages);
     setImages(newImages);
     setMeshes(newMeshes);
+  }
+
+  function handleVolumeAdded() {
+    const images = getImageList();
+    setImages(images);
   }
 
   function handleMeshAdded() {
@@ -814,16 +817,16 @@ function App() {
       console.log("mesh", mesh);
       const reader = new FileReader();
       reader.onload = async (event) => {
-        console.log("file", file);
-        console.log("event", event);
         let buffer = event.target.result;
         console.log(buffer);
-        let layer = NVMeshLoaders.readLayer(file.path, buffer, mesh);
-        if (layer) {
+        const currentLayerCount = mesh.layers.length;
+        NVMeshLoaders.readLayer(file.path, buffer, mesh);
+        const newLayerCount = mesh.layers.length;        
+        if (newLayerCount > currentLayerCount) {
+          let layer = mesh.layers[currentLayerCount];
           layer.name = file.path.replace(/^.*[\\/]/, "");
           layer.url = file.path;
           console.log("layer", layer);
-          mesh.layers.push(layer);
           mesh.updateMesh(nv.gl);
           nv.drawScene();
           getMeshList();
