@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { TextField, Typography, Container, Box, Paper, Switch, FormControlLabel, InputLabel, FormControl } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { TextField, Typography, Container, Box, Paper, Switch } from '@mui/material';
 import { ColorPickerTile } from './ColorPickerTile';
 
 function getColorsFromJson(initialJsonObject) {
@@ -7,7 +7,6 @@ function getColorsFromJson(initialJsonObject) {
     const colors = {};
     Object.keys(updatedJsonObject).forEach(key => {
       if (key.toLowerCase().endsWith('color')) {
-        console.log('key, color', key, updatedJsonObject[key])
         const color = updatedJsonObject[key];
         colors[key] = {r: color[0] * 255, g: color[1] * 255, b: color[2] * 255, a: color[3] };
       }
@@ -25,7 +24,6 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
     const colors = {};
     Object.keys(updatedJsonObject).forEach(key => {
       if (key.toLowerCase().endsWith('color')) {
-        // console.log('key, color', key, updatedJsonObject[key])
         colors[key] = updatedJsonObject[key];
       }
     });
@@ -53,8 +51,6 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
       [key]: color.rgb
     };
     setJsonObject(updatedJsonObject);
-    // colors[key] = color.rgb;
-    console.log('Updated color state for', key, ':', color);
     const colorArray = [
       color.rgb.r / 255,
       color.rgb.g / 255,
@@ -112,7 +108,7 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title}) => {
                   size="small"
                   sx={{textAlign: 'right', float: 'right', direction: 'rtl'}}
                   variant="outlined"
-                  value={jsonObject[key]}
+                  value={null === jsonObject[key] || Number.isNaN(jsonObject[key]) ? 0 : jsonObject[key] }
                   onChange={(e) => handleChange(e, key)}
                 />
                 </Box>
