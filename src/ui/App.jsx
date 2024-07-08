@@ -57,9 +57,9 @@ import {
 } from "@mui/icons-material";
 import JsonEditor from "./components/JsonEditor";
 import { SceneSettingsDialog } from "./components/SceneSettingsDialog";
-import Button from '@mui/material/Button';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
+import Button from "@mui/material/Button";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 
 const drawerWidth = 220;
 
@@ -185,7 +185,7 @@ function App() {
   const handleChange = (event, newValue) => {
     let newImageType = NONE;
 
-    switch(newValue) {
+    switch (newValue) {
       case 1:
         newImageType = VOLUME;
         break;
@@ -200,16 +200,15 @@ function App() {
     setActiveTab(newValue);
     setSidebarContent(newImageType);
     window.resizeTo(window.width, window.height);
-    
   };
 
   const handleClickTab = (index) => {
-    if(index === activeTab) {
+    if (index === activeTab) {
       setActiveTab(-1);
       setActiveImageType(NONE);
       setSidebarContent(NONE);
     }
-  }
+  };
 
   const toggleSidebarContent = useCallback(
     (content) => {
@@ -267,7 +266,6 @@ function App() {
     },
     [activeImage, nv]
   );
-
 
   // ------------ Callbacks ------------
   // add a volume from a URL
@@ -365,14 +363,12 @@ function App() {
         setMeshOpacity(layers.get(mesh.id)[activeLayer].opacity);
         setActiveImageType(MESH_LAYER);
         setActiveLayer(mesh.layers.length - 1);
-       
       }
       console.log("mesh", mesh);
     },
     [nv, activeMesh, activeLayer, layers, getMeshList]
   );
 
-  
   const updateMeshOpacity = useCallback(
     (opacity) => {
       const mesh = nv.meshes[activeMesh];
@@ -457,7 +453,7 @@ function App() {
     }
   }, [nv]);
 
-  const saveDocument = useCallback( async () => {
+  const saveDocument = useCallback(async () => {
     const result = await nvUtils.openSaveFileDialog("niivue.nvd");
     if (!result.canceled) {
       const json = nv.json();
@@ -637,12 +633,23 @@ function App() {
       });
 
       nvUtils.openSettings(() => {
-        console.log('open settings received');
+        console.log("open settings received");
         setSceneSettingsOpen(true);
-      })
+      });
     }
     getCommsInfo();
-  }, [activeImage, nv, addVolume, setSceneSettingsOpen, loadMosaicString, loadDocument, saveDocument, addMesh, addMeshLayer, layers]);
+  }, [
+    activeImage,
+    nv,
+    addVolume,
+    setSceneSettingsOpen,
+    loadMosaicString,
+    loadDocument,
+    saveDocument,
+    addMesh,
+    addMeshLayer,
+    layers,
+  ]);
 
   // when active image changes, update the min and max
   useEffect(() => {
@@ -726,7 +733,7 @@ function App() {
   }, [nv, activeImage]);
 
   function handleDrop() {
-    console.log('handle drop called');
+    console.log("handle drop called");
     const newImages = getImageList();
     const newMeshes = getMeshList();
     console.log(newImages);
@@ -820,7 +827,7 @@ function App() {
         console.log(buffer);
         const currentLayerCount = mesh.layers.length;
         NVMeshLoaders.readLayer(file.path, buffer, mesh);
-        const newLayerCount = mesh.layers.length;        
+        const newLayerCount = mesh.layers.length;
         if (newLayerCount > currentLayerCount) {
           let layer = mesh.layers[currentLayerCount];
           layer.name = file.path.replace(/^.*[\\/]/, "");
@@ -908,8 +915,6 @@ function App() {
       }
     }
   };
-
-  
 
   const onColorPickerChange = (color) => {
     setColorPickerColor(color.rgb);
@@ -1185,139 +1190,65 @@ function App() {
   return (
     // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
-       <Box sx={{ width: '100%', position: 'sticky', top: '0px', bgcolor: 'background.paper' }}>
-      <Tabs
-        value={activeTab}
-        onChange={handleChange}
-        aria-label="wrapped label tabs example"
-      >
-         <Tab          
-          label="Hide"
-        />
-        <Tab          
-          label="Volumes"
-        />
-        <Tab label="Meshes"
-        />
-        <Tab label="Settings" 
-        />
-      </Tabs>
-    </Box>
       {/* AppContainer: the parent component that lays out the rest of the scene */}
       <div>
-      <Container
-        disableGutters
-        maxWidth={false}
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          height: "100vh",
-          width: "100vw",
-          minHeight: "300px",
-          gap: 0,
-        }}
-      >
-        
-        {/* CssBaseline sets some standard CSS configs for working with MUI */}
-        <CssBaseline />
-        <Drawer open={open}>
-          <List>
-            <ListItem key="Volumes" disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                }}
-                onClick={() => {
-                  toggleSidebarContent(VOLUME);
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  <ViewInArOutlined />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Volumes"
-                  sx={{ opacity: open ? 1 : 0 }}
-                />
-              </ListItemButton>
-            </ListItem>
-            <ListItem key="Meshes" disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                }}
-                onClick={() => toggleSidebarContent(MESH)}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  <HubSharp />
-                </ListItemIcon>
-                <ListItemText primary="Meshes" sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-            <ListItem
-              key="Scene Settings"
-              disablePadding
-              sx={{ display: "block" }}
+        <Container
+          disableGutters
+          maxWidth={false}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100vh",
+            width: "100vw",
+            minHeight: "300px",
+            gap: 0,
+          }}
+        >
+          <Box
+            sx={{
+              width: "100%",
+              position: "sticky",
+              top: "0px",
+              bgcolor: "background.paper",
+            }}
+          >
+            <Tabs
+              value={activeTab}
+              onChange={handleChange}
+              aria-label="wrapped label tabs example"
             >
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                }}
-                onClick={() => toggleSidebarContent(SETTINGS)}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  <VideoSettingsOutlined />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Scene Settings"
-                  sx={{ opacity: open ? 1 : 0 }}
-                />
-              </ListItemButton>
-            </ListItem>
-          </List>
-        </Drawer>
-        {/* Sidebar: is the left panel that shows all files and image/scene widgets */}
-        {sideBar}
-        {/* Niivue Canvas: where things are rendered :) */}
-        <NiivueCanvas nv={nv} />
-        <ColorPickerDialog
-          isOpen={isColorPickerOpen}
-          pickedColor={colorPickerColor}
-          onChange={onColorPickerChange}
-          onClose={onCloseColorPicker}
-          isFullScreen={false}
-        />
-        <SceneSettingsDialog
-          isOpen={isSceneSettingsOpen}
-          initialJsonObject={nv.opts}
-          onJsonChange={handleJsonChange}
-          isFullScreen={true}
-          onClose={(wasCanceled) => {console.log('isCanceled', wasCanceled); setSceneSettingsOpen(false)}}
-        />
-      </Container>
+              <Tab label="Hide" />
+              <Tab label="Volumes" />
+              <Tab label="Meshes" />
+              <Tab label="Settings" />
+            </Tabs>
+            {/* CssBaseline sets some standard CSS configs for working with MUI */}
+            <CssBaseline />
+          </Box>
+          <Box display={"flex"} flexDirection={"row"} height={"100%"}>
+          {/* Sidebar: is the left panel that shows all files and image/scene widgets */}
+          {sideBar}
+          {/* Niivue Canvas: where things are rendered :) */}
+          <NiivueCanvas nv={nv} />
+          <ColorPickerDialog
+            isOpen={isColorPickerOpen}
+            pickedColor={colorPickerColor}
+            onChange={onColorPickerChange}
+            onClose={onCloseColorPicker}
+            isFullScreen={false}
+          />
+          <SceneSettingsDialog
+            isOpen={isSceneSettingsOpen}
+            initialJsonObject={nv.opts}
+            onJsonChange={handleJsonChange}
+            isFullScreen={true}
+            onClose={(wasCanceled) => {
+              console.log("isCanceled", wasCanceled);
+              setSceneSettingsOpen(false);
+            }}
+          />
+          </Box>
+        </Container>
       </div>
     </NV.Provider>
   );
