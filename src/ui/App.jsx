@@ -199,8 +199,7 @@ function App() {
 
     setActiveTab(newValue);
     setSidebarContent(newImageType);
-    // setActiveImageType(newImageType);
-    
+    window.resizeTo(window.width, window.height);
     
   };
 
