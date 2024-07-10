@@ -221,14 +221,14 @@ function App() {
         setActiveImageType(content);
       }
     },
-    [sidebarContent]
+    [sidebarContent],
   );
 
   const setVisibility = useCallback(
     (index, opacity) => {
       nv.setOpacity(index, opacity);
     },
-    [nv]
+    [nv],
   );
 
   const setLayerVisibility = useCallback(
@@ -247,7 +247,7 @@ function App() {
       console.log("layerItem", layerItem);
       // setLayers(layers);
     },
-    [nv, layers]
+    [nv, layers],
   );
 
   const setLayerAsActive = useCallback(
@@ -256,7 +256,7 @@ function App() {
       setActiveMesh(index);
       setActiveLayer(layerIndex);
     },
-    [setActiveImageType, setActiveMesh, setActiveLayer]
+    [setActiveImageType, setActiveMesh, setActiveLayer],
   );
 
   const updateOpacity = useCallback(
@@ -264,7 +264,7 @@ function App() {
       nv.setOpacity(activeImage, opacity);
       setOpacity(opacity);
     },
-    [activeImage, nv]
+    [activeImage, nv],
   );
 
   // ------------ Callbacks ------------
@@ -290,7 +290,7 @@ function App() {
       console.log(newImages);
       setImages(newImages);
     },
-    [activeImage, nv, setImages]
+    [activeImage, nv, setImages],
   );
 
   const getMeshList = useCallback(() => {
@@ -331,7 +331,7 @@ function App() {
       console.log(newMeshes);
       setMeshes(newMeshes);
     },
-    [activeMesh, nv, setMeshes]
+    [activeMesh, nv, setMeshes],
   );
 
   // add a mesh from a URL
@@ -357,7 +357,7 @@ function App() {
             visible: true,
             opacity: l.opacity,
             colormap: l.colormap,
-          }))
+          })),
         );
         getMeshList();
         setMeshOpacity(layers.get(mesh.id)[activeLayer].opacity);
@@ -366,7 +366,7 @@ function App() {
       }
       console.log("mesh", mesh);
     },
-    [nv, activeMesh, activeLayer, layers, getMeshList]
+    [nv, activeMesh, activeLayer, layers, getMeshList],
   );
 
   const updateMeshOpacity = useCallback(
@@ -378,7 +378,7 @@ function App() {
       nv.drawScene();
       console.log("mesh opactiy is updated", mesh);
     },
-    [activeMesh, nv]
+    [activeMesh, nv],
   );
 
   const updateMeshLayerOpacity = useCallback(
@@ -392,7 +392,7 @@ function App() {
       mesh.updateMesh(nv.gl);
       nv.drawScene();
     },
-    [activeMesh, activeLayer, nv, layers]
+    [activeMesh, activeLayer, nv, layers],
   );
 
   const updateColormap = useCallback(
@@ -402,7 +402,7 @@ function App() {
       // nv.drawScene();
       setColormap(colormap);
     },
-    [activeImage, nv]
+    [activeImage, nv],
   );
 
   const updateMeshLayerColormap = useCallback(
@@ -415,7 +415,7 @@ function App() {
       mesh.updateMesh(nv.gl);
       nv.drawScene();
     },
-    [activeMesh, activeLayer, nv, layers]
+    [activeMesh, activeLayer, nv, layers],
   );
 
   const setCalMinMax = useCallback(
@@ -426,7 +426,7 @@ function App() {
       setMin(min);
       setMax(max);
     },
-    [activeImage, nv]
+    [activeImage, nv],
   );
 
   const onMosaicChange = (newValue) => {
@@ -695,7 +695,7 @@ function App() {
       });
       setImages(newImages);
     },
-    [images, setActiveImage]
+    [images, setActiveImage],
   );
 
   const toggleActiveMesh = useCallback(
@@ -713,7 +713,7 @@ function App() {
       });
       setMeshes(newMeshes);
     },
-    [meshes, setActiveMesh]
+    [meshes, setActiveMesh],
   );
 
   const getImageList = useCallback(() => {
@@ -783,7 +783,7 @@ function App() {
       }
       setImages(newImages);
     },
-    [nv, getImageList, images, meshes]
+    [nv, getImageList, images, meshes],
   );
 
   const handleRemoveMesh = useCallback(
@@ -805,7 +805,7 @@ function App() {
       setActiveMesh(0);
       setMeshes(newMeshes);
     },
-    [activeMesh, nv]
+    [activeMesh, nv],
   );
 
   const getLayerList = useCallback(
@@ -814,7 +814,7 @@ function App() {
       console.log("mesh from getLayerList", mesh, index);
       return mesh.layers;
     },
-    [nv]
+    [nv],
   );
 
   const handleLayerDropped = useCallback(
@@ -846,7 +846,7 @@ function App() {
               visible: true,
               opacity: l.opacity,
               colormap: l.colormap,
-            }))
+            })),
           );
           setMeshOpacity(layers.get(mesh.id)[activeLayer].opacity);
         }
@@ -854,7 +854,7 @@ function App() {
       };
       reader.readAsArrayBuffer(file);
     },
-    [nv, getMeshList, layers, activeLayer]
+    [nv, getMeshList, layers, activeLayer],
   );
 
   const handleMoveUp = useCallback(
@@ -869,7 +869,7 @@ function App() {
       setActiveImage(0);
       setImages(newImages);
     },
-    [getImageList, nv]
+    [getImageList, nv],
   );
 
   const handleMoveDown = useCallback(
@@ -884,7 +884,7 @@ function App() {
       setActiveImage(0);
       setImages(newImages);
     },
-    [getImageList, nv]
+    [getImageList, nv],
   );
 
   const handleShowHeader = (index) => {
@@ -963,7 +963,7 @@ function App() {
             [dragIndex, 1],
             [hoverIndex, 0, prevImages[dragIndex]],
           ],
-        })
+        }),
       );
       // update the volume order in Niivue
       nv.setVolume(nv.volumes[dragIndex], hoverIndex);
@@ -974,7 +974,7 @@ function App() {
         setActiveImage(dragIndex);
       }
     },
-    [nv, activeImage, setImages, setActiveImage]
+    [nv, activeImage, setImages, setActiveImage],
   );
 
   const renderImage = useCallback(
@@ -1010,7 +1010,7 @@ function App() {
       handleNextFrame,
       handlePreviousFrame,
       moveImage,
-    ]
+    ],
   );
 
   const renderMesh = useCallback(
@@ -1042,7 +1042,7 @@ function App() {
       setLayerVisibility,
       setLayerAsActive,
       layers,
-    ]
+    ],
   );
 
   let imageToolsPanel;
@@ -1192,44 +1192,44 @@ function App() {
     <NV.Provider value={_nv}>
       {/* AppContainer: the parent component that lays out the rest of the scene */}
       {/* <div> */}
-        <Container
-          disableGutters
-          maxWidth={false}
+      <Container
+        disableGutters
+        maxWidth={false}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          width: "100vw",
+          minHeight: "300px",
+          gap: 0,
+        }}
+      >
+        <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100vh",
-            width: "100vw",
-            minHeight: "300px",
-            gap: 0,
+            width: "100%",
+            position: "sticky",
+            top: "0px",
+            bgcolor: "background.paper",
           }}
         >
-          <Box
-            sx={{
-              width: "100%",
-              position: "sticky",
-              top: "0px",
-              bgcolor: "background.paper",
-            }}
+          <Tabs
+            value={activeTab}
+            onChange={handleChange}
+            aria-label="wrapped label tabs example"
           >
-            <Tabs
-              value={activeTab}
-              onChange={handleChange}
-              aria-label="wrapped label tabs example"
-            >
-              <Tab label="Hide" />
-              <Tab label="Volumes" />
-              <Tab label="Meshes" />
-              <Tab label="Settings" />
-            </Tabs>
-            {/* CssBaseline sets some standard CSS configs for working with MUI */}
-            <CssBaseline />
-          </Box>
-          <Box display={"flex"} flexDirection={"row"} height={"100%"}>
+            <Tab label="Hide" />
+            <Tab label="Volumes" />
+            <Tab label="Meshes" />
+            <Tab label="Settings" />
+          </Tabs>
+          {/* CssBaseline sets some standard CSS configs for working with MUI */}
+          <CssBaseline />
+        </Box>
+        <Box display={"flex"} flexDirection={"row"} height={"100%"}>
           {/* Sidebar: is the left panel that shows all files and image/scene widgets */}
           {sideBar}
           {/* Niivue Canvas: where things are rendered :) */}
-          <NiivueCanvas nv={nv} height={"100%"}/>
+          <NiivueCanvas nv={nv} height={"100%"} />
           <ColorPickerDialog
             isOpen={isColorPickerOpen}
             pickedColor={colorPickerColor}
@@ -1247,8 +1247,8 @@ function App() {
               setSceneSettingsOpen(false);
             }}
           />
-          </Box>
-        </Container>
+        </Box>
+      </Container>
       {/* </div> */}
     </NV.Provider>
   );

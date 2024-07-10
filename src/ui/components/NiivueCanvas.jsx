@@ -1,8 +1,13 @@
-import { useRef, useEffect, useState } from 'react';
-import { Niivue, SLICE_TYPE } from '@niivue/niivue'
-import { nvUtils } from '../nvUtils'
+import { useRef, useEffect, useState } from "react";
+import { Niivue, SLICE_TYPE } from "@niivue/niivue";
+import { nvUtils } from "../nvUtils";
 
-export function NiivueCanvas({ nv = null, volumes = [], meshes = [], ...props }) {
+export function NiivueCanvas({
+  nv = null,
+  volumes = [],
+  meshes = [],
+  ...props
+}) {
   const [commsInfo, setCommsInfo] = useState(null);
   const canvas = useRef(null);
 
@@ -118,7 +123,7 @@ export function NiivueCanvas({ nv = null, volumes = [], meshes = [], ...props })
   // useEffect(() => {
   //     if(nv && nvImages){
   //         // load volumes expects an array of object with at LEAST the
-  //         // url and name properties. 
+  //         // url and name properties.
   //         // a useful property to add is the colormap property
   //         // something like this:
   //         // {
@@ -134,22 +139,22 @@ export function NiivueCanvas({ nv = null, volumes = [], meshes = [], ...props })
 
   // if webgl2 is not supported, return null (nothing will be rendered)
   if (!nvUtils.webGL2Supported()) {
-    return (null)
+    return null;
   } else {
     // otherwise return the canvas element
     // with niivue attached
     return (
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
+          display: "flex",
+          flexDirection: "column",
           flexGrow: 1,
           flexShrink: 1,
-          width: '100%',
-          height: '100%',
-          minWidth: '0px',
-          minHeight: '0px',
-          ...props
+          width: "100%",
+          height: "100%",
+          minWidth: "0px",
+          minHeight: "0px",
+          ...props,
         }}
       >
         <canvas
@@ -157,14 +162,12 @@ export function NiivueCanvas({ nv = null, volumes = [], meshes = [], ...props })
           height={480}
           width={640}
           style={{
-            outline: 'none', // remove focus ring
-            minWidth: '0px',
-            minHeight: '0px',
+            outline: "none", // remove focus ring
+            minWidth: "0px",
+            minHeight: "0px",
           }}
-        >
-        </canvas>
-
+        ></canvas>
       </div>
-    )
+    );
   }
 }

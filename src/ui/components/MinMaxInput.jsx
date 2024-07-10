@@ -1,9 +1,9 @@
-import TextField from "@mui/material/TextField"
-import Box from "@mui/material/Box"
-import PropTypes from "prop-types"
+import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
+import PropTypes from "prop-types";
 
 export function MinMaxInput({
-  onSetMinMax = () => { },
+  onSetMinMax = () => {},
   precision = 2,
   min,
   max,
@@ -11,43 +11,44 @@ export function MinMaxInput({
   calMax,
   ...props
 }) {
-
   function handleMinChange(event) {
-    console.log(event.target.value)
-    onSetMinMax(Number(event.target.value), max)
+    console.log(event.target.value);
+    onSetMinMax(Number(event.target.value), max);
   }
 
   function handleMaxChange(event) {
-    console.log(event.target.value)
-    onSetMinMax(min, Number(event.target.value))
+    console.log(event.target.value);
+    onSetMinMax(min, Number(event.target.value));
   }
 
   // on double click, set the min to the cal_min to reset
   function handleMinDoubleClick() {
-    onSetMinMax(calMin, max)
+    onSetMinMax(calMin, max);
   }
 
   // on double click, set the max to the cal_max to reset
   function handleMaxDoubleClick() {
-    onSetMinMax(min, calMax)
+    onSetMinMax(min, calMax);
   }
 
   return (
     <Box
       sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: '100%',
-        minHeight: '50px',
-        ...props
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        width: "100%",
+        minHeight: "50px",
+        ...props,
       }}
     >
       <TextField
-        sx={{
-          // minWidth: '50%',
-        }}
+        sx={
+          {
+            // minWidth: '50%',
+          }
+        }
         id="min-number"
         label="Min"
         helperText="double click to reset"
@@ -57,7 +58,7 @@ export function MinMaxInput({
         inputProps={{
           min: calMin,
           max: calMax,
-          type: 'number'
+          type: "number",
         }}
         variant="standard"
         size="small"
@@ -65,9 +66,11 @@ export function MinMaxInput({
         onDoubleClick={handleMinDoubleClick}
       />
       <TextField
-        sx={{
-          // minWidth: '50%',
-        }}
+        sx={
+          {
+            // minWidth: '50%',
+          }
+        }
         id="max-number"
         label="Max"
         helperText="double click to reset"
@@ -76,7 +79,7 @@ export function MinMaxInput({
         inputProps={{
           min: calMin,
           max: calMax,
-          type: 'number'
+          type: "number",
         }}
         variant="standard"
         size="small"
@@ -84,7 +87,7 @@ export function MinMaxInput({
         onDoubleClick={handleMaxDoubleClick}
       />
     </Box>
-  )
+  );
 }
 
 MinMaxInput.propTypes = {
@@ -93,5 +96,5 @@ MinMaxInput.propTypes = {
   min: PropTypes.number,
   max: PropTypes.number,
   calMin: PropTypes.number,
-  calMax: PropTypes.number
-}
+  calMax: PropTypes.number,
+};

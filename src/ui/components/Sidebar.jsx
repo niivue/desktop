@@ -6,22 +6,21 @@ export function Sidebar({ children, asColumn = true, ...props }) {
   return (
     <Box
       sx={{
-        display: 'flex',
-        flexDirection: asColumn ? 'column' : 'row',
-        alignItems: 'flex-start',
-        height: '100%',
-        minHeight: '100%',
+        display: "flex",
+        flexDirection: asColumn ? "column" : "row",
+        alignItems: "flex-start",
+        height: "100%",
+        minHeight: "100%",
         minWidth: Math.round(window.screen.width * 0.3), // calculate 20% of the window width
         maxWidth: Math.round(window.screen.width * 0.3), // calculate 30% of the window width
-        backgroundColor: 'white',
+        backgroundColor: "white",
         padding: 1,
-        overflowY: 'scroll',
-        overflowX: 'hidden',
+        overflowY: "scroll",
+        overflowX: "hidden",
         gap: 1,
-        ...props
+        ...props,
       }}
     >
-      
       {children}
     </Box>
   );
@@ -30,4 +29,4 @@ export function Sidebar({ children, asColumn = true, ...props }) {
 Sidebar.propTypes = {
   children: PropTypes.node,
   asColumn: PropTypes.bool,
-}
+};
