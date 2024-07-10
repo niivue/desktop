@@ -42,7 +42,7 @@ const nvVolumeFilters = [
  * @property {string} name - The name of the filter.
  * @property {Array<string>} extensions - The extensions for the filter.
  */
-const nvSurfaceFilters = [
+const nvMeshFilters = [
   { name: 'Surface types', extensions: [
     'gz',
     'jcon',
@@ -156,6 +156,10 @@ function registerIpcListeners() {
     }
     ipcMain.handle(key, handler);
   }
+
+  // register one off handlers
+  ipcMain.handle('openAddMeshLayersFileDialog', openAddMeshLayersFileDialog);
+  
 }
 
 /**
@@ -243,6 +247,16 @@ async function onLoadVolumesClick() {
 }
 
 
+async function onLoadMeshesClick() {
+  let files = await events.openFileDialog(filters=nvMeshFilters);
+  mainWindow.webContents.send('loadMeshes', files.filePaths);
+}
+
+async function openAddMeshLayersFileDialog() {
+  let files = await events.openFileDialog(filters=nvMeshFilters);
+  mainWindow.webContents.send('loadMeshLayers', files.filePaths);
+}
+
 
 async function onSaveBitmapClick() {
   /*let savePath = await  dialog.showSaveDialog({
@@ -265,9 +279,9 @@ async function onSaveBitmapClick() {
  * @async
  * @function
  */
-async function onLoadSurfacesClick() {
-  let files = await events.openFileDialog(filters=nvSurfaceFilters);
-  mainWindow.webContents.send('loadSurfaces', files.filePaths);
+async function onLoadMeshesClick() {
+  let files = await events.openFileDialog(filters=nvMeshFilters);
+  mainWindow.webContents.send('loadMeshes', files.filePaths);
 }
 
 /**
@@ -309,6 +323,15 @@ async function onSetViewClick(view) {
 async function onSetVolOptClick(opt) {
   let val = Menu.getApplicationMenu().getMenuItemById(opt).checked
   mainWindow.webContents.send('setOpt', [opt, val]);
+}
+
+
+/**
+ * Opens settings dialog
+ */
+async function onSettingsClick() {
+  console.log('open settings clicked');
+  mainWindow.webContents.send('openSettings');  
 }
 
 /**
@@ -410,6 +433,14 @@ let menu = [
           await onLoadVolumesClick();
         }
       },
+      // load meshes
+      {
+        label: 'Load meshes',
+        id: 'loadMeshes',
+        click: async () => {
+          await onLoadMeshesClick();
+        }
+      },
       // load mosaic string
       {
         label: 'Load mosaic string',
@@ -424,23 +455,16 @@ let menu = [
         click: async () => {
           await onLoadDocumentClick();
         }
-      },
+      },      
       // close all volumes
       {
-        label: 'Close all volumes',
+        label: 'Close all images',
         id: 'closeAllVolumes',
         click: async () => {
           await onCloseAllVolumesClick();
         }
       },
-      // load surfaces
-      // {
-      //   label: 'Load surfaces',
-      //   id: 'loadSurfaces',
-      //   click: async () => {
-      //     await onLoadSurfacesClick();
-      //   }
-      // },
+      
       { type: 'separator' },
       {
         label: 'Save bitmap',
@@ -840,58 +864,6 @@ let menu = [
     ]
   },
 
-
-  // add color menu
-  {
-    label: 'Color',
-    submenu: [
-      {
-        label: 'Background',
-        id: 'backColor',
-        click: async () => {
-          onSetColorOptClick('backColor');
-        },
-      },
-      {
-        label: 'Crosshair',
-        id: 'crosshairColor',
-        click: async () => {
-          onSetColorOptClick('crosshairColor');
-        },
-      },
-      {
-        label: 'Font',
-        id: 'fontColor',
-        click: async () => {
-          onSetColorOptClick('fontColor');
-        },
-      },
-      
-      {
-        label: 'Ruler',
-        id: 'rulerColor',
-        click: async () => {
-          onSetColorOptClick('rulerColor');
-        },
-      },
-      
-      {
-        label: 'Clip plane',
-        id: 'clipPlaneColor',
-        click: async () => {
-          onSetColorOptClick('clipPlaneColor');
-        },
-      },
-      
-      {
-        label: 'Selection box',
-        id: 'selectionBoxColor',
-        click: async () => {
-          onSetColorOptClick('selectionBoxColor');
-        },
-      },
-    ]
-  },
   // add window menu with reload options
   {
     label: 'Window',

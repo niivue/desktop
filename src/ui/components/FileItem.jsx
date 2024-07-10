@@ -180,21 +180,7 @@ export function FileItem({
         >
           {basename(name)}
         </Typography>
-      </Tooltip>
-      {/* very small Typography to indicate if mesh or volume */}
-      {/* "mesh" or "volume" will be placed in the bottom right corner */}
-      <Typography
-        sx={{
-          fontSize: '0.5em',
-          position: 'relative',
-          color: '#666666',
-          alignSelf: 'flex-end',
-        }}
-      >
-        {/* TODO: support all niivue volume and mesh file types */}
-        {name.includes('.nii') ? 'volume' : 'mesh'}
-        {/* {maxFrame > 1 ? ` (${frame}/${maxFrame})` : ''} */}
-      </Typography>
+      </Tooltip>      
       <Menu
         open={contextMenu !== null}
         onClose={handleClose}
