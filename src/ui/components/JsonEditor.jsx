@@ -52,7 +52,20 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title }) => {
   }, [initialJsonObject]);
 
   const handleChange = (e, key) => {
-    const { value } = e.target;
+    let { value } = e.target;
+    if(typeof jsonObject[key] === 'number') {
+      const n = Number(value);
+      if(n && n % 1 === 0) {
+        value = Number.parseInt(value);
+      }
+      else {
+        value = Number.parseFloat(value);
+      }
+      
+    }
+
+    console.log('element', e);
+    console.log('typeof value', typeof value);
     const updatedJsonObject = {
       ...jsonObject,
       [key]: value,
@@ -136,6 +149,36 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title }) => {
                     onChange={(colorArray) =>
                       handleColorChange(colorArray, key)
                     }
+                  />
+                </Box>
+              ) : typeof jsonObject[key] === "number" ? (
+                <Box sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}>
+                <Typography variant="subtitle1">
+                    {translateCamlCaseToTitleCase(key)}
+                  </Typography>
+                  <TextField
+                    size="small"
+                    sx={{
+                      textAlign: "right",
+                      float: "right",
+                      direction: "rtl",
+                    }}
+                    type="number"
+                    variant="outlined"
+                    inputProps={{
+                      step: jsonObject[key] % 1 === 0 ? 1 : 0.05
+                    }}
+                    value={
+                      null === jsonObject[key] || Number.isNaN(jsonObject[key])
+                        ? 0
+                        : jsonObject[key]
+                    }
+                    onChange={(e) => handleChange(e, key)}
                   />
                 </Box>
               ) : (
