@@ -199,7 +199,7 @@ function App() {
 
     setActiveTab(newValue);
     setSidebarContent(newImageType);
-    window.resizeTo(window.width, window.height);
+    // window.resizeTo(window.width, window.height);
   };
 
   const handleClickTab = (index) => {
@@ -212,7 +212,7 @@ function App() {
 
   const toggleSidebarContent = useCallback(
     (content) => {
-      window.resizeTo(window.width, window.height);
+      // window.resizeTo(window.width, window.height);
       if (sidebarContent === content) {
         setSidebarContent(NONE);
         setActiveImageType(NONE);
@@ -1191,7 +1191,7 @@ function App() {
     // wrap the app in the Niivue context
     <NV.Provider value={_nv}>
       {/* AppContainer: the parent component that lays out the rest of the scene */}
-      <div>
+      {/* <div> */}
         <Container
           disableGutters
           maxWidth={false}
@@ -1249,7 +1249,7 @@ function App() {
           />
           </Box>
         </Container>
-      </div>
+      {/* </div> */}
     </NV.Provider>
   );
 }
