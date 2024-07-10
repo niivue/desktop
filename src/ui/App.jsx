@@ -1229,7 +1229,7 @@ function App() {
           {/* Sidebar: is the left panel that shows all files and image/scene widgets */}
           {sideBar}
           {/* Niivue Canvas: where things are rendered :) */}
-          <NiivueCanvas nv={nv} />
+          <NiivueCanvas nv={nv} height={"100%"}/>
           <ColorPickerDialog
             isOpen={isColorPickerOpen}
             pickedColor={colorPickerColor}
