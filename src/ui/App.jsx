@@ -1202,6 +1202,7 @@ function App() {
           width: "100vw",
           minHeight: "300px",
           gap: 0,
+          overflow: "hidden"
         }}
       >
         <Box
