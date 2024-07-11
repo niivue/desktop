@@ -107,8 +107,7 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title }) => {
   };
 
   return (
-    <Container>
-      <Box sx={{ mt: 4 }}>
+      <Box>
         <Typography variant="h4" component="h1" gutterBottom>
           {title}
         </Typography>
@@ -222,7 +221,6 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title }) => {
           </Paper>
         </Box>
       </Box>
-    </Container>
   );
 };
 
