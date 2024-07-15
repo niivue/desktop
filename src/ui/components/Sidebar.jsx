@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 export function Sidebar({ children, asColumn = true, ...props }) {
   return (
     <Box
+      disableGutters
       sx={{
         display: "flex",
         flexDirection: asColumn ? "column" : "row",
@@ -14,10 +15,10 @@ export function Sidebar({ children, asColumn = true, ...props }) {
         minWidth: Math.round(window.screen.width * 0.3), // calculate 20% of the window width
         maxWidth: Math.round(window.screen.width * 0.3), // calculate 30% of the window width
         backgroundColor: "white",
-        padding: 1,
+        padding: 0,
         overflowY: "scroll",
         overflowX: "hidden",
-        gap: 1,
+        gap: 1,        
         ...props,
       }}
     >
