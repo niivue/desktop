@@ -1258,7 +1258,7 @@ function App() {
             </Fragment>
           ))}
         </Box>
-        <Box display={"flex"} flexDirection={"row"} height={"100%"} disableGutters >
+        <Box display={"flex"} flexDirection={"row"} height={"100%"} >
           {/* Sidebar: is the left panel that shows all files and image/scene widgets */}
           {sideBar}
           {/* Niivue Canvas: where things are rendered :) */}

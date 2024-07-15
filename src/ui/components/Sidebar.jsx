@@ -5,7 +5,6 @@ import PropTypes from "prop-types";
 export function Sidebar({ children, asColumn = true, ...props }) {
   return (
     <Box
-      disableGutters
       sx={{
         display: "flex",
         flexDirection: asColumn ? "column" : "row",
