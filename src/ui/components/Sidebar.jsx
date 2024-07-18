@@ -17,6 +17,7 @@ export function Sidebar({ children, asColumn = true, ...props }) {
         overflowY: "scroll",
         overflowX: "hidden",
         gap: 1,
+        paddingRight: "20px",
         ...props,
       }}
     >

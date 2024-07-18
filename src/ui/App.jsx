@@ -1141,7 +1141,7 @@ function App() {
   switch (sidebarContent) {
     case VOLUME:
       sideBar = (
-        <Sidebar paddingRight={"20px"}>
+        <Sidebar>
           <Typography
             variant="body"
             sx={{
