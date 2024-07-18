@@ -203,7 +203,7 @@ function App() {
 
   const toggleSidebarContent = useCallback(
     (content) => {
-      window.resizeTo(window.width, window.height);
+
       if (sidebarContent === content) {
         setSidebarContent(NONE);
         setActiveImageType(NONE);
@@ -898,6 +898,7 @@ function App() {
   };
 
   const toggleDrawer = (anchor) => (event) => {
+
     if (
       event.type === "keydown" &&
       (event.key === "Tab" || event.key === "Shift")
@@ -923,8 +924,8 @@ function App() {
       settings: false,
       [anchor]: !sideBarState[anchor],
     });
-    toggleSidebarContent(content);
 
+    toggleSidebarContent(content);
     // alert('anchor ' + anchor + ' is ' + open)
   };
 
@@ -1140,7 +1141,7 @@ function App() {
   switch (sidebarContent) {
     case VOLUME:
       sideBar = (
-        <Sidebar>
+        <Sidebar paddingRight={"20px"}>
           <Typography
             variant="body"
             sx={{
@@ -1223,7 +1224,7 @@ function App() {
           height: "100vh",
           width: "100vw",
           minHeight: "300px",
-          paddingTop: "50px"          
+          paddingTop: "50px"
         }}
       >
         {/* CssBaseline sets some standard CSS configs for working with MUI */}
@@ -1258,11 +1259,11 @@ function App() {
             </Fragment>
           ))}
         </Box>
-        <Box display={"flex"} flexDirection={"row"} height={"100%"} >
+        <Box display={"flex"} flexDirection={"row"} height={"100%"} gap={"20px"} width={"100vw"} >
           {/* Sidebar: is the left panel that shows all files and image/scene widgets */}
           {sideBar}
           {/* Niivue Canvas: where things are rendered :) */}
-          <NiivueCanvas nv={nv}/>
+          <NiivueCanvas nv={nv} flex={"1"} />
           <ColorPickerDialog
             isOpen={isColorPickerOpen}
             pickedColor={colorPickerColor}
