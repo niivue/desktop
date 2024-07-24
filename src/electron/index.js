@@ -1,14 +1,12 @@
-const { app, BrowserWindow, Menu, ipcMain, dialog} = require('electron');
-const path = require('path');
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require("electron");
+const path = require("path");
 const { fork } = require("child_process");
-const {devPorts} = require('./devPorts');
-const {events} = require('./events');
-const parseArgs = require('minimist');
-const args = parseArgs(process.argv.slice(2),
-  {
-    boolean: ['dev']
-  }
-);
+const { devPorts } = require("./devPorts");
+const { events } = require("./events");
+const parseArgs = require("minimist");
+const args = parseArgs(process.argv.slice(2), {
+  boolean: ["dev"],
+});
 
 /**
  * the filters for the volume file dialog
@@ -17,23 +15,25 @@ const args = parseArgs(process.argv.slice(2),
  * @property {Array<string>} extensions - The extensions for the filter.
  */
 const nvVolumeFilters = [
-  { name: 'Volume types', extensions: [
-    'nii',
-    'nii.gz',
-    'mih',
-    'mif',
-    'nrrd',
-    'nhdr',
-    'mhd',
-    'mha',
-    'mgh',
-    'mgz',
-    'v',
-    'v16',
-    'vmr',
-    'HEAD', // afni HEAD/BRIK
-    ] 
-  }
+  {
+    name: "Volume types",
+    extensions: [
+      "nii",
+      "nii.gz",
+      "mih",
+      "mif",
+      "nrrd",
+      "nhdr",
+      "mhd",
+      "mha",
+      "mgh",
+      "mgz",
+      "v",
+      "v16",
+      "vmr",
+      "HEAD", // afni HEAD/BRIK
+    ],
+  },
 ];
 
 /**
@@ -43,32 +43,34 @@ const nvVolumeFilters = [
  * @property {Array<string>} extensions - The extensions for the filter.
  */
 const nvMeshFilters = [
-  { name: 'Surface types', extensions: [
-    'gz',
-    'jcon',
-    'json',
-    'tck',
-    'trk',
-    'trx',
-    'tract',
-    'gii',
-    'mz3',  
-    'asc',
-    'dfs',
-    'byu',
-    'geo',
-    'ico',
-    'off',
-    'nv',
-    'obj',
-    'ply',
-    'x3d',
-    'fib',
-    'vtk',
-    'srf',
-    'stl'
-    ]
-  }
+  {
+    name: "Surface types",
+    extensions: [
+      "gz",
+      "jcon",
+      "json",
+      "tck",
+      "trk",
+      "trx",
+      "tract",
+      "gii",
+      "mz3",
+      "asc",
+      "dfs",
+      "byu",
+      "geo",
+      "ico",
+      "off",
+      "nv",
+      "obj",
+      "ply",
+      "x3d",
+      "fib",
+      "vtk",
+      "srf",
+      "stl",
+    ],
+  },
 ];
 
 /**
@@ -83,10 +85,9 @@ let mainWindow = {};
  * @see https://nodejs.org/api/child_process.html#child_process_child_process_fork_modulepath_args_options
  */
 // launch the fileServer as a background process
-fileServer = fork(
-  path.join(__dirname, "fileServer.js"),
-  { env: { FORK: true } }
-);
+fileServer = fork(path.join(__dirname, "fileServer.js"), {
+  env: { FORK: true },
+});
 
 /**
  * handles setting the process env variables for the fileServer port and host
@@ -96,7 +97,7 @@ fileServer = fork(
  */
 function onFileServerPort(port) {
   process.env.NIIVUE_FILESERVER_PORT = port;
-  process.env.NIIVUE_HOST = 'localhost';
+  process.env.NIIVUE_HOST = "localhost";
 }
 
 // handler function for the fileServer port message
@@ -121,7 +122,6 @@ fileServer.on("message", (message) => {
   handleFileServerMessage(message);
 });
 
-
 /**
  * Determines if the application is running in development mode.
  * @returns {boolean} True if the application is running in development mode, false otherwise.
@@ -131,7 +131,7 @@ function isDev() {
   // the first two are the path to the node executable and the path to the script being run
   // the third is the first argument passed to the app
   // if it's "--dev", we're in development mode
-  return args['dev']; //process.argv[2] === '--dev';
+  return args["dev"]; //process.argv[2] === '--dev';
 }
 
 /**
@@ -158,15 +158,14 @@ function registerIpcListeners() {
   }
 
   // register one off handlers
-  ipcMain.handle('openAddMeshLayersFileDialog', openAddMeshLayersFileDialog);
-  
+  ipcMain.handle("openAddMeshLayersFileDialog", openAddMeshLayersFileDialog);
 }
 
 /**
  * Creates a new browser window for the specified GUI.
  * @param {string} guiName - The name of the GUI to create a window for.
  */
-function createWindow(guiName="niivue") {
+function createWindow(guiName = "niivue") {
   // could eventually add a "settings" GUI name too
   // that would be a separate window for settings
 
@@ -175,7 +174,7 @@ function createWindow(guiName="niivue") {
     width: 1000,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
@@ -183,48 +182,52 @@ function createWindow(guiName="niivue") {
     try {
       mainWindow.loadURL(`http://localhost:${devPorts[guiName]}`);
     } catch (err) {
-      console.log(`Error loading ${guiName} at http://localhost:${devPorts[guiName]}`);
+      console.log(
+        `Error loading ${guiName} at http://localhost:${devPorts[guiName]}`,
+      );
       console.log(err);
     }
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
   } else {
     // load the index.html of the app
-    mainWindow.loadFile(path.join(__dirname, 'ui', 'index.html'));
+    mainWindow.loadFile(path.join(__dirname, "ui", "index.html"));
   }
-};
+}
 
 async function loadCliVolumes() {
   let cliImages = args._;
   if (cliImages.length > 0) {
     // wait for the main window to finish loading before sending the loadVolumes message
     // or else the message will be lost
-    mainWindow.webContents.on('did-finish-load', async () => {
-      // if passing in cliImages to openFileDialog, we don't actually show the 
+    mainWindow.webContents.on("did-finish-load", async () => {
+      // if passing in cliImages to openFileDialog, we don't actually show the
       // dialog, we just return the cliImages with the same object formatting as the dialog
-      let result = await events.openFileDialog(filters=nvVolumeFilters, cliImages=cliImages);
-      mainWindow.webContents.send('loadVolumes', result.filePaths);
-    })
+      let result = await events.openFileDialog(
+        (filters = nvVolumeFilters),
+        (cliImages = cliImages),
+      );
+      mainWindow.webContents.send("loadVolumes", result.filePaths);
+    });
   }
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', async ()=>{
+app.on("ready", async () => {
   // register event handlers
   registerIpcListeners();
   // create the main window
   createWindow();
   // load cli volumes
   loadCliVolumes();
-  
 });
 
 // Quit when all windows are closed
-app.on('window-all-closed', () => {
+app.on("window-all-closed", () => {
   // close the file server gracefully
-  fileServer.kill()
+  fileServer.kill();
   app.quit();
 });
 
@@ -242,21 +245,19 @@ app.on('window-all-closed', () => {
  * // and the main window receives a loadVolumes message with ['file1.nii.gz', 'file2.nii.gz']
  */
 async function onLoadVolumesClick() {
-  let files = await events.openFileDialog(filters=nvVolumeFilters);
-  mainWindow.webContents.send('loadVolumes', files.filePaths);
+  let files = await events.openFileDialog((filters = nvVolumeFilters));
+  mainWindow.webContents.send("loadVolumes", files.filePaths);
 }
 
-
 async function onLoadMeshesClick() {
-  let files = await events.openFileDialog(filters=nvMeshFilters);
-  mainWindow.webContents.send('loadMeshes', files.filePaths);
+  let files = await events.openFileDialog((filters = nvMeshFilters));
+  mainWindow.webContents.send("loadMeshes", files.filePaths);
 }
 
 async function openAddMeshLayersFileDialog() {
-  let files = await events.openFileDialog(filters=nvMeshFilters);
-  mainWindow.webContents.send('loadMeshLayers', files.filePaths);
+  let files = await events.openFileDialog((filters = nvMeshFilters));
+  mainWindow.webContents.send("loadMeshLayers", files.filePaths);
 }
-
 
 async function onSaveBitmapClick() {
   /*let savePath = await  dialog.showSaveDialog({
@@ -270,7 +271,7 @@ async function onSaveBitmapClick() {
   let str = 'nv.saveScene("' + savePath.filePath+ '")'
   console.log(str)
   mainWindow.webContents.send('setEvalStr', str);*/
-  mainWindow.webContents.send('setEvalStr', 'nv.saveScene("ScreenShot.png")');
+  mainWindow.webContents.send("setEvalStr", 'nv.saveScene("ScreenShot.png")');
 }
 
 /**
@@ -280,8 +281,8 @@ async function onSaveBitmapClick() {
  * @function
  */
 async function onLoadMeshesClick() {
-  let files = await events.openFileDialog(filters=nvMeshFilters);
-  mainWindow.webContents.send('loadMeshes', files.filePaths);
+  let files = await events.openFileDialog((filters = nvMeshFilters));
+  mainWindow.webContents.send("loadMeshes", files.filePaths);
 }
 
 /**
@@ -291,17 +292,17 @@ async function onLoadMeshesClick() {
  * @function
  */
 async function onAddVolumeOverlayClick() {
-  let files = await events.openFileDialog(filters=nvVolumeFilters);
+  let files = await events.openFileDialog((filters = nvVolumeFilters));
   // send just the first file to the main window, since we only want to add one overlay at a time
-  mainWindow.webContents.send('addVolumeOverlay', files.filePaths[0]);
+  mainWindow.webContents.send("addVolumeOverlay", files.filePaths[0]);
 }
 
 // open a standard template image shipped with the app
 async function openStandard(fileName) {
-  let file = path.join(__dirname, 'images', 'standard', fileName);
+  let file = path.join(__dirname, "images", "standard", fileName);
   // get the absolute path to the file
   file = path.resolve(file);
-  mainWindow.webContents.send('loadVolumes', [file]);
+  mainWindow.webContents.send("loadVolumes", [file]);
 }
 
 /**
@@ -311,7 +312,7 @@ async function openStandard(fileName) {
  * @function
  */
 async function onSetViewClick(view) {
-  mainWindow.webContents.send('setView', view);
+  mainWindow.webContents.send("setView", view);
 }
 
 /**
@@ -321,17 +322,16 @@ async function onSetViewClick(view) {
  * @function
  */
 async function onSetVolOptClick(opt) {
-  let val = Menu.getApplicationMenu().getMenuItemById(opt).checked
-  mainWindow.webContents.send('setOpt', [opt, val]);
+  let val = Menu.getApplicationMenu().getMenuItemById(opt).checked;
+  mainWindow.webContents.send("setOpt", [opt, val]);
 }
-
 
 /**
  * Opens settings dialog
  */
 async function onSettingsClick() {
-  console.log('open settings clicked');
-  mainWindow.webContents.send('openSettings');  
+  console.log("open settings clicked");
+  mainWindow.webContents.send("openSettings");
 }
 
 /**
@@ -342,37 +342,33 @@ async function onSettingsClick() {
  * @function
  */
 async function onSetNumberOptClick(opt, numericScale = 1.0) {
-  let val = Menu.getApplicationMenu().getMenuItemById(opt).checked
+  let val = Menu.getApplicationMenu().getMenuItemById(opt).checked;
   if (isFinite(numericScale)) {
-    if (val === true)
-        val = numericScale
-    else
-        val = 0.0
+    if (val === true) val = numericScale;
+    else val = 0.0;
   }
-  mainWindow.webContents.send('setOpt', [opt, val]);
+  mainWindow.webContents.send("setOpt", [opt, val]);
 }
 
-
 async function onSetDrawPenClick(penColor = Infinity) {
-  mainWindow.webContents.send('setDrawPen', penColor);
+  mainWindow.webContents.send("setDrawPen", penColor);
 }
 
 async function onPickColorClick() {
-  mainWindow.webContents.send('pickColor');
+  mainWindow.webContents.send("pickColor");
 }
 
 async function onCheckClick(opt) {
-  let val = Menu.getApplicationMenu().getMenuItemById(opt).checked
-  let str = ''
-  if (opt === 'drawFilled')
-    str = 'nv.opts.isFilledPen = ' + val.toString()
-  if (opt === 'drawOverwrite')
-    str = 'nv.drawFillOverwrites = ' + val.toString()
-  if (opt === 'drawTranslucent') {
-    var f = val ? '0.8' : '1.0';
-    str = 'nv.drawOpacity = ' + f + '; nv.drawScene()'
+  let val = Menu.getApplicationMenu().getMenuItemById(opt).checked;
+  let str = "";
+  if (opt === "drawFilled") str = "nv.opts.isFilledPen = " + val.toString();
+  if (opt === "drawOverwrite")
+    str = "nv.drawFillOverwrites = " + val.toString();
+  if (opt === "drawTranslucent") {
+    var f = val ? "0.8" : "1.0";
+    str = "nv.drawOpacity = " + f + "; nv.drawScene()";
   }
-  mainWindow.webContents.send('setEvalStr', str);
+  mainWindow.webContents.send("setEvalStr", str);
 }
 
 /**
@@ -382,113 +378,111 @@ async function onCheckClick(opt) {
  * @function
  */
 async function onSetColorOptClick(opt) {
-  console.log('getting', opt)
+  console.log("getting", opt);
   //https://github.com/electron/electron/issues/2473
   //https://www.npmjs.com/package/electron-color-picker/v/0.1.1?activeTab=readme
-  let val = await mainWindow.webContents.send('getOpt', [opt]);
-  console.log('ret', val)
-  val = [0.0, 1.0, 0.0, 1.0]
-  mainWindow.webContents.send('setOpt', [opt, val]);
+  let val = await mainWindow.webContents.send("getOpt", [opt]);
+  console.log("ret", val);
+  val = [0.0, 1.0, 0.0, 1.0];
+  mainWindow.webContents.send("setOpt", [opt, val]);
 }
 
 // closes all volumes
 // TODO: will need to add a similar function for meshes
 async function onCloseAllVolumesClick() {
-  mainWindow.webContents.send('closeAllVolumes');
+  mainWindow.webContents.send("closeAllVolumes");
 }
 
 // sends a message to save a mosaic string as a text file
 async function onSaveMosaicStringClick() {
-  mainWindow.webContents.send('saveMosaicString');
+  mainWindow.webContents.send("saveMosaicString");
 }
 
 // sends a message to load a mosaic string from a text file
 async function onLoadMosaicStringClick() {
-  mainWindow.webContents.send('loadMosaicString')
+  mainWindow.webContents.send("loadMosaicString");
 }
 
 // sends a message to load a document from a file
 async function onLoadDocumentClick() {
-  mainWindow.webContents.send('loadDocument')
+  mainWindow.webContents.send("loadDocument");
 }
-
 
 // sends a message to save the document as a file
 async function onSaveDocumentClick() {
-  mainWindow.webContents.send('saveDocument')
+  mainWindow.webContents.send("saveDocument");
 }
-
 
 // create an application menu
 let menu = [
   // add file menu with load volumes option
   {
-    label: 'File',
+    label: "File",
     submenu: [
       // load volumes
       {
-        label: 'Load volumes',
-        id: 'loadVolumes',
+        label: "Load volumes",
+        id: "loadVolumes",
         click: async () => {
           await onLoadVolumesClick();
-        }
+        },
       },
       // load meshes
       {
-        label: 'Load meshes',
-        id: 'loadMeshes',
+        label: "Load meshes",
+        id: "loadMeshes",
         click: async () => {
           await onLoadMeshesClick();
-        }
+        },
       },
       // load mosaic string
       {
-        label: 'Load mosaic string',
-        id: 'loadMosaicString',
+        label: "Load mosaic string",
+        id: "loadMosaicString",
         click: async () => {
           await onLoadMosaicStringClick();
-        }
+        },
       },
       {
-        label: 'Load document',
-        id: 'loadDocument',
+        label: "Load document",
+        id: "loadDocument",
         click: async () => {
           await onLoadDocumentClick();
-        }
-      },      
+        },
+      },
       // close all volumes
       {
-        label: 'Close all images',
-        id: 'closeAllVolumes',
+        label: "Close all images",
+        id: "closeAllVolumes",
         click: async () => {
           await onCloseAllVolumesClick();
-        }
+        },
       },
-      
-      { type: 'separator' },
+
+      { type: "separator" },
       {
-        label: 'Save bitmap',
-        id: 'saveBitmap',
+        label: "Save bitmap",
+        id: "saveBitmap",
         click: async () => {
           await onSaveBitmapClick();
-        }
+        },
       },
       {
-        label: 'Save mosaic string',
-        id: 'saveMosaic',
+        label: "Save mosaic string",
+        id: "saveMosaic",
         click: async () => {
           await onSaveMosaicStringClick();
-        }
+        },
       },
       {
-        label: 'Save document',
-        id: 'saveDocument',
+        label: "Save document",
+        id: "saveDocument",
         click: async () => {
           await onSaveDocumentClick();
-        }
+        },
       },
       // separator
-      { type: 'separator' },
+      { type: "separator" },
       // add volume overlay
       // {
       //   label: 'Add volume overlay',
@@ -501,17 +495,17 @@ let menu = [
       // { type: 'separator' },
       // open standard
       {
-        label: 'Open standard',
-        id: 'openStandard',
+        label: "Open standard",
+        id: "openStandard",
         submenu: [
           {
-            label: 'mni152',
-            id: 'mni152',
+            label: "mni152",
+            id: "mni152",
             click: async () => {
-              await openStandard('mni152.nii.gz');
-            }
-          }
-        ]
+              await openStandard("mni152.nii.gz");
+            },
+          },
+        ],
       },
       // add surface overlay
       // TODO: this should prob be a separate submenu on each surface item to add mesh overlays
@@ -522,117 +516,117 @@ let menu = [
       //     await onAddSurfaceOverlayClick();
       //   }
       // },
-    ]
+    ],
   },
   // add view menu with view options
   {
-    label: 'View',
+    label: "View",
     submenu: [
       {
-        label: 'Render',
-        id: 'renderView',
+        label: "Render",
+        id: "renderView",
         click: async () => {
-          onSetViewClick('render');
+          onSetViewClick("render");
         },
-        type: 'radio',
+        type: "radio",
         // set accelerator to to option+r
-        accelerator: 'Option+R'
+        accelerator: "Option+R",
       },
       {
-        label: 'Axial',
-        id: 'axialView',
+        label: "Axial",
+        id: "axialView",
         click: async () => {
-          onSetViewClick('axial');
+          onSetViewClick("axial");
         },
-        type: 'radio',
-        accelerator: 'Option+A'
+        type: "radio",
+        accelerator: "Option+A",
       },
       {
-        label: 'Sagittal',
-        id: 'sagittalView',
+        label: "Sagittal",
+        id: "sagittalView",
         click: async () => {
-          onSetViewClick('sagittal');
+          onSetViewClick("sagittal");
         },
-        type: 'radio',
-        accelerator: 'Option+S'
+        type: "radio",
+        accelerator: "Option+S",
       },
       {
-        label: 'Coronal',
-        id: 'coronalView',
+        label: "Coronal",
+        id: "coronalView",
         click: async () => {
-          onSetViewClick('coronal');
+          onSetViewClick("coronal");
         },
-        type: 'radio',
-        accelerator: 'Option+C'
+        type: "radio",
+        accelerator: "Option+C",
       },
       {
-        label: 'Multi-planar (A+C+S)',
-        id: 'multiPlanarViewACS',
+        label: "Multi-planar (A+C+S)",
+        id: "multiPlanarViewACS",
         click: async () => {
-          onSetViewClick('multiPlanarACS');
+          onSetViewClick("multiPlanarACS");
         },
-        type: 'radio',
-        accelerator: 'Option+M',
-        checked: true
+        type: "radio",
+        accelerator: "Option+M",
+        checked: true,
       },
       {
-        label: 'Multi-planar (A+C+S+R)',
-        id: 'multiPlanarViewACSR',
+        label: "Multi-planar (A+C+S+R)",
+        id: "multiPlanarViewACSR",
         click: async () => {
-          onSetViewClick('multiPlanarACSR');
+          onSetViewClick("multiPlanarACSR");
         },
-        type: 'radio',
-        accelerator: 'Option+Shift+M'
+        type: "radio",
+        accelerator: "Option+Shift+M",
       },
       // mosaic view requires user supplied strings
       // in the UI
       {
-        label: 'Mosaic',
-        id: 'mosaicView',
+        label: "Mosaic",
+        id: "mosaicView",
         click: async () => {
-          onSetViewClick('mosaic');
+          onSetViewClick("mosaic");
         },
-        type: 'radio',
-        accelerator: 'Option+O'
+        type: "radio",
+        accelerator: "Option+O",
       },
-      { type: 'separator' },
+      { type: "separator" },
       {
-        label: 'Next frame',
-        id: 'nextFrame',
+        label: "Next frame",
+        id: "nextFrame",
         click: async () => {
-          mainWindow.webContents.send('setFrame', 1);
+          mainWindow.webContents.send("setFrame", 1);
         },
-        accelerator: 'Right'
+        accelerator: "Right",
       },
       {
-        label: 'Previous frame',
-        id: 'previousFrame',
+        label: "Previous frame",
+        id: "previousFrame",
         click: async () => {
-          mainWindow.webContents.send('setFrame', -1);
+          mainWindow.webContents.send("setFrame", -1);
         },
-        accelerator: 'Left'
+        accelerator: "Left",
       },
-      { type: 'separator' },
+      { type: "separator" },
       {
-        label: 'Rendering cube visible',
-        id: 'isOrientCube',
+        label: "Rendering cube visible",
+        id: "isOrientCube",
         click: async () => {
-          onSetVolOptClick('isOrientCube');
+          onSetVolOptClick("isOrientCube");
         },
-        type: 'checkbox',
-        checked: false
+        type: "checkbox",
+        checked: false,
       },
 
       {
-        label: 'Colorbar visible',
-        id: 'isColorbar',
+        label: "Colorbar visible",
+        id: "isColorbar",
         click: async () => {
-          onSetVolOptClick('isColorbar');
+          onSetVolOptClick("isColorbar");
         },
-        type: 'checkbox',
-        checked: false
+        type: "checkbox",
+        checked: false,
       },
-      // crosshair 
+      // crosshair
       // {
       //   label: 'Crosshair visible',
       //   id: 'isCrosshair',
@@ -644,277 +638,278 @@ let menu = [
       // },
       // 3D crosshair
       {
-        label: '3D crosshair visible',
-        id: 'show3Dcrosshair',
+        label: "3D crosshair visible",
+        id: "show3Dcrosshair",
         click: async () => {
-          onSetVolOptClick('show3Dcrosshair');
+          onSetVolOptClick("show3Dcrosshair");
         },
-        type: 'checkbox',
-        checked: false
+        type: "checkbox",
+        checked: false,
       },
       // isCornerOrientationText
       {
-        label: 'Corner orientation text',
-        id: 'isCornerOrientationText',
+        label: "Corner orientation text",
+        id: "isCornerOrientationText",
         click: async () => {
-          onSetVolOptClick('isCornerOrientationText');
+          onSetVolOptClick("isCornerOrientationText");
         },
-        type: 'checkbox',
-        checked: false
+        type: "checkbox",
+        checked: false,
       },
-    ]
+    ],
   },
   // add drag menu
   {
-    label: 'Drag',
+    label: "Drag",
     submenu: [
       {
-        label: 'Pan/zoom',
-        id: 'panzoom',
+        label: "Pan/zoom",
+        id: "panzoom",
         click: () => {
-          mainWindow.webContents.send('setDragMode', 'pan');
+          mainWindow.webContents.send("setDragMode", "pan");
         },
-        type: 'radio'
+        type: "radio",
       },
       {
-        label: 'Measure',
-        id: 'measure',
+        label: "Measure",
+        id: "measure",
         click: () => {
-          mainWindow.webContents.send('setDragMode', 'measure');
+          mainWindow.webContents.send("setDragMode", "measure");
         },
-        type: 'radio'
+        type: "radio",
       },
       {
-        label: 'Window/level', // contrast
-        id: 'windowlevel',
+        label: "Window/level", // contrast
+        id: "windowlevel",
         click: () => {
-          mainWindow.webContents.send('setDragMode', 'contrast');
+          mainWindow.webContents.send("setDragMode", "contrast");
         },
-        type: 'radio',
-        checked: true
+        type: "radio",
+        checked: true,
       },
       {
-        label: 'None',
-        id: 'none',
+        label: "None",
+        id: "none",
         click: () => {
-          mainWindow.webContents.send('setDragMode', 'none');
+          mainWindow.webContents.send("setDragMode", "none");
         },
-        type: 'radio'
-      }
-    ]
+        type: "radio",
+      },
+    ],
   },
   // add volume menu with options that influence volumes but not meshes
   {
-    label: 'Volume',
+    label: "Volume",
     submenu: [
       {
-        label: 'Nearest interpolation',
-        id: 'isNearestInterpolation',
+        label: "Nearest interpolation",
+        id: "isNearestInterpolation",
         click: async () => {
-          onSetVolOptClick('isNearestInterpolation');
+          onSetVolOptClick("isNearestInterpolation");
         },
-        type: 'checkbox',
-        checked: false
+        type: "checkbox",
+        checked: false,
       },
       {
-        label: 'Radiological convention',
-        id: 'isRadiologicalConvention',
+        label: "Radiological convention",
+        id: "isRadiologicalConvention",
         click: async () => {
-          onSetVolOptClick('isRadiologicalConvention');
+          onSetVolOptClick("isRadiologicalConvention");
         },
-        type: 'checkbox',
-        checked: false
+        type: "checkbox",
+        checked: false,
       },
       {
-        label: 'Sagittal nose left',
-        id: 'sagittalNoseLeft',
+        label: "Sagittal nose left",
+        id: "sagittalNoseLeft",
         click: async () => {
-          onSetVolOptClick('sagittalNoseLeft');
+          onSetVolOptClick("sagittalNoseLeft");
         },
-        type: 'checkbox',
-        checked: false
+        type: "checkbox",
+        checked: false,
       },
       {
-        label: 'World (not voxel) Space',
-        id: 'isSliceMM',
+        label: "World (not voxel) Space",
+        id: "isSliceMM",
         click: async () => {
-          onSetVolOptClick('isSliceMM');
+          onSetVolOptClick("isSliceMM");
         },
-        type: 'checkbox',
-        checked: false
+        type: "checkbox",
+        checked: false,
       },
       //
       {
-        label: 'Ruler visible',
-        id: 'isRuler',
+        label: "Ruler visible",
+        id: "isRuler",
         click: async () => {
-          onSetVolOptClick('isRuler');
+          onSetVolOptClick("isRuler");
         },
-        type: 'checkbox',
-        checked: false
+        type: "checkbox",
+        checked: false,
       },
       {
-        label: 'Crosshair visible',
-        id: 'crosshairWidth',
+        label: "Crosshair visible",
+        id: "crosshairWidth",
         click: async () => {
-          onSetNumberOptClick('crosshairWidth', 1.0);
+          onSetNumberOptClick("crosshairWidth", 1.0);
         },
-        type: 'checkbox',
-        checked: true
+        type: "checkbox",
+        checked: true,
       },
-    ]
+    ],
   },
   // add draw menu
   {
-    label: 'Draw',
+    label: "Draw",
     submenu: [
       {
-        label: 'Off',
-        id: 'drawOff',
+        label: "Off",
+        id: "drawOff",
         click: async () => {
           onSetDrawPenClick(Infinity);
         },
-        type: 'radio',
-        checked: true
+        type: "radio",
+        checked: true,
       },
       {
-        label: 'Red',
-        id: 'drawRed',
+        label: "Red",
+        id: "drawRed",
         click: async () => {
           onSetDrawPenClick(1);
         },
-        type: 'radio',
+        type: "radio",
       },
       {
-        label: 'Green',
-        id: 'drawGreen',
+        label: "Green",
+        id: "drawGreen",
         click: async () => {
           onSetDrawPenClick(2);
         },
-        type: 'radio',
+        type: "radio",
       },
       {
-        label: 'Blue',
-        id: 'drawBlue',
+        label: "Blue",
+        id: "drawBlue",
         click: async () => {
           onSetDrawPenClick(3);
         },
-        type: 'radio',
+        type: "radio",
       },
       {
-        label: 'Yellow',
-        id: 'drawYellow',
+        label: "Yellow",
+        id: "drawYellow",
         click: async () => {
           onSetDrawPenClick(4);
         },
-        type: 'radio',
+        type: "radio",
       },
       {
-        label: 'Cyan',
-        id: 'drawCyan',
+        label: "Cyan",
+        id: "drawCyan",
         click: async () => {
           onSetDrawPenClick(5);
         },
-        type: 'radio',
+        type: "radio",
       },
       {
-        label: 'Purple',
-        id: 'drawPurple',
+        label: "Purple",
+        id: "drawPurple",
         click: async () => {
           onSetDrawPenClick(6);
         },
-        type: 'radio',
+        type: "radio",
       },
       {
-        label: 'Erase',
-        id: 'drawErase',
+        label: "Erase",
+        id: "drawErase",
         click: async () => {
           onSetDrawPenClick(0);
         },
-        type: 'radio',
+        type: "radio",
       },
-      { type: 'separator' },
+      { type: "separator" },
       {
-        label: 'Filled',
-        id: 'drawFilled',
+        label: "Filled",
+        id: "drawFilled",
         click: async () => {
-          onCheckClick('drawFilled');
+          onCheckClick("drawFilled");
         },
-        type: 'checkbox',
-        checked: false
-      },
-      {
-        label: 'Overwrite',
-        id: 'drawOverwrite',
-        click: async () => {
-          onCheckClick('drawOverwrite');
-        },
-        type: 'checkbox',
-        checked: true
+        type: "checkbox",
+        checked: false,
       },
       {
-        label: 'Translucent',
-        id: 'drawTranslucent',
+        label: "Overwrite",
+        id: "drawOverwrite",
         click: async () => {
-          onCheckClick('drawTranslucent');
+          onCheckClick("drawOverwrite");
         },
-        type: 'checkbox',
-        checked: true
+        type: "checkbox",
+        checked: true,
       },
-    ]
+      {
+        label: "Translucent",
+        id: "drawTranslucent",
+        click: async () => {
+          onCheckClick("drawTranslucent");
+        },
+        type: "checkbox",
+        checked: true,
+      },
+    ],
   },
 
   // add window menu with reload options
   {
-    label: 'Window',
+    label: "Window",
     submenu: [
       {
-        label: 'Reload',
-        accelerator: 'CmdOrCtrl+R',
+        label: "Reload",
+        accelerator: "CmdOrCtrl+R",
         click: () => {
           BrowserWindow.getFocusedWindow().reload();
-        }
+        },
       },
       {
-        label: 'Toggle DevTools',
-        accelerator: 'CmdOrCtrl+Shift+I',
+        label: "Toggle DevTools",
+        accelerator: "CmdOrCtrl+Shift+I",
         click: () => {
           BrowserWindow.getFocusedWindow().toggleDevTools();
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
   // add help menu with link to github issues
   {
-    label: 'Help',
+    label: "Help",
     submenu: [
       {
-        label: 'Report issue',
+        label: "Report issue",
         click: async () => {
-          const { shell } = require('electron');
-          await shell.openExternal('https://github.com/niivue/desktop/issues/new/choose');
-        }
-      }
-    ]
-  }
+          const { shell } = require("electron");
+          await shell.openExternal(
+            "https://github.com/niivue/desktop/issues/new/choose",
+          );
+        },
+      },
+    ],
+  },
 ];
 // Add macOS application menus
-if (process.platform === 'darwin') {
+if (process.platform === "darwin") {
   menu.unshift({
     label: app.name,
     submenu: [
-      { role: 'about' },
-      { type: 'separator' },
-      { role: 'services', submenu: [] },
-      { type: 'separator' },
-      { role: 'hide' },
-      { role: 'hideothers' },
-      { role: 'unhide' },
-      { type: 'separator' },
-      { role: 'quit' }
-    ]
+      { role: "about" },
+      { type: "separator" },
+      { role: "services", submenu: [] },
+      { type: "separator" },
+      { role: "hide" },
+      { role: "hideothers" },
+      { role: "unhide" },
+      { type: "separator" },
+      { role: "quit" },
+    ],
   });
 }
 
 Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
-

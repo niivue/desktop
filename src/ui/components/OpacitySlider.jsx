@@ -1,36 +1,31 @@
-import Slider from "@mui/material/Slider"
-import Typography from "@mui/material/Typography"
-import Box from "@mui/material/Box"
+import Slider from "@mui/material/Slider";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 export function OpacitySlider({
   opacity,
-  onSetOpacity = () => { },
+  onSetOpacity = () => {},
   children,
   ...props
 }) {
-
   function handleOpacityChange(event, value) {
-    console.log(value)
-    onSetOpacity(Number(value))
+    console.log(value);
+    onSetOpacity(Number(value));
   }
   return (
     <Box
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        width: '100%',
-        minHeight: '50px',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        width: "100%",
+        minHeight: "50px",
         gap: 1,
-        ...props
+        ...props,
       }}
     >
-      <Typography
-        variant="body"
-      >
-        Opacity
-      </Typography>
+      <Typography>Opacity</Typography>
       <Slider
         id="opacity-slider"
         label="Opacity"
@@ -43,5 +38,5 @@ export function OpacitySlider({
         onChange={handleOpacityChange}
       />
     </Box>
-  )
+  );
 }

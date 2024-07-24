@@ -6,5 +6,5 @@
  * basename('/path/to/file.txt') // 'file.txt'
  */
 export function basename(path) {
-    return path.split('/').pop();
+  return path.split("/").pop();
 }

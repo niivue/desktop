@@ -62,7 +62,7 @@ export function MeshItem({
             mouseX: event.clientX + 2,
             mouseY: event.clientY - 6,
           }
-        : null
+        : null,
     );
   }
 
@@ -78,17 +78,13 @@ export function MeshItem({
   function handleAddLayer() {
     handleClose();
     onAddLayer(index);
-    setOpen(true);    
+    setOpen(true);
   }
 
   function toggleLayerVisibility(layerIndex) {
     const isVisible = !layers[layerIndex].visible;
 
-    setLayerVisibility(
-      index,
-      layerIndex,
-      isVisible ? 1.0 : 0.0
-    );    
+    setLayerVisibility(index, layerIndex, isVisible ? 1.0 : 0.0);
   }
 
   const handleDrop = (event) => {
@@ -98,7 +94,7 @@ export function MeshItem({
       const newFiles = Array.from(droppedFiles);
       setFiles((prevFiles) => [...prevFiles, ...newFiles]);
       onLayerDropped(index, droppedFiles[0]);
-      
+
       setOpen(true);
     }
 
@@ -139,7 +135,7 @@ export function MeshItem({
             >
               {basename(name)}
             </Typography>
-          </Tooltip>          
+          </Tooltip>
           {open ? <ExpandLess align="right" /> : <ExpandMore align="right" />}
         </ListItemButton>
         <Menu
@@ -161,14 +157,17 @@ export function MeshItem({
               <ListItemButton
                 sx={{ pl: 4 }}
                 key={item.url}
-                onClick={() => {setActiveLayer(index, layerIndex); setLayerVisibility(index, layerIndex, layers[layerIndex].opacity);}}
+                onClick={() => {
+                  setActiveLayer(index, layerIndex);
+                  setLayerVisibility(
+                    index,
+                    layerIndex,
+                    layers[layerIndex].opacity,
+                  );
+                }}
               >
                 <IconButton onClick={() => toggleLayerVisibility(layerIndex)}>
-                  {item.visible ? (
-                    <VisibilityIcon />
-                  ) : (
-                    <VisibilityOffIcon />
-                  )}
+                  {item.visible ? <VisibilityIcon /> : <VisibilityOffIcon />}
                 </IconButton>
                 <ListItemText primary={item.name} />
               </ListItemButton>
@@ -193,5 +192,5 @@ MeshItem.propTypes = {
   setActiveLayer: PropTypes.func,
   getLayerList: PropTypes.func,
   onAddLayer: PropTypes.func,
-  layers: PropTypes.array
+  layers: PropTypes.array,
 };

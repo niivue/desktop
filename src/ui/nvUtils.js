@@ -56,24 +56,24 @@ nvUtils.openSaveFileDialog = async function (defaultPath) {
  * @function
  * @returns {Promise<Object>} A promise that resolves to an object containing the file path and the file name.
  */
-nvUtils.openSaveMosaicFileDialog = async function(defaultPath) {
+nvUtils.openSaveMosaicFileDialog = async function (defaultPath) {
   if (isFunction(NIIVUE.openSaveMosaicFileDialog)) {
     return await NIIVUE.openSaveMosaicFileDialog(defaultPath);
   } else {
     return NIIVUE.openSaveMosaicFileDialog;
   }
-}
+};
 
 nvUtils.onSaveMosaicString = function (callback) {
   if (isFunction(NIIVUE.onSaveMosaicString)) {
     NIIVUE.onSaveMosaicString(callback);
   }
-}
+};
 
-nvUtils.saveTextFile = function(filePath, text) {
-  console.log('saveTextFile', text)
-  NIIVUE.saveTextFile({filePath, text});
-}
+nvUtils.saveTextFile = function (filePath, text) {
+  console.log("saveTextFile", text);
+  NIIVUE.saveTextFile({ filePath, text });
+};
 
 /**
  * opens a save file dialog in the main process with mosaic.txt as default file name
@@ -82,46 +82,44 @@ nvUtils.saveTextFile = function(filePath, text) {
  * @function
  * @returns {Promise<Object>} A promise that resolves to an object containing the file path and the file name.
  */
-nvUtils.openLoadMosaicFileDialog = async function() {
+nvUtils.openLoadMosaicFileDialog = async function () {
   if (isFunction(NIIVUE.openLoadMosaicFileDialog)) {
     return await NIIVUE.openLoadMosaicFileDialog();
   } else {
     return NIIVUE.openLoadMosaicFileDialog;
   }
-}
-
+};
 
 nvUtils.onLoadMosaicString = function (callback) {
   if (isFunction(NIIVUE.onLoadMosaicString)) {
     NIIVUE.onLoadMosaicString(callback);
   }
-}
+};
 
-nvUtils.loadTextFile = async function(textFilePath) {
-  console.log('loadTextFile')
-  return await NIIVUE.loadTextFile(textFilePath)
-}
+nvUtils.loadTextFile = async function (textFilePath) {
+  console.log("loadTextFile");
+  return await NIIVUE.loadTextFile(textFilePath);
+};
 
 nvUtils.onLoadDocument = function (callback) {
   if (isFunction(NIIVUE.onLoadDocument)) {
     NIIVUE.onLoadDocument(callback);
   }
-}
+};
 
 nvUtils.onSaveDocument = function (callback) {
   if (isFunction(NIIVUE.onSaveDocument)) {
     NIIVUE.onSaveDocument(callback);
   }
-}
+};
 
-nvUtils.openMeshLayersFileDialog = async function() {
-  if(isFunction(NIIVUE.openMeshLayersFileDialog)) {
+nvUtils.openMeshLayersFileDialog = async function () {
+  if (isFunction(NIIVUE.openMeshLayersFileDialog)) {
     return await NIIVUE.openMeshLayersFileDialog();
-  }
-  else {
+  } else {
     return NIIVUE.openMeshLayersFileDialog;
   }
-}
+};
 
 /**
  * removes the extension from a string
@@ -165,27 +163,24 @@ nvUtils.onLoadVolumes = function (callback) {
 };
 
 nvUtils.onLoadMeshes = function (callback) {
-  console.log('onload meshes callback called')
+  console.log("onload meshes callback called");
   if (isFunction(NIIVUE.onLoadMeshes)) {
-    console.log('callback defined')
+    console.log("callback defined");
     NIIVUE.onLoadMeshes(callback);
-  }
-  else {
-    console.log('callback not defined')
+  } else {
+    console.log("callback not defined");
   }
 };
 
 nvUtils.onLoadMeshLayers = function (callback) {
-  console.log('onload meshe layers callback called')
+  console.log("onload meshe layers callback called");
   if (isFunction(NIIVUE.onLoadMeshLayers)) {
-    console.log('callback defined')
+    console.log("callback defined");
     NIIVUE.onLoadMeshLayers(callback);
-  }
-  else {
-    console.log('callback not defined')
+  } else {
+    console.log("callback not defined");
   }
 };
-
 
 nvUtils.onAddVolumeOverlay = function (callback) {
   if (isFunction(NIIVUE.onAddVolumeOverlay)) {
@@ -221,14 +216,14 @@ nvUtils.onGetOpt = function (callback) {
   if (isFunction(NIIVUE.onGetOpt)) {
     return NIIVUE.onGetOpt(callback);
   }
-  return false
+  return false;
 };
 
 nvUtils.onCloseAllVolumes = function (callback) {
   if (isFunction(NIIVUE.onCloseAllVolumes)) {
     NIIVUE.onCloseAllVolumes(callback);
   }
-}
+};
 
 nvUtils.onSetDragMode = function (callback) {
   if (isFunction(NIIVUE.onSetDragMode)) {
@@ -257,17 +252,16 @@ nvUtils.webGL2Supported = function () {
   return supported;
 };
 
-nvUtils.onSetViewSelected = function (view, forceRender = false, mosaic = '') {
-  console.log('nvutils set view selected')
+nvUtils.onSetViewSelected = function (view, forceRender = false, mosaic = "") {
+  console.log("nvutils set view selected");
   if (isFunction(NIIVUE.onSetViewSelected)) {
     NIIVUE.onSetViewSelected(view, forceRender, mosaic);
   }
 };
 
 nvUtils.openSettings = function (callback) {
-  console.log('open settings nvUtils');
+  console.log("open settings nvUtils");
   if (isFunction(NIIVUE.openSettings)) {
     NIIVUE.openSettings(callback);
   }
 };
-

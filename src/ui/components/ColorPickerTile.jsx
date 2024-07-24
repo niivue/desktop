@@ -10,7 +10,7 @@ export const ColorPickerTile = ({ color, onChange }) => {
     setCurrentColor(color.rgb);
     onChange(color);
   };
-  
+
   const handleClick = () => {
     setDisplayColorPicker(!displayColorPicker);
   };
@@ -18,34 +18,33 @@ export const ColorPickerTile = ({ color, onChange }) => {
   const handleClose = () => {
     setDisplayColorPicker(false);
   };
-  
 
   const styles = reactCSS({
-    'default': {
+    default: {
       color: {
-        width: '36px',
-        height: '14px',
-        borderRadius: '2px',
+        width: "36px",
+        height: "14px",
+        borderRadius: "2px",
         background: `rgba(${currentColor.r}, ${currentColor.g}, ${currentColor.b}, ${currentColor.a})`,
       },
       swatch: {
-        padding: '5px',
-        background: '#fff',
-        borderRadius: '1px',
-        boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
-        display: 'inline-block',
-        cursor: 'pointer',
+        padding: "5px",
+        background: "#fff",
+        borderRadius: "1px",
+        boxShadow: "0 0 0 1px rgba(0,0,0,.1)",
+        display: "inline-block",
+        cursor: "pointer",
       },
       popover: {
-        position: 'absolute',
-        zIndex: '2',
+        position: "absolute",
+        zIndex: "2",
       },
       cover: {
-        position: 'fixed',
-        top: '0px',
-        right: '0px',
-        bottom: '0px',
-        left: '0px',
+        position: "fixed",
+        top: "0px",
+        right: "0px",
+        bottom: "0px",
+        left: "0px",
       },
     },
   });

@@ -1,8 +1,8 @@
 # NiiVue Desktop
 
-Niivue Desktop is a cross-platform app for viewing medical imaging data. 
+Niivue Desktop is a cross-platform app for viewing medical imaging data.
 
-It is built using [Electron](https://www.electronjs.org/) and [Niivue](https://github.com/niivue/niivue). 
+It is built using [Electron](https://www.electronjs.org/) and [Niivue](https://github.com/niivue/niivue).
 
 ## Current features
 
@@ -10,7 +10,6 @@ It is built using [Electron](https://www.electronjs.org/) and [Niivue](https://g
 - View data in 3D, 2D, and simultaneous 2D/3D
 - Adjust window/level (contrast), zoom, and pan
 - Measure distances
-
 
 ## Planned features
 
@@ -44,9 +43,9 @@ Download the latest release from the [releases page](https://github.com/niivue/d
 1. Make changes to the UI code and see them reflected in the app
 1. Make changes to the main process code (anything electron related) and restart the app to see them reflected
 1. Build the app with:
-    - `npm run make:macArm` for macOS ARM (apple silicon)
-    - `npm run make:macIntel` for macOS x64 (intel)
-    - `npm run make:linux` for linux x64
+   - `npm run make:macArm` for macOS ARM (apple silicon)
+   - `npm run make:macIntel` for macOS x64 (intel)
+   - `npm run make:linux` for linux x64
 
 ## Similar projects and alternatives
 
@@ -59,4 +58,3 @@ Download the latest release from the [releases page](https://github.com/niivue/d
 ## License
 
 Niivue Desktop uses the [BSD-2-Clause](https://opensource.org/licenses/BSD-2-Clause) license.
-

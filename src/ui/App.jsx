@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   createContext,
+  Fragment,
 } from "react";
 import update from "immutability-helper";
 import "./App.css";
@@ -33,6 +34,7 @@ import Typography from "@mui/material/Typography";
 import { styled, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
+import Grid from "@mui/material/Grid";
 import MuiAppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
@@ -83,23 +85,6 @@ const closedMixin = (theme) => ({
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
 });
-
-const Drawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
-  width: drawerWidth,
-  flexShrink: 0,
-  whiteSpace: "nowrap",
-  boxSizing: "border-box",
-  ...(open && {
-    ...openedMixin(theme),
-    "& .MuiDrawer-paper": openedMixin(theme),
-  }),
-  ...(!open && {
-    ...closedMixin(theme),
-    "& .MuiDrawer-paper": closedMixin(theme),
-  }),
-}));
 
 // use a context to call the Niivue instance from any component
 const _nv = new Niivue();
@@ -181,6 +166,12 @@ function App() {
   const [layers, setLayers] = useState(new Map());
   const [activeLayer, setActiveLayer] = useState(0);
   const [activeTab, setActiveTab] = useState(0);
+  const [sideBarState, setSideBarState] = useState({
+    hide: false,
+    volumes: false,
+    meshes: false,
+    settings: false,
+  });
 
   const handleChange = (event, newValue) => {
     let newImageType = NONE;
@@ -212,7 +203,7 @@ function App() {
 
   const toggleSidebarContent = useCallback(
     (content) => {
-      // window.resizeTo(window.width, window.height);
+
       if (sidebarContent === content) {
         setSidebarContent(NONE);
         setActiveImageType(NONE);
@@ -906,6 +897,38 @@ function App() {
     nv.setFrame4D(id, currentFrame - 1);
   };
 
+  const toggleDrawer = (anchor) => (event) => {
+
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+
+    let content = NONE;
+    switch (anchor) {
+      case "volumes":
+        content = VOLUME;
+        break;
+      case "meshes":
+        content = MESH;
+        break;
+      case "settings":
+        content = SETTINGS;
+        break;
+    }
+    setSideBarState({
+      volumes: false,
+      meshes: false,
+      settings: false,
+      [anchor]: !sideBarState[anchor],
+    });
+
+    toggleSidebarContent(content);
+    // alert('anchor ' + anchor + ' is ' + open)
+  };
+
   const saveMosaicString = async (mosaic) => {
     console.log("mosaic:", mosaic);
     if (mosaic) {
@@ -1192,44 +1215,55 @@ function App() {
     <NV.Provider value={_nv}>
       {/* AppContainer: the parent component that lays out the rest of the scene */}
       {/* <div> */}
-        <Container
-          disableGutters
-          maxWidth={false}
+      <Container
+        disableGutters
+        maxWidth={false}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          width: "100vw",
+          minHeight: "300px",
+          paddingTop: "50px"
+        }}
+      >
+        {/* CssBaseline sets some standard CSS configs for working with MUI */}
+        {/* <CssBaseline /> */}
+        <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100vh",
-            width: "100vw",
-            minHeight: "300px",
-            gap: 0,
+            position: "fixed",
+            top: "0px",
+            zIndex: "1000",
+            backgroundColor: "white",
+            width: "100%",
+            height: "50px"
           }}
         >
-          <Box
-            sx={{
-              width: "100%",
-              position: "sticky",
-              top: "0px",
-              bgcolor: "background.paper",
-            }}
+          <IconButton
+            aria-label="collapse"
+            onClick={toggleDrawer("hide", true)}
           >
-            <Tabs
-              value={activeTab}
-              onChange={handleChange}
-              aria-label="wrapped label tabs example"
-            >
-              <Tab label="Hide" />
-              <Tab label="Volumes" />
-              <Tab label="Meshes" />
-              <Tab label="Settings" />
-            </Tabs>
-            {/* CssBaseline sets some standard CSS configs for working with MUI */}
-            <CssBaseline />
-          </Box>
-          <Box display={"flex"} flexDirection={"row"} height={"100%"}>
+            <ChevronLeftIcon color="primary" />
+          </IconButton>
+          {["volumes", "meshes", "settings"].map((anchor) => (
+            <Fragment key={anchor}>
+              <Button onClick={toggleDrawer(anchor, true)}>
+                <Typography
+                  sx={{
+                    textDecoration: sideBarState[anchor] ? "underline" : "",
+                  }}
+                >
+                  {anchor}
+                </Typography>
+              </Button>
+            </Fragment>
+          ))}
+        </Box>
+        <Box display={"flex"} flexDirection={"row"} height={"100%"} gap={"20px"} width={"100vw"} >
           {/* Sidebar: is the left panel that shows all files and image/scene widgets */}
           {sideBar}
           {/* Niivue Canvas: where things are rendered :) */}
-          <NiivueCanvas nv={nv} />
+          <NiivueCanvas nv={nv} flex={"1"} />
           <ColorPickerDialog
             isOpen={isColorPickerOpen}
             pickedColor={colorPickerColor}
@@ -1247,8 +1281,8 @@ function App() {
               setSceneSettingsOpen(false);
             }}
           />
-          </Box>
-        </Container>
+        </Box>
+      </Container>
       {/* </div> */}
     </NV.Provider>
   );

@@ -1,40 +1,33 @@
-import TextField from "@mui/material/TextField"
-import Box from "@mui/material/Box"
-import PropTypes from "prop-types"
+import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
+import PropTypes from "prop-types";
 
-export function MosaicInput({
-  onChange = () => { },
-  value="",
-  ...props
-}) {
-
-  const defaultMosaic = "A 0 20 C 30 S 42"
-
+export function MosaicInput({ onChange = () => {}, value = "", ...props }) {
+  const defaultMosaic = "A 0 20 C 30 S 42";
 
   function handleChange(event) {
-    onChange(event.target.value)
+    onChange(event.target.value);
   }
 
   function reset() {
-    onChange(defaultMosaic)
+    onChange(defaultMosaic);
   }
-
 
   return (
     <Box
       sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '100%',
-        minHeight: '100px',
-        ...props
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        width: "100%",
+        minHeight: "100px",
+        ...props,
       }}
     >
       <TextField
         sx={{
-          height: '100%',
-          width: '100%'
+          height: "100%",
+          width: "100%",
         }}
         id="mosaic-input"
         label="Mosaic"
@@ -43,7 +36,7 @@ export function MosaicInput({
         multiline={true}
         maxRows={3}
         inputProps={{
-          type: 'textarea'
+          type: "textarea",
         }}
         // value should be set to 2 decimal places
         value={value}
@@ -52,10 +45,10 @@ export function MosaicInput({
         onDoubleClick={reset}
       />
     </Box>
-  )
+  );
 }
 
 MosaicInput.propTypes = {
   onChange: PropTypes.func,
-  value: PropTypes.string
-}
+  value: PropTypes.string,
+};

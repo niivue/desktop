@@ -9,7 +9,7 @@
  * @type {DevPorts}
  */
 const devPorts = {
-    niivue: 5184,
+  niivue: 5184,
 };
 
-module.exports.devPorts = devPorts
+module.exports.devPorts = devPorts;
