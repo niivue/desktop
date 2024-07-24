@@ -107,7 +107,14 @@ const JsonEditor = ({ initialJsonObject, onJsonChange, title }) => {
   };
 
   return (
-      <Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Typography variant="h4" component="h1" gutterBottom>
           {title}
         </Typography>

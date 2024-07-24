@@ -13,11 +13,11 @@ export function Sidebar({ children, asColumn = true, ...props }) {
         minHeight: "100%",
         minWidth: "400px",
         backgroundColor: "white",
-        padding: 0,
         overflowY: "scroll",
         overflowX: "hidden",
         gap: 1,
-        paddingRight: "20px",
+        // paddingRight: "20px",
+        px: 1, 
         ...props,
       }}
     >

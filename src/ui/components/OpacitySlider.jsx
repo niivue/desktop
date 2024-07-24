@@ -25,7 +25,7 @@ export function OpacitySlider({
         ...props,
       }}
     >
-      <Typography variant="body">Opacity</Typography>
+      <Typography>Opacity</Typography>
       <Slider
         id="opacity-slider"
         label="Opacity"
