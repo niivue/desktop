@@ -1,9 +1,11 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import wasm from 'vite-plugin-wasm';
+import { copyFileSync } from 'fs';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), wasm(),],
   server: {
     port: 5184,
   },
@@ -15,3 +17,16 @@ export default defineConfig({
     outDir: "../electron/ui",
   },
 });
+
+/*
+optimizeDeps: {
+    include: ['@niivue/niimath-js/src/process-image.wasm'],
+  },
+
+rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name][extname]',
+      },
+    },
+    assetsInlineLimit: 0, // Ensure assets like WASM are not inlined but copied
+    */
